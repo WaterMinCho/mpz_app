@@ -1,0 +1,36 @@
+# Set the Node.js version as a build-time argument
+# with Node.js 18 as the default
+ARG NODE_VERSION=18-slim
+FROM node:${NODE_VERSION}
+
+# Set Node-related environment variables
+ENV NODE_ENV=production
+
+# Create app directory
+WORKDIR /app
+
+# Copy package.json and package-lock.json
+COPY frontend/package*.json ./
+
+# Install dependencies
+RUN npm ci --only=production
+
+# Copy the frontend code into the container
+COPY ./frontend .
+
+# Build the Next.js application
+RUN npm run build
+
+# Clean up dev dependencies to reduce image size
+RUN npm prune --production
+
+# Expose the port that Next.js runs on
+ENV PORT=3000
+EXPOSE ${PORT}
+
+# Set runtime configuration
+ARG NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+
+# Run the Next.js application
+CMD ["npm", "start"]
