@@ -1,0 +1,252 @@
+from ninja import Router
+from ninja.errors import HttpError
+from asgiref.sync import sync_to_async
+from django.utils import timezone
+from adoptions.schemas.inbound import (
+    AdoptionApplicationIn, UserSettingsIn, AdoptionQuestionResponseIn
+)
+from adoptions.schemas.outbound import (
+    AdoptionPreCheckOut, AdoptionApplicationOut, 
+    AnimalInfoOut, CenterInfoOut, ContractTemplateOut,
+    UserSettingsOut, AdoptionQuestionOut
+)
+from adoptions.models import (
+    Adoption, AdoptionQuestion, AdoptionQuestionResponse
+)
+from user.models import User
+from animals.models import Animal
+from centers.models import AdoptionContractTemplate
+from api.security import jwt_auth
+
+router = Router(tags=["Adoption"])
+
+
+@router.get(
+    "/adoption/pre-check/{animal_id}",
+    summary="[C] 입양 신청 사전 확인",
+    description="입양 신청 가능 여부 및 필요한 정보들을 확인합니다",
+    response={200: AdoptionPreCheckOut, 401: dict, 404: dict, 500: dict},
+    auth=jwt_auth,
+)
+async def get_adoption_pre_check(request, animal_id: str):
+    try:
+        current_user = request.auth
+        
+        # 일반사용자 권한 확인
+        if current_user.user_type != User.UserTypeChoice.normal:
+            raise HttpError(403, "일반사용자만 입양 신청이 가능합니다")
+        
+        # 동물 정보 조회 (센터 정보와 함께)
+        try:
+            animal = await Animal.objects.select_related('center').aget(id=animal_id)
+        except Animal.DoesNotExist:
+            raise HttpError(404, "동물을 찾을 수 없습니다")
+        
+        if not animal.center:
+            raise HttpError(404, "센터 정보를 찾을 수 없습니다")
+        
+        # 입양 가능한 상태인지 확인
+        can_apply = animal.status in ["보호중", "임시보호중"]
+        
+        # 이미 입양 신청을 했는지 확인
+        existing_application_count = await Adoption.objects.filter(
+            user_id=current_user.id,
+            animal_id=animal_id,
+            status__in=["신청", "미팅", "계약서작성", "입양완료", "모니터링"]
+        ).acount()
+        
+        existing_application = existing_application_count > 0
+        
+        # 현재 사용자 정보 조회 (전화번호 인증 상태 포함)
+        is_phone_verified = current_user.is_phone_verified
+        
+        # 사용자 설정 정보 조회 (전화번호가 인증된 경우에만)
+        user_settings_data = None
+        needs_user_settings = True
+        
+        if is_phone_verified:
+            # User 모델에 이미 필요한 필드들이 있으므로 직접 사용
+            user_settings_data = UserSettingsOut(
+                phone=current_user.phone_number or "",
+                phone_verification=True,
+                name=current_user.nickname or "",
+                birth=getattr(current_user, 'birth', "") or "",
+                address=getattr(current_user, 'address', "") or "",
+                address_is_public=getattr(current_user, 'address_is_public', False),
+            )
+            
+            # 필수 정보가 모두 있는지 확인
+            needs_user_settings = not (
+                user_settings_data.name and 
+                user_settings_data.birth and 
+                user_settings_data.address
+            )
+        
+        # 센터의 입양 질문들 조회
+        adoption_questions_data = await sync_to_async(list)(
+            AdoptionQuestion.objects.filter(
+                center=animal.center,
+                is_active=True
+            ).order_by('sequence').values('id', 'content', 'sequence')
+        )
+        
+        adoption_questions = [
+            AdoptionQuestionOut(
+                id=str(q['id']),
+                content=q['content'],
+                sequence=q['sequence']
+            ) for q in adoption_questions_data
+        ]
+        
+        # 센터의 계약서 템플릿 조회
+        try:
+            contract_template = await AdoptionContractTemplate.objects.filter(
+                center=animal.center,
+                is_active=True
+            ).afirst()
+        except:
+            contract_template = None
+        
+        response_data = AdoptionPreCheckOut(
+            can_apply=can_apply and not existing_application,
+            is_phone_verified=is_phone_verified,
+            needs_user_settings=needs_user_settings,
+            animal=AnimalInfoOut(
+                id=str(animal.id),
+                name=animal.name,
+                status=animal.status,
+                center_id=str(animal.center.id),
+                center_name=animal.center.name,
+            ),
+            user_settings=user_settings_data,
+            adoption_questions=adoption_questions,
+            center_info=CenterInfoOut(
+                has_monitoring=getattr(animal.center, 'has_monitoring', False),
+                monitoring_description=getattr(animal.center, 'monitoring_description', None),
+                adoption_guidelines=getattr(animal.center, 'adoption_guidelines', None),
+                adoption_price=getattr(animal.center, 'adoption_price', 0),
+            ),
+            contract_template=ContractTemplateOut(
+                id=str(contract_template.id),
+                title=contract_template.title,
+                content=contract_template.content,
+            ) if contract_template else None,
+            existing_application=existing_application,
+        )
+        
+        return response_data
+        
+    except HttpError:
+        raise
+    except Exception as e:
+        print(f"Get adoption pre-check error: {e}")
+        raise HttpError(500, "입양 신청 사전 확인 중 오류가 발생했습니다")
+
+
+@router.post(
+    "/adoption/apply",
+    summary="[C] 입양 신청 제출",
+    description="동물에 대한 입양 신청을 제출합니다",
+    response={201: AdoptionApplicationOut, 400: dict, 401: dict, 403: dict, 404: dict, 500: dict},
+    auth=jwt_auth,
+)
+async def submit_adoption_application(request, data: AdoptionApplicationIn):
+    try:
+        current_user = request.auth
+        
+        # 일반사용자 권한 확인
+        if current_user.user_type != User.UserTypeChoice.normal:
+            raise HttpError(403, "일반사용자만 입양 신청이 가능합니다")
+        
+        # 현재 사용자의 전화번호 인증 상태 확인
+        if not current_user.is_phone_verified:
+            raise HttpError(403, "전화번호 인증이 필요합니다")
+        
+        # 동물 정보 조회
+        try:
+            animal = await Animal.objects.select_related('center').aget(id=data.animal_id)
+        except Animal.DoesNotExist:
+            raise HttpError(404, "동물을 찾을 수 없습니다")
+        
+        if not animal.center:
+            raise HttpError(404, "센터 정보를 찾을 수 없습니다")
+        
+        # 입양 가능한 상태인지 확인
+        if animal.status not in ["보호중", "임시보호중"]:
+            raise HttpError(403, "현재 입양 신청이 불가능한 동물입니다")
+        
+        # 이미 입양 신청을 했는지 확인 (취소되지 않은 신청)
+        existing_application_count = await Adoption.objects.filter(
+            user_id=current_user.id,
+            animal_id=data.animal_id,
+            status__in=["신청", "미팅", "계약서작성", "입양완료", "모니터링"]
+        ).acount()
+        
+        if existing_application_count > 0:
+            raise HttpError(403, "이미 해당 동물에 대한 입양 신청을 하셨습니다")
+        
+        # 사용자 설정 저장 또는 업데이트 (필요한 경우만)
+        if data.user_settings:
+            # User 모델에 직접 업데이트
+            update_fields = {}
+            if data.user_settings.name:
+                update_fields['nickname'] = data.user_settings.name
+            if data.user_settings.birth:
+                update_fields['birth'] = data.user_settings.birth
+            if data.user_settings.address:
+                update_fields['address'] = data.user_settings.address
+            if hasattr(current_user, 'address_is_public'):
+                update_fields['address_is_public'] = data.user_settings.address_is_public
+            
+            if update_fields:
+                await User.objects.filter(id=current_user.id).aupdate(**update_fields)
+        
+        # 입양 신청 생성
+        adoption = await Adoption.objects.acreate(
+            user=current_user,
+            animal=animal,
+            notes=data.notes,
+            monitoring_agreement=data.monitoring_agreement,
+            guidelines_agreement=data.guidelines_agreement,
+        )
+        
+        # 질문 응답 저장
+        if data.question_responses:
+            question_response_values = []
+            for response in data.question_responses:
+                question_response_values.append(
+                    AdoptionQuestionResponse(
+                        adoption=adoption,
+                        question_id=response.question_id,
+                        answer=response.answer,
+                    )
+                )
+            
+            await AdoptionQuestionResponse.objects.abulk_create(question_response_values)
+        
+        # 응답 데이터 생성
+        response_data = AdoptionApplicationOut(
+            id=str(adoption.id),
+            animal_id=str(adoption.animal.id),
+            animal_name=adoption.animal.name,
+            center_name=adoption.animal.center.name,
+            status=adoption.status,
+            notes=adoption.notes,
+            created_at=adoption.created_at.isoformat(),
+            updated_at=adoption.updated_at.isoformat(),
+        )
+        
+        # 센터 관리자들에게 입양 신청 알림 전송 (TODO: 구현 필요)
+        try:
+            # NotificationService.sendAdoptionNotification 구현 필요
+            pass
+        except Exception as e:
+            print(f"알림 전송 실패: {e}")
+        
+        return 201, response_data
+        
+    except HttpError:
+        raise
+    except Exception as e:
+        print(f"Submit adoption application error: {e}")
+        raise HttpError(500, "입양 신청 제출 중 오류가 발생했습니다")
