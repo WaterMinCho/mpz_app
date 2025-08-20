@@ -56,8 +56,19 @@ INSTALLED_APPS = [
     # third party
     "corsheaders",
     # local apps
+    "common",
     "user",
     "commando",
+    "centers",
+    "animals",
+    "adoptions",
+    "comments",
+    "favorites",
+    "notifications",
+    "posts",
+    "notices",
+    "feedback",
+    "banners",
 ]
 
 MIDDLEWARE = [
@@ -199,6 +210,11 @@ PAGINATION_PER_PAGE = 10
 # login jwt token expiration
 ACCESS_TOKEN_EXPIRATION_TIME = 365 * 60 * 60 * 24  # 1 years
 REFRESH_TOKEN_EXPIRATION_TIME = 2 * 365 * 60 * 60 * 24  # 100 years
+
+# Kakao Social Login Settings
+KAKAO_SOCIAL_LOGIN_CLIENT_ID = config("KAKAO_SOCIAL_LOGIN_CLIENT_ID", default="")
+KAKAO_SOCIAL_LOGIN_CLIENT_SECRET = config("KAKAO_SOCIAL_LOGIN_CLIENT_SECRET", default="")
+KAKAO_SOCIAL_LOGIN_REDIRECT_URI = config("KAKAO_SOCIAL_LOGIN_REDIRECT_URI", default="")
 
 if DEBUG:
     FRONTEND_URL = "http://127.0.0.1:3000"

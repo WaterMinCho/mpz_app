@@ -1,0 +1,107 @@
+from django.db import models
+from django.conf import settings
+from common.models import BaseModel
+
+
+class Center(BaseModel):
+    """보호소/센터 모델"""
+    
+    USER_TYPE_CHOICES = [
+        ('일반사용자', '일반사용자'),
+        ('센터관리자', '센터관리자'),
+        ('훈련사', '훈련사'),
+        ('최고관리자', '최고관리자'),
+    ]
+    
+    REGION_CHOICES = [
+        ('서울', '서울'),
+        ('부산', '부산'),
+        ('대구', '대구'),
+        ('인천', '인천'),
+        ('광주', '광주'),
+        ('대전', '대전'),
+        ('울산', '울산'),
+        ('세종', '세종'),
+        ('경기', '경기'),
+        ('강원', '강원'),
+        ('충북', '충북'),
+        ('충남', '충남'),
+        ('전북', '전북'),
+        ('전남', '전남'),
+        ('경북', '경북'),
+        ('경남', '경남'),
+        ('제주', '제주'),
+    ]
+    
+    # 센터 소유자/대표자 (1:1 관계 - 센터 최고관리자)
+    owner = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, help_text="센터 소유자/대표자", related_name="owned_center", null=True, blank=True)
+    name = models.CharField(max_length=100, help_text="센터명")
+    center_number = models.CharField(max_length=20, blank=True, null=True, help_text="보호소 번호")
+    description = models.TextField(blank=True, null=True, help_text="센터 설명")
+    location = models.CharField(max_length=200, blank=True, null=True, help_text="위치")
+    region = models.CharField(max_length=10, choices=REGION_CHOICES, blank=True, null=True, help_text="지역")
+    phone_number = models.CharField(max_length=20, blank=True, null=True, help_text="전화번호")
+    adoption_procedure = models.TextField(blank=True, null=True, help_text="입양 절차")
+    adoption_guidelines = models.TextField(blank=True, null=True, help_text="입양 유의사항")
+    has_monitoring = models.BooleanField(default=False, help_text="모니터링 실시 여부")
+    monitoring_period_months = models.IntegerField(default=3, help_text="모니터링 전체 기간 (개월)")
+    monitoring_interval_days = models.IntegerField(default=14, help_text="모니터링 체크 간격 (일)")
+    monitoring_description = models.TextField(blank=True, null=True, help_text="모니터링 방법/설명")
+    verified = models.BooleanField(default=False, help_text="인증 여부")
+    is_public = models.BooleanField(default=False, help_text="공개 여부")
+    adoption_price = models.IntegerField(default=0, help_text="입양 가격")
+    image_url = models.CharField(max_length=500, blank=True, null=True, help_text="센터 이미지 URL")
+    
+    class Meta:
+        db_table = 'centers'
+        verbose_name = '센터'
+        verbose_name_plural = '센터들'
+    
+    def __str__(self):
+        return f"{self.owner.username} - {self.name}"
+
+
+class AdoptionContractTemplate(BaseModel):
+    """센터별 입양 계약서 템플릿"""
+    
+    center = models.ForeignKey(Center, on_delete=models.CASCADE, help_text="관련 센터")
+    title = models.CharField(max_length=200, help_text="계약서 제목")
+    description = models.TextField(blank=True, null=True, help_text="계약서 설명/목적")
+    content = models.TextField(help_text="계약서 본문 내용")
+    is_active = models.BooleanField(default=True, help_text="활성화 여부")
+    
+    class Meta:
+        db_table = 'adoption_contract_templates'
+        verbose_name = '입양 계약서 템플릿'
+        verbose_name_plural = '입양 계약서 템플릿들'
+    
+    def __str__(self):
+        return f"{self.center.name} - {self.title}"
+
+
+class QuestionForm(BaseModel):
+    """센터별 질문 폼"""
+    
+    QUESTION_TYPE_CHOICES = [
+        ('text', '텍스트'),
+        ('textarea', '긴 텍스트'),
+        ('radio', '라디오'),
+        ('checkbox', '체크박스'),
+        ('select', '선택'),
+    ]
+    
+    center = models.ForeignKey(Center, on_delete=models.CASCADE, help_text="관련 센터")
+    question = models.TextField(help_text="질문 내용")
+    question_type = models.CharField(max_length=20, choices=QUESTION_TYPE_CHOICES, help_text="질문 타입")
+    options = models.JSONField(blank=True, null=True, help_text="선택지 옵션들")
+    is_required = models.BooleanField(default=False, help_text="필수 여부")
+    sequence = models.IntegerField(default=1, help_text="질문 순서")
+    
+    class Meta:
+        db_table = 'question_forms'
+        verbose_name = '질문 폼'
+        verbose_name_plural = '질문 폼들'
+        ordering = ['center', 'sequence']
+    
+    def __str__(self):
+        return f"{self.center.name} - {self.question[:50]}"
