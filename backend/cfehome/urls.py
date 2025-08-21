@@ -24,6 +24,7 @@ from user.admin_api import router as admin_router
 from user.kakao_api import router as kakao_router
 from adoptions.api.main_api import router as adoption_router
 from animals.api import router as animals_router
+from centers.api import router as centers_router
 from cloudflare.api import router as cloudflare_router
 from django.contrib.admin.views.decorators import staff_member_required
 
@@ -46,6 +47,7 @@ base_api.add_router("v1/admin", admin_router)
 base_api.add_router("v1/kakao", kakao_router)
 base_api.add_router("v1/adoptions", adoption_router)
 base_api.add_router("v1/animals", animals_router)
+base_api.add_router("v1/centers", centers_router)
 base_api.add_router("v1/cloudflare", cloudflare_router)
 
 urlpatterns = [
