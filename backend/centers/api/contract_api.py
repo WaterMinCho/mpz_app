@@ -14,7 +14,7 @@ from centers.schemas.outbound import (
 )
 from api.security import jwt_auth
 
-router = Router()
+router = Router(tags=["Contract Template"])
 
 @router.post(
     "/",
