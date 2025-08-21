@@ -39,3 +39,4 @@ class FileInfoOut(Schema):
     content_type: str
     size: Optional[int] = None
     uploaded_at: Optional[datetime] = None
+

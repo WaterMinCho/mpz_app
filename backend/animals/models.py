@@ -1,4 +1,6 @@
 from django.db import models
+from django.core.validators import MinValueValidator, MaxValueValidator
+from decimal import Decimal
 from centers.models import Center
 from common.models import BaseModel
 
@@ -26,12 +28,24 @@ class Animal(BaseModel):
     name = models.CharField(max_length=100, help_text="동물 이름")
     announce_number = models.CharField(max_length=50, blank=True, null=True, help_text="공고번호")
     breed = models.CharField(max_length=100, blank=True, null=True, help_text="품종")
-    age = models.CharField(max_length=20, blank=True, null=True, help_text="나이")
-    is_female = models.BooleanField(help_text="암컷 여부")
-    weight = models.FloatField(blank=True, null=True, help_text="체중 (kg)")
-    neutering = models.BooleanField(help_text="중성화 여부")
-    vaccination = models.BooleanField(help_text="예방접종 여부")
-    heartworm = models.BooleanField(help_text="심장사상충 예방 여부")
+    age = models.PositiveIntegerField(
+        blank=True, 
+        null=True, 
+        help_text="나이 (개월 단위)",
+        validators=[MinValueValidator(0), MaxValueValidator(300)]  # 0개월 ~ 25년
+    )
+    is_female = models.BooleanField(default=False, help_text="암컷 여부")
+    weight = models.DecimalField(
+        max_digits=5, 
+        decimal_places=2,
+        blank=True, 
+        null=True, 
+        help_text="체중 (kg, 최대 999.99kg)",
+        validators=[MinValueValidator(Decimal('0.01')), MaxValueValidator(Decimal('999.99'))]
+    )
+    neutering = models.BooleanField(default=False, help_text="중성화 여부")
+    vaccination = models.BooleanField(default=False, help_text="예방접종 여부")
+    heartworm = models.BooleanField(default=False, help_text="심장사상충 예방 여부")
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='보호중', help_text="보호 상태")
     description = models.TextField(blank=True, null=True, help_text="동물 설명")
     personality = models.TextField(blank=True, null=True, help_text="성격")
