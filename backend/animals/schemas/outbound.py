@@ -1,4 +1,4 @@
-from ninja import Schema
+from ninja import Schema, Field
 from typing import Optional, List
 from datetime import datetime
 from decimal import Decimal
@@ -6,80 +6,80 @@ from decimal import Decimal
 
 class AnimalImageOut(Schema):
     """동물 이미지 출력 스키마"""
-    id: str
-    image_url: str
-    is_primary: bool
-    sequence: int
+    id: str = Field(..., description="동물 이미지 ID")
+    image_url: str = Field(..., description="이미지 URL")
+    is_primary: bool = Field(..., description="대표 이미지 여부")
+    sequence: int = Field(..., description="이미지 순서")
 
 
 class AnimalOut(Schema):
     """동물 출력 스키마"""
-    id: str
-    name: str
-    is_female: bool
-    age: Optional[int] = None
-    weight: Optional[Decimal] = None
-    color: Optional[str] = None
-    breed: Optional[str] = None
-    description: Optional[str] = None
-    status: str
-    waiting_days: int = 0
-    activity_level: Optional[str] = None
-    sensitivity: Optional[str] = None
-    sociability: Optional[str] = None
-    separation_anxiety: Optional[str] = None
-    special_notes: Optional[str] = None
-    health_notes: Optional[str] = None
-    basic_training: Optional[str] = None
-    trainer_comment: Optional[str] = None
-    announce_number: Optional[str] = None
-    announcement_date: Optional[str] = None
-    found_location: Optional[str] = None
-    personality: Optional[str] = None
-    center_id: str
-    animal_images: List[AnimalImageOut] = []
-    created_at: str
-    updated_at: str
+    id: str = Field(..., description="동물 ID")
+    name: str = Field(..., description="동물 이름")
+    is_female: bool = Field(..., description="암컷 여부")
+    age: Optional[int] = Field(None, description="나이 (개월)")
+    weight: Optional[Decimal] = Field(None, description="체중 (kg)")
+    color: Optional[str] = Field(None, description="색상")
+    breed: Optional[str] = Field(None, description="품종")
+    description: Optional[str] = Field(None, description="동물 설명")
+    status: str = Field(..., description="동물 상태 (보호중, 입양대기, 입양완료)")
+    waiting_days: int = Field(0, description="보호 기간 (일)")
+    activity_level: Optional[str] = Field(None, description="활동량 수준")
+    sensitivity: Optional[str] = Field(None, description="예민함 정도")
+    sociability: Optional[str] = Field(None, description="사회성")
+    separation_anxiety: Optional[str] = Field(None, description="분리불안 정도")
+    special_notes: Optional[str] = Field(None, description="특이사항")
+    health_notes: Optional[str] = Field(None, description="건강 정보")
+    basic_training: Optional[str] = Field(None, description="기본 훈련 상태")
+    trainer_comment: Optional[str] = Field(None, description="훈련사 코멘트")
+    announce_number: Optional[str] = Field(None, description="공고번호")
+    announcement_date: Optional[str] = Field(None, description="공고일 (ISO 형식)")
+    found_location: Optional[str] = Field(None, description="발견 장소")
+    personality: Optional[str] = Field(None, description="성격")
+    center_id: str = Field(..., description="센터 ID")
+    animal_images: List[AnimalImageOut] = Field(default_factory=list, description="동물 이미지 목록")
+    created_at: str = Field(..., description="생성일시 (ISO 형식)")
+    updated_at: str = Field(..., description="수정일시 (ISO 형식)")
 
 
 class AnimalListOut(Schema):
     """동물 목록 출력 스키마"""
-    animals: List[AnimalOut]
-    total: int
-    page: int
-    limit: int
-    total_pages: int
-    has_next: bool
-    has_prev: bool
+    animals: List[AnimalOut] = Field(..., description="동물 목록")
+    total: int = Field(..., description="전체 동물 수")
+    page: int = Field(..., description="현재 페이지 번호")
+    limit: int = Field(..., description="페이지당 항목 수")
+    total_pages: int = Field(..., description="전체 페이지 수")
+    has_next: bool = Field(..., description="다음 페이지 존재 여부")
+    has_prev: bool = Field(..., description="이전 페이지 존재 여부")
 
 
 class AnimalStatusUpdateOut(Schema):
     """동물 상태 변경 출력 스키마"""
-    id: str
-    name: str
-    previous_status: str
-    new_status: str
-    updated_at: str
-    message: str
+    id: str = Field(..., description="동물 ID")
+    name: str = Field(..., description="동물 이름")
+    previous_status: str = Field(..., description="이전 상태")
+    new_status: str = Field(..., description="새로운 상태")
+    updated_at: str = Field(..., description="상태 변경 일시 (ISO 형식)")
+    message: str = Field(..., description="상태 변경 메시지")
 
 
 class BreedsOut(Schema):
     """품종 목록 출력 스키마"""
-    breeds: List[str]
-    total: int
+    breeds: List[str] = Field(..., description="품종 목록")
+    total: int = Field(..., description="전체 품종 수")
 
 
 class RelatedAnimalsOut(Schema):
     """관련 동물 목록 출력 스키마"""
-    animals: List[AnimalOut]
-    total: int
+    animals: List[AnimalOut] = Field(..., description="관련 동물 목록")
+    total: int = Field(..., description="관련 동물 수")
 
 
 class SuccessOut(Schema):
     """성공 응답 스키마"""
-    message: str
+    message: str = Field(..., description="성공 메시지")
 
 
 class ErrorOut(Schema):
     """에러 응답 스키마"""
-    error: str
+    error: str = Field(..., description="에러 메시지")

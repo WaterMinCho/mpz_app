@@ -61,6 +61,8 @@ class Animal(BaseModel):
     
     def __str__(self):
         return f"{self.center.name} - {self.name} ({self.get_status_display()})"
+    
+
 
 
 class AnimalImage(BaseModel):

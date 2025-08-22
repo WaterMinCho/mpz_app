@@ -1,0 +1,114 @@
+from ninja import Router, Query
+from ninja.errors import HttpError
+from ninja.pagination import paginate
+from django.http import HttpRequest
+from asgiref.sync import sync_to_async
+from typing import List
+from centers.models import Center
+from centers.schemas.inbound import (
+    CenterListQueryIn,
+)
+from centers.schemas.outbound import (
+    CenterOut,
+    ErrorOut
+)
+
+router = Router(tags=["Centers"])
+
+def _build_center_response(center, show_private_location=False):
+    """센터 응답 데이터를 구성합니다."""
+    return CenterOut(
+        id=str(center.id),
+        user_id=str(center.owner.id) if center.owner else None,
+        name=center.name,
+        center_number=center.center_number,
+        description=center.description,
+        location=center.location if (show_private_location or center.is_public) else None,
+        region=center.region,
+        phone_number=center.phone_number,
+        adoption_procedure=center.adoption_procedure,
+        adoption_guidelines=center.adoption_guidelines,
+        has_monitoring=center.has_monitoring,
+        monitoring_period_months=center.monitoring_period_months,
+        monitoring_interval_days=center.monitoring_interval_days,
+        monitoring_description=center.monitoring_description,
+        verified=center.verified,
+        is_public=center.is_public,
+        adoption_price=center.adoption_price,
+        image_url=center.image_url,
+        created_at=center.created_at.isoformat(),
+        updated_at=center.updated_at.isoformat(),
+    )
+
+@router.get(
+    "/",
+    summary="[R] 센터 목록 조회",
+    description="지역별 센터 목록을 조회합니다.",
+    response={
+        200: List[CenterOut],
+        500: ErrorOut,
+    },
+)
+@paginate
+async def get_centers(request: HttpRequest, filters: CenterListQueryIn = Query(CenterListQueryIn())):
+    """센터 목록을 조회합니다."""
+    try:
+        @sync_to_async
+        def get_centers_list():
+            # 기본 쿼리셋 (공개된 센터만)
+            queryset = Center.objects.filter(is_public=True).select_related('owner')
+            
+            # 지역별 필터링
+            if filters.location:
+                queryset = queryset.filter(location__icontains=filters.location)
+            
+            # 지역별 필터링
+            if filters.region:
+                queryset = queryset.filter(region__icontains=filters.region)
+            
+            # 최신순 정렬
+            queryset = queryset.order_by('-created_at')
+            
+            # 응답 데이터 변환 (주소 공개 여부에 따라 조건부 노출)
+            centers_response = [
+                _build_center_response(center, show_private_location=False)
+                for center in queryset
+            ]
+            
+            return centers_response
+        
+        return await get_centers_list()
+        
+    except Exception as e:
+        raise HttpError(500, f"센터 목록 조회 중 오류가 발생했습니다: {str(e)}")
+
+
+@router.get(
+    "/{center_id}",
+    summary="[R] 센터 상세 조회",
+    description="특정 센터의 상세 정보를 조회합니다.",
+    response={
+        200: CenterOut,
+        404: ErrorOut,
+        500: ErrorOut,
+    },
+)
+async def get_center_by_id(request: HttpRequest, center_id: str):
+    """센터 상세 정보를 조회합니다."""
+    try:
+        @sync_to_async
+        def get_center_detail():
+            try:
+                center = Center.objects.select_related('owner').get(id=center_id)
+            except Center.DoesNotExist:
+                raise HttpError(404, "보호소를 찾을 수 없습니다")
+            
+            # 응답 데이터 변환 (주소 공개 여부에 따라 조건부 노출)
+            return _build_center_response(center, show_private_location=False)
+        
+        return await get_center_detail()
+        
+    except HttpError:
+        raise
+    except Exception as e:
+        raise HttpError(500, f"보호소 정보 조회 중 오류가 발생했습니다: {str(e)}")
