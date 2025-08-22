@@ -59,7 +59,7 @@ async def kakao_login(request):
     summary="카카오 로그인 콜백",
     description="카카오 로그인 콜백",
 )
-async def kakao_login_callback(request, code: str, state: str):
+async def kakao_login_callback(request, code: str, state: str, redirect_uri: str = None):
 
     @sync_to_async
     def set_unusable_password(user):
@@ -68,6 +68,9 @@ async def kakao_login_callback(request, code: str, state: str):
 
     # 액세스 토큰 받기 (프론트엔드와 동일한 로직)
     try:
+        # redirect_uri를 동적으로 결정 (프론트엔드에서 전달받거나 기본값 사용)
+        actual_redirect_uri = redirect_uri if redirect_uri else REDIRECT_URI
+        
         async with httpx.AsyncClient(timeout=30.0) as client:
             token_request = await client.post(
                 KAKAO_CONFIG["token_endpoint"],
@@ -75,9 +78,12 @@ async def kakao_login_callback(request, code: str, state: str):
                     "grant_type": "authorization_code",
                     "client_id": CLIENT_ID,
                     "client_secret": CLIENT_SECRET,
-                    "redirect_uri": REDIRECT_URI,
+                    "redirect_uri": actual_redirect_uri,
                     "code": code,
                 },
+                headers={
+                    "Content-Type": "application/x-www-form-urlencoded;charset=utf-8"
+                }
             )
             if token_request.status_code != 200:
                 error_text = token_request.text
