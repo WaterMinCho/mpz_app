@@ -31,5 +31,11 @@ sqlparse==0.5.3
 typing_extensions==4.12.2
 urllib3==2.3.0
 whitenoise==6.8.2
-yarl==1.18.3 
+yarl==1.18.3
+
+# AI/ML packages for animal matching
+langchain==0.3.14
+langchain-openai==0.2.14
+langgraph==0.2.56
+openai==1.59.0 
 uvicorn
