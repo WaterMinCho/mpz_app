@@ -130,7 +130,7 @@ async def create_post(request: HttpRequest, data: PostCreateIn):
 @router.get(
     "/",
     summary="[R] 게시글 목록 조회",
-    description="게시글 목록을 조회합니다.",
+    description="게시글 목록을 조회합니다. 시스템 태그로 필터링 시, 사용자 태그가 시스템 태그와 하나라도 매칭되는 글만 표시됩니다.",
     response={
         200: list[PostOut],
         500: dict,
@@ -144,6 +144,49 @@ def get_post_list(request: HttpRequest, query: Query[PostListQueryIn]):
         
         if query.user_id:
             posts_query = posts_query.filter(user_id=query.user_id)
+        
+        # 시스템 태그 필터링 적용
+        if query.system_tags:
+            try:
+                from posts.models import SystemTag
+                
+                system_tag_names = [tag.strip() for tag in query.system_tags if tag.strip()]
+                
+                if system_tag_names:
+                    # 대소문자 구분 없이 매칭되는 시스템 태그 찾기
+                    # 대소문자 구분 없이 매칭하기 위해 여러 조건으로 분리
+                    from django.db.models import Q
+                    
+                    tag_conditions = Q()
+                    for tag_name in system_tag_names:
+                        tag_conditions |= Q(name__iexact=tag_name)
+                    
+                    matching_system_tags = SystemTag.objects.filter(
+                        is_active=True
+                    ).filter(tag_conditions)
+                    
+                    if matching_system_tags.exists():
+                        # 매칭되는 시스템 태그가 있는 포스트만 필터링
+                        # 대소문자 구분 없이 매칭하기 위해 여러 조건으로 분리
+                        from django.db.models import Q
+                        
+                        # 각 시스템 태그에 대해 대소문자 구분 없이 매칭
+                        tag_conditions = Q()
+                        for system_tag in matching_system_tags:
+                            # exact lookup 사용 (대소문자 구분)
+                            tag_conditions |= Q(posttag__tag_name=system_tag.name)
+                        
+                        posts_query = posts_query.filter(tag_conditions).distinct()
+                    else:
+                        # 매칭되는 시스템 태그가 없으면 빈 결과 반환
+                        return []
+                        
+            except Exception as e:
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.error(f"시스템 태그 필터링 중 오류 발생: {str(e)}")
+                # 오류 발생 시 필터링 없이 진행
+                pass
         
         posts = posts_query.order_by('-created_at')
         
@@ -170,6 +213,44 @@ def get_post_list(request: HttpRequest, query: Query[PostListQueryIn]):
 
     except Exception as e:
         raise HttpError(500, f"게시글 목록 조회 중 오류가 발생했습니다: {str(e)}")
+
+
+@router.get(
+    "/tags/system",
+    summary="[R] 시스템 태그 목록 조회",
+    description="최고관리자가 등록한 시스템 태그 목록을 조회합니다.",
+    response={
+        200: list,
+        500: dict,
+    },
+)
+async def get_system_tags(request: HttpRequest):
+    """시스템 태그 목록을 조회합니다."""
+    try:
+        from posts.models import SystemTag
+        
+        @sync_to_async
+        def get_system_tags_sync():
+            tags = SystemTag.objects.filter(is_active=True).order_by('name')
+            
+            tags_data = []
+            for tag in tags:
+                tags_data.append({
+                    "id": str(tag.id),
+                    "name": tag.name,
+                    "description": tag.description,
+                    "usage_count": tag.usage_count,
+                    "is_active": tag.is_active,
+                    "created_at": tag.created_at.isoformat(),
+                    "updated_at": tag.updated_at.isoformat(),
+                })
+            
+            return tags_data
+        
+        return await get_system_tags_sync()
+
+    except Exception as e:
+        raise HttpError(500, f"시스템 태그 목록 조회 중 오류가 발생했습니다: {str(e)}")
 
 
 @router.get(

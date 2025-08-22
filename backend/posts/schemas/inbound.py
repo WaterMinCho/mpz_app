@@ -23,6 +23,7 @@ class PostUpdateIn(Schema):
 class PostListQueryIn(Schema):
     """게시글 목록 조회 쿼리 스키마"""
     user_id: Optional[str] = Field(None, description="특정 사용자의 게시글만 조회")
+    system_tags: Optional[List[str]] = Field(None, description="시스템 태그로 필터링 (하나라도 매칭되는 글만 표시)")
 
 
 

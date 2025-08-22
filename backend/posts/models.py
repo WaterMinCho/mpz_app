@@ -27,6 +27,34 @@ class Post(BaseModel):
     
     def __str__(self):
         return f"{self.user.username} - {self.title}"
+    
+    def has_matching_system_tags(self):
+        """이 포스트가 시스템 태그와 매칭되는지 확인합니다."""
+        from django.db.models import Q
+        post_tags = PostTag.objects.filter(post=self).values_list('tag_name', flat=True)
+        if not post_tags:
+            return False
+        
+        # 대소문자 구분 없이 매칭
+        matching_system_tags = SystemTag.objects.filter(
+            is_active=True,
+            name__iexact__in=post_tags
+        )
+        return matching_system_tags.exists()
+    
+    def get_matching_system_tags(self):
+        """이 포스트와 매칭되는 시스템 태그들을 반환합니다."""
+        from django.db.models import Q
+        post_tags = PostTag.objects.filter(post=self).values_list('tag_name', flat=True)
+        if not post_tags:
+            return []
+        
+        # 대소문자 구분 없이 매칭
+        matching_system_tags = SystemTag.objects.filter(
+            is_active=True,
+            name__iexact__in=post_tags
+        )
+        return list(matching_system_tags)
 
 
 class PostImage(BaseModel):
@@ -47,7 +75,7 @@ class PostImage(BaseModel):
 
 
 class PostTag(BaseModel):
-    """포스트 태그 모델"""
+    """포스트 태그 모델 (사용자가 작성한 태그)"""
     
     post = models.ForeignKey(Post, on_delete=models.CASCADE, help_text="관련 포스트")
     tag_name = models.CharField(max_length=50, help_text="태그명")
@@ -60,3 +88,28 @@ class PostTag(BaseModel):
     
     def __str__(self):
         return f"{self.post.title} - #{self.tag_name}"
+
+
+class SystemTag(BaseModel):
+    """시스템 태그 모델 (최고관리자가 등록하는 공식 태그)"""
+    
+    name = models.CharField(max_length=50, unique=True, help_text="태그명")
+    description = models.TextField(blank=True, null=True, help_text="태그 설명")
+    is_active = models.BooleanField(default=True, help_text="활성화 여부")
+    usage_count = models.IntegerField(default=0, help_text="사용된 횟수")
+    
+    class Meta:
+        db_table = 'system_tags'
+        verbose_name = '시스템 태그'
+        verbose_name_plural = '시스템 태그들'
+        ordering = ['name']
+    
+    def __str__(self):
+        return self.name
+    
+    def update_usage_count(self):
+        """사용 횟수를 업데이트합니다."""
+        from django.db.models import Count
+        count = PostTag.objects.filter(tag_name__iexact=self.name).count()
+        self.usage_count = count
+        self.save(update_fields=['usage_count'])
