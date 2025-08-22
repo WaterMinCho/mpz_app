@@ -57,15 +57,15 @@ class AdoptionContractTemplateAdmin(admin.ModelAdmin):
 
 @admin.register(QuestionForm)
 class QuestionFormAdmin(admin.ModelAdmin):
-    list_display = ['center', 'question', 'question_type', 'is_required', 'sequence', 'created_at']
-    list_filter = ['center', 'question_type', 'is_required']
+    list_display = ['center', 'question', 'type', 'is_required', 'sequence', 'created_at']
+    list_filter = ['center', 'type', 'is_required']
     search_fields = ['center__name', 'question']
     list_editable = ['is_required', 'sequence']
     ordering = ['center', 'sequence']
     
     fieldsets = (
         ('기본 정보', {
-            'fields': ('center', 'question', 'question_type', 'is_required', 'sequence')
+            'fields': ('center', 'question', 'type', 'is_required', 'sequence')
         }),
         ('선택지', {
             'fields': ('options',)

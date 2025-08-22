@@ -1,5 +1,5 @@
 from ninja import Schema, Field
-from typing import Optional
+from typing import Optional, List
 
 
 class ContractTemplateCreateIn(Schema):
@@ -72,3 +72,23 @@ class CenterAnimalsQueryIn(Schema):
     weight: Optional[str] = Field(None, pattern="^(10kg_under|25kg_under|over_25kg)$", description="체중 범위")
     age: Optional[str] = Field(None, pattern="^(2_under|7_under|over_7)$", description="나이 범위")
     has_trainer_comment: Optional[str] = Field(None, pattern="^(true|false)$", description="훈련사 코멘트 존재 여부")
+
+class QuestionFormCreateIn(Schema):
+    """질문 폼 생성 입력 스키마"""
+    question: str = Field(..., min_length=1, max_length=500, description="질문 내용")
+    type: str = Field(..., pattern="^(text|multiple_choice|single_choice|checkbox)$", description="질문 유형 (text, multiple_choice, single_choice, checkbox)")
+    options: Optional[List[str]] = Field(None, description="선택지 목록 (multiple_choice, single_choice, checkbox 유형에서 사용)")
+    is_required: Optional[bool] = Field(False, description="필수 질문 여부")
+    sequence: Optional[int] = Field(None, ge=1, description="질문 순서 (자동 설정 시 생략 가능)")
+
+class QuestionFormUpdateIn(Schema):
+    """질문 폼 수정 입력 스키마"""
+    question: Optional[str] = Field(None, min_length=1, max_length=500, description="질문 내용")
+    type: Optional[str] = Field(None, pattern="^(text|multiple_choice|single_choice|checkbox)$", description="질문 유형 (text, multiple_choice, single_choice, checkbox)")
+    options: Optional[List[str]] = Field(None, description="선택지 목록 (multiple_choice, single_choice, checkbox 유형에서 사용)")
+    is_required: Optional[bool] = Field(None, description="필수 질문 여부")
+    sequence: Optional[int] = Field(None, ge=1, description="질문 순서")
+
+class QuestionSequenceUpdateIn(Schema):
+    """질문 순서 변경 입력 스키마"""
+    sequence: int = Field(..., ge=1, description="새로운 질문 순서")

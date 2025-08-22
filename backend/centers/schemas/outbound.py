@@ -106,3 +106,23 @@ class CenterAnimalsOut(Schema):
     total_pages: int = Field(..., description="전체 페이지 수")
     has_next: bool = Field(..., description="다음 페이지 존재 여부")
     has_prev: bool = Field(..., description="이전 페이지 존재 여부")
+
+class QuestionFormOut(Schema):
+    """질문 폼 출력 스키마"""
+    id: str = Field(..., description="질문 폼 ID")
+    center_id: str = Field(..., description="센터 ID")
+    question: str = Field(..., description="질문 내용")
+    type: str = Field(..., description="질문 유형 (text, multiple_choice, single_choice, checkbox)")
+    options: Optional[List[str]] = Field(None, description="선택지 목록")
+    is_required: bool = Field(..., description="필수 질문 여부")
+    sequence: int = Field(..., description="질문 순서")
+    created_at: str = Field(..., description="생성일시 (ISO 형식)")
+    updated_at: str = Field(..., description="수정일시 (ISO 형식)")
+
+class QuestionFormListOut(Schema):
+    """질문 폼 목록 출력 스키마"""
+    questions: List[QuestionFormOut] = Field(..., description="질문 폼 목록")
+
+class QuestionFormDeleteOut(Schema):
+    """질문 폼 삭제 출력 스키마"""
+    message: str = Field(..., description="삭제 완료 메시지")

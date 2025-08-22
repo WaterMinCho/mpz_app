@@ -84,15 +84,14 @@ class QuestionForm(BaseModel):
     
     QUESTION_TYPE_CHOICES = [
         ('text', '텍스트'),
-        ('textarea', '긴 텍스트'),
-        ('radio', '라디오'),
+        ('multiple_choice', '다중 선택'),
+        ('single_choice', '단일 선택'),
         ('checkbox', '체크박스'),
-        ('select', '선택'),
     ]
     
     center = models.ForeignKey(Center, on_delete=models.CASCADE, help_text="관련 센터")
     question = models.TextField(help_text="질문 내용")
-    question_type = models.CharField(max_length=20, choices=QUESTION_TYPE_CHOICES, help_text="질문 타입")
+    type = models.CharField(max_length=20, choices=QUESTION_TYPE_CHOICES, null=True, blank=True, help_text="질문 타입")
     options = models.JSONField(blank=True, null=True, help_text="선택지 옵션들")
     is_required = models.BooleanField(default=False, help_text="필수 여부")
     sequence = models.IntegerField(default=1, help_text="질문 순서")
