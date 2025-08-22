@@ -1,5 +1,7 @@
 from ninja import Schema
-from typing import Optional
+from typing import Optional, List
+
+from .inbound import ContractTemplateCreateIn
 
 
 class ContractTemplateOut(Schema):
@@ -22,3 +24,14 @@ class SuccessOut(Schema):
 class ErrorOut(Schema):
     """에러 응답 스키마"""
     error: str
+
+
+class ProcedureSettingsOut(Schema):
+    """프로시저 설정 출력 스키마"""
+    has_monitoring: Optional[bool] = None
+    monitoring_period_months: Optional[int] = None
+    monitoring_interval_days: Optional[int] = None
+    monitoring_description: Optional[str] = None
+    adoption_guidelines: Optional[str] = None
+    adoption_procedure: Optional[str] = None
+    contract_templates: List[ContractTemplateOut] = []
