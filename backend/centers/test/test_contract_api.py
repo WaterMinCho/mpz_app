@@ -239,3 +239,79 @@ class TestContractTemplateAPI(TestCase):
         except Exception as e:
             # 인증 실패는 예상된 결과
             self.assertTrue(True)
+
+    async def test_get_contract_templates_success(self):
+        """계약서 템플릿 목록 조회 성공 테스트"""
+        headers = await self.authenticate()
+        
+        response = await self.client.get("/", headers=headers)
+        
+        # 200 OK
+        self.assertEqual(response.status_code, 200)
+        
+        # 응답이 리스트 형태인지 확인
+        templates = response.json()
+        self.assertIsInstance(templates, list)
+        
+        # 기존 템플릿이 있는지 확인 (setUp에서 생성됨)
+        self.assertGreater(len(templates), 0)
+        
+        # 첫 번째 템플릿의 구조 확인
+        if templates:
+            template = templates[0]
+            self.assertIn("id", template)
+            self.assertIn("title", template)
+            self.assertIn("content", template)
+
+    async def test_get_contract_template_success(self):
+        """계약서 템플릿 상세 조회 성공 테스트"""
+        headers = await self.authenticate()
+        
+        # 먼저 템플릿 목록을 가져와서 ID 확인
+        list_response = await self.client.get("/", headers=headers)
+        self.assertEqual(list_response.status_code, 200)
+        
+        templates = list_response.json()
+        if templates:
+            template_id = templates[0]["id"]
+            
+            # 특정 템플릿 상세 조회
+            response = await self.client.get(f"/{template_id}", headers=headers)
+            
+            # 200 OK
+            self.assertEqual(response.status_code, 200)
+            
+            # 응답 데이터 구조 확인
+            template = response.json()
+            self.assertIn("id", template)
+            self.assertIn("title", template)
+            self.assertIn("content", template)
+            self.assertEqual(template["id"], template_id)
+
+    async def test_get_contract_template_not_found(self):
+        """계약서 템플릿 상세 조회 실패 테스트: 존재하지 않는 템플릿"""
+        headers = await self.authenticate()
+        
+        # 존재하지 않는 ID로 조회
+        fake_id = "00000000-0000-0000-0000-000000000000"
+        response = await self.client.get(f"/{fake_id}", headers=headers)
+        
+        # 404 Not Found
+        self.assertEqual(response.status_code, 404)
+
+    async def test_get_contract_templates_unauthorized(self):
+        """계약서 템플릿 목록 조회 실패 테스트: 인증 없음"""
+        # 인증 헤더 없이 요청
+        response = await self.client.get("/")
+        
+        # 401 Unauthorized
+        self.assertEqual(response.status_code, 401)
+
+    async def test_get_contract_template_unauthorized(self):
+        """계약서 템플릿 상세 조회 실패 테스트: 인증 없음"""
+        # 인증 헤더 없이 요청
+        fake_id = "00000000-0000-0000-0000-000000000000"
+        response = await self.client.get(f"/{fake_id}")
+        
+        # 401 Unauthorized
+        self.assertEqual(response.status_code, 401)

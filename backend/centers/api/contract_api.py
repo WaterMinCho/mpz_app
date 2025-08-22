@@ -2,6 +2,7 @@ from ninja import Router
 from ninja.errors import HttpError
 from django.http import HttpRequest
 from asgiref.sync import sync_to_async
+from typing import List
 from centers.models import Center, AdoptionContractTemplate
 from centers.schemas.inbound import (
     ContractTemplateCreateIn,
@@ -15,6 +16,130 @@ from centers.schemas.outbound import (
 from api.security import jwt_auth
 
 router = Router(tags=["Contract Template"])
+
+@router.get(
+    "/",
+    summary="[R] 계약서 템플릿 목록 조회",
+    description="센터 관리자가 자신의 센터 계약서 템플릿 목록을 조회합니다.",
+    response={
+        200: List[ContractTemplateOut],
+        401: ErrorOut,
+        403: ErrorOut,
+        500: ErrorOut,
+    },
+    auth=jwt_auth,
+)
+async def get_contract_templates(request: HttpRequest):
+    """계약서 템플릿 목록을 조회합니다."""
+    try:
+        @sync_to_async
+        def get_templates():
+            # JWT 토큰에서 사용자 정보 추출
+            if not hasattr(request, 'auth') or not request.auth:
+                raise HttpError(401, "인증이 필요합니다")
+            
+            # 현재 사용자 (jwt_auth에서 이미 User 객체를 반환함)
+            current_user = request.auth
+            
+            # 센터 관리자 권한 확인
+            if current_user.user_type != "센터관리자":
+                raise HttpError(403, "센터 관리자만 접근할 수 있습니다")
+            
+            # 사용자의 센터 조회
+            try:
+                user_center = Center.objects.get(owner=current_user)
+            except Center.DoesNotExist:
+                raise HttpError(400, "등록된 센터가 없습니다")
+            
+            # 해당 센터의 모든 템플릿 조회
+            templates = AdoptionContractTemplate.objects.filter(center=user_center).order_by('-created_at')
+            
+            # 응답 데이터 변환
+            return [
+                ContractTemplateOut(
+                    id=str(template.id),
+                    center_id=str(template.center.id),
+                    title=template.title,
+                    description=template.description,
+                    content=template.content,
+                    is_active=template.is_active,
+                    created_at=template.created_at.isoformat(),
+                    updated_at=template.updated_at.isoformat(),
+                )
+                for template in templates
+            ]
+        
+        return await get_templates()
+        
+    except HttpError:
+        raise
+    except Exception as e:
+        raise HttpError(500, f"계약서 템플릿 목록 조회 중 오류가 발생했습니다: {str(e)}")
+
+
+@router.get(
+    "/{template_id}",
+    summary="[R] 계약서 템플릿 상세 조회",
+    description="센터 관리자가 특정 계약서 템플릿을 상세 조회합니다.",
+    response={
+        200: ContractTemplateOut,
+        401: ErrorOut,
+        403: ErrorOut,
+        404: ErrorOut,
+        500: ErrorOut,
+    },
+    auth=jwt_auth,
+)
+async def get_contract_template(request: HttpRequest, template_id: str):
+    """계약서 템플릿을 상세 조회합니다."""
+    try:
+        @sync_to_async
+        def get_template():
+            # JWT 토큰에서 사용자 정보 추출
+            if not hasattr(request, 'auth') or not request.auth:
+                raise HttpError(401, "인증이 필요합니다")
+            
+            # 현재 사용자 (jwt_auth에서 이미 User 객체를 반환함)
+            current_user = request.auth
+            
+            # 센터 관리자 권한 확인
+            if current_user.user_type != "센터관리자":
+                raise HttpError(403, "센터 관리자만 접근할 수 있습니다")
+            
+            # 사용자의 센터 조회
+            try:
+                user_center = Center.objects.get(owner=current_user)
+            except Center.DoesNotExist:
+                raise HttpError(400, "등록된 센터가 없습니다")
+            
+            # 템플릿이 존재하고 사용자의 센터에 속하는지 확인
+            try:
+                template = AdoptionContractTemplate.objects.get(
+                    id=template_id,
+                    center=user_center
+                )
+            except AdoptionContractTemplate.DoesNotExist:
+                raise HttpError(404, "템플릿을 찾을 수 없습니다")
+            
+            # 응답 데이터 변환
+            return ContractTemplateOut(
+                id=str(template.id),
+                center_id=str(template.center.id),
+                title=template.title,
+                description=template.description,
+                content=template.content,
+                is_active=template.is_active,
+                created_at=template.created_at.isoformat(),
+                updated_at=template.updated_at.isoformat(),
+            )
+        
+        return await get_template()
+        
+    except HttpError:
+        raise
+    except Exception as e:
+        raise HttpError(500, f"계약서 템플릿 상세 조회 중 오류가 발생했습니다: {str(e)}")
+
 
 @router.post(
     "/",
