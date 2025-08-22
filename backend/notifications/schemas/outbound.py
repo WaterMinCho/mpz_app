@@ -9,8 +9,11 @@ class NotificationOut(Schema):
     title: str = Field(..., description="알림 제목")
     message: str = Field(..., description="알림 내용")
     notification_type: str = Field(..., description="알림 유형")
+    priority: str = Field(..., description="우선순위")
     is_read: bool = Field(..., description="읽음 여부")
     read_at: Optional[str] = Field(None, description="읽은 시간 (ISO 형식)")
+    action_url: Optional[str] = Field(None, description="액션 URL (클릭 시 이동할 페이지)")
+    metadata: Optional[dict] = Field(None, description="추가 메타데이터")
     created_at: str = Field(..., description="생성 시간 (ISO 형식)")
     updated_at: str = Field(..., description="수정 시간 (ISO 형식)")
 

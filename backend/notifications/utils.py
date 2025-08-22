@@ -282,10 +282,15 @@ async def send_bulk_push_notification(
 
 # 편의 함수들
 
-async def send_adoption_update_notification(user_id: str, adoption_status: str, animal_name: str):
+async def send_adoption_update_notification(user_id: str, adoption_status: str, animal_name: str, adoption_id: str = None):
     """입양 상태 업데이트 알림"""
     title = f"입양 상태 업데이트: {animal_name}"
     message = f"{animal_name}의 입양 상태가 '{adoption_status}'로 변경되었습니다."
+    
+    # action_url 설정 (입양 신청 상세 페이지로 이동)
+    action_url = None
+    if adoption_id:
+        action_url = f"/my-adoptions/{adoption_id}"
     
     await create_and_send_notification(
         user_id=user_id,
@@ -293,14 +298,20 @@ async def send_adoption_update_notification(user_id: str, adoption_status: str, 
         title=title,
         message=message,
         priority="high",
-        metadata={"animal_name": animal_name, "status": adoption_status}
+        action_url=action_url,
+        metadata={"animal_name": animal_name, "status": adoption_status, "adoption_id": adoption_id}
     )
 
 
-async def send_monitoring_reminder_notification(user_id: str, reminder_type: str):
+async def send_monitoring_reminder_notification(user_id: str, reminder_type: str, adoption_id: str = None):
     """모니터링 리마인더 알림"""
     title = "모니터링 알림"
     message = f"{reminder_type} 모니터링 시간입니다."
+    
+    # action_url 설정 (모니터링 페이지로 이동)
+    action_url = None
+    if adoption_id:
+        action_url = f"/my-adoptions/{adoption_id}/monitoring"
     
     await create_and_send_notification(
         user_id=user_id,
@@ -308,14 +319,20 @@ async def send_monitoring_reminder_notification(user_id: str, reminder_type: str
         title=title,
         message=message,
         priority="normal",
-        metadata={"reminder_type": reminder_type}
+        action_url=action_url,
+        metadata={"reminder_type": reminder_type, "adoption_id": adoption_id}
     )
 
 
-async def send_center_update_notification(user_id: str, center_name: str, update_type: str):
+async def send_center_update_notification(user_id: str, center_name: str, update_type: str, center_id: str = None):
     """센터 정보 업데이트 알림"""
     title = f"센터 업데이트: {center_name}"
     message = f"{center_name}의 {update_type} 정보가 업데이트되었습니다."
+    
+    # action_url 설정 (센터 상세 페이지로 이동)
+    action_url = None
+    if center_id:
+        action_url = f"/centers/{center_id}"
     
     await create_and_send_notification(
         user_id=user_id,
@@ -323,7 +340,8 @@ async def send_center_update_notification(user_id: str, center_name: str, update
         title=title,
         message=message,
         priority="normal",
-        metadata={"center_name": center_name, "update_type": update_type}
+        action_url=action_url,
+        metadata={"center_name": center_name, "update_type": update_type, "center_id": center_id}
     )
 
 

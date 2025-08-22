@@ -230,7 +230,8 @@ async def submit_adoption_application(request, data: AdoptionApplicationIn):
             await send_adoption_update_notification(
                 user_id=str(current_user.id),
                 adoption_status="신청완료",
-                animal_name=animal.name
+                animal_name=animal.name,
+                adoption_id=str(adoption.id)
             )
         except Exception as e:
             # 알림 전송 실패는 로그만 남기고 API 응답에는 영향 주지 않음
@@ -247,10 +248,12 @@ async def submit_adoption_application(request, data: AdoptionApplicationIn):
                 title=f"새로운 입양 신청: {animal.name}",
                 message=f"{current_user.username}님이 {animal.name}에 대한 입양 신청을 하였습니다.",
                 priority="high",
+                action_url=f"/admin/adoptions/{adoption.id}",  # 입양 신청 상세 페이지로 이동
                 metadata={
                     "adoption_id": str(adoption.id),
                     "animal_name": animal.name,
-                    "applicant_name": current_user.username
+                    "applicant_name": current_user.username,
+                    "animal_id": str(animal.id)
                 }
             )
         except Exception as e:

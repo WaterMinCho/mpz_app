@@ -33,8 +33,11 @@ def _build_notification_response(notification):
         title=notification.title,
         message=notification.message,
         notification_type=notification.notification_type,
+        priority=notification.priority,
         is_read=notification.is_read,
         read_at=notification.read_at.isoformat() if notification.read_at else None,
+        action_url=notification.action_url,
+        metadata=notification.metadata,
         created_at=notification.created_at.isoformat(),
         updated_at=notification.updated_at.isoformat(),
     )
