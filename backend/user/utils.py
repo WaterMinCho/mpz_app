@@ -101,9 +101,9 @@ async def decodeJWT(bearer):
 
 
 def set_cookie_jwt(response, access, refresh, access_exp, refresh_exp, reset=None):
-    domain = settings.SESSION_COOKIE_DOMAIN
-    secure = settings.SESSION_COOKIE_SECURE
-    samesite = settings.SESSION_COOKIE_SAMESITE
+    domain = getattr(settings, 'SESSION_COOKIE_DOMAIN', None)
+    secure = getattr(settings, 'SESSION_COOKIE_SECURE', True)
+    samesite = getattr(settings, 'SESSION_COOKIE_SAMESITE', 'Lax')
 
     response.set_cookie(
         key="access",

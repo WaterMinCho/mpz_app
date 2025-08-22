@@ -102,13 +102,18 @@ async def kakao_login_callback(request, code: str, state: str):
                     503, f"카카오 사용자 정보 조회 실패: {profile_request.status_code}"
                 )
             profile_data = profile_request.json()
-    except httpx.ConnectError:
+    except httpx.ConnectError as e:
+        print(f"카카오 서버 연결 오류: {e}")
         raise HttpError(503, "카카오 서버 연결에 실패했습니다. 잠시 후 다시 시도해주세요.")
-    except httpx.TimeoutException:
+    except httpx.TimeoutException as e:
+        print(f"카카오 서버 타임아웃 오류: {e}")
         raise HttpError(
             503, "카카오 서버 응답 시간이 초과되었습니다. 잠시 후 다시 시도해주세요."
         )
     except Exception as e:
+        print(f"카카오 로그인 처리 중 예상치 못한 오류: {e}")
+        import traceback
+        traceback.print_exc()
         raise HttpError(503, f"카카오 로그인 처리 중 오류가 발생했습니다: {str(e)}")
 
     # 응답 데이터 검증 (프론트엔드와 동일한 구조)
@@ -155,8 +160,14 @@ async def kakao_login_callback(request, code: str, state: str):
         created = True
 
     # 실제 JWT 토큰 생성
-    access, access_exp = utils.get_access_token({"user_id": user.id})
-    refresh, refresh_exp = utils.get_refresh_token()
+    try:
+        access, access_exp = utils.get_access_token({"user_id": user.id})
+        refresh, refresh_exp = utils.get_refresh_token()
+    except Exception as e:
+        print(f"JWT 토큰 생성 오류: {e}")
+        import traceback
+        traceback.print_exc()
+        raise HttpError(503, f"JWT 토큰 생성 중 오류가 발생했습니다: {str(e)}")
 
     @sync_to_async
     def update_jwt(user_id, access, refresh):
@@ -172,8 +183,13 @@ async def kakao_login_callback(request, code: str, state: str):
     redirect_path = "/"
 
     # JWT 토큰을 쿠키에 설정하고 홈으로 리다이렉트
-    redirect_url = f"{settings.FRONTEND_URL}{redirect_path}"
-    response = HttpResponseRedirect(redirect_url)
-    response = utils.set_cookie_jwt(response, access, refresh, access_exp, refresh_exp)
-
-    return response
+    try:
+        redirect_url = f"{settings.FRONTEND_URL}{redirect_path}"
+        response = HttpResponseRedirect(redirect_url)
+        response = utils.set_cookie_jwt(response, access, refresh, access_exp, refresh_exp)
+        return response
+    except Exception as e:
+        print(f"쿠키 설정 및 리다이렉트 오류: {e}")
+        import traceback
+        traceback.print_exc()
+        raise HttpError(503, f"쿠키 설정 중 오류가 발생했습니다: {str(e)}")
