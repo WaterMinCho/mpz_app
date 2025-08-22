@@ -47,6 +47,8 @@ class AnimalFavoriteOut(Schema):
     is_female: bool = Field(..., description="암컷 여부")
     status: str = Field(..., description="동물 상태 (보호중, 입양대기, 입양완료)")
     personality: Optional[str] = Field(None, description="성격")
+    found_location: Optional[str] = Field(None, description="발견 장소")
+    admission_date: Optional[str] = Field(None, description="센터 입소일 (ISO 형식)")
     center_id: str = Field(..., description="센터 ID")
     center_name: str = Field(..., description="센터명")
     is_favorited: bool = Field(True, description="찜 상태 (항상 True)")

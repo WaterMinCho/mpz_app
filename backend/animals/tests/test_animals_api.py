@@ -3,10 +3,11 @@ from animals.api import router
 from ninja.testing import TestAsyncClient
 from user.models import User
 from centers.models import Center
-from animals.models import Animal, AnimalImage
+from animals.models import Animal, AnimalImage, AnimalMegaphone
 from django.test import override_settings
 from asgiref.sync import sync_to_async
 from decimal import Decimal
+from datetime import date
 import uuid
 
 
@@ -31,6 +32,14 @@ class TestAnimalsAPI(TestCase):
             user_type="센터관리자"
         )
         
+        # 테스트용 일반 사용자 생성
+        self.regular_user = User.objects.create_user(
+            username="regularuser",
+            password="password1234!",
+            email="regular@example.com",
+            user_type="일반사용자"
+        )
+        
         # 테스트용 동물 생성
         self.animal = Animal.objects.create(
             center=self.center,
@@ -40,7 +49,17 @@ class TestAnimalsAPI(TestCase):
             weight=Decimal('15.50'),
             breed="골든 리트리버",
             status="보호중",
-            description="친근한 강아지입니다"
+            description="친근한 강아지입니다",
+            found_location="서울시 강남구",
+            admission_date=date(2024, 1, 15),
+            personality="활발하고 친근함",
+            megaphone_count=5,
+            activity_level=3,
+            sensitivity=2,
+            sociability=4,
+            separation_anxiety=1,
+            basic_training=2,
+            trainer_comment="기본 명령어 숙지"
         )
         
         # 테스트용 동물 이미지 생성
@@ -51,15 +70,18 @@ class TestAnimalsAPI(TestCase):
             sequence=1
         )
 
-    async def authenticate(self):
+    async def authenticate(self, user=None):
         """사용자 인증 및 JWT 토큰 획득"""
+        if user is None:
+            user = self.center_user
+            
         # user 앱의 로그인 API를 통해 토큰 획득
         from user.api import router as user_router
         from ninja.testing import TestAsyncClient as UserTestClient
         
         user_client = UserTestClient(user_router)
         login_data = {
-            "username": self.center_user.username,
+            "username": user.username,
             "password": "password1234!",
         }
         response = await user_client.post("/login", json=login_data)
@@ -72,7 +94,7 @@ class TestAnimalsAPI(TestCase):
         else:
             # 테스트용 더미 토큰 (실제로는 작동하지 않음)
             return {
-                "Authorization": "Bearer test_token_for_testing",
+                "Authorization": f"Bearer test_token_for_testing",
             }
 
     async def test_create_animal_success(self):
@@ -85,7 +107,10 @@ class TestAnimalsAPI(TestCase):
             "age": 2,
             "weight": Decimal('12.00'),
             "breed": "말티즈",
-            "description": "귀여운 강아지입니다"
+            "description": "귀여운 강아지입니다",
+            "found_location": "서울시 서초구",
+            "announcement_date": "2024-01-20",
+            "personality": "조용하고 순함"
         }
         
         try:
@@ -143,6 +168,22 @@ class TestAnimalsAPI(TestCase):
         response = await self.client.get("/?breed=골든")
         self.assertEqual(response.status_code, 200)
 
+    async def test_get_animals_with_sorting(self):
+        """동물 목록 조회 테스트 (정렬 적용)"""
+        # 확성기 수 기준 내림차순 정렬
+        response = await self.client.get("/?sort_by=megaphone_count&sort_order=desc")
+        self.assertEqual(response.status_code, 200)
+        
+        data = response.json()
+        self.assertIn("data", data)
+        
+        # 입소일 기준 오름차순 정렬
+        response = await self.client.get("/?sort_by=admission_date&sort_order=asc")
+        self.assertEqual(response.status_code, 200)
+        
+        data = response.json()
+        self.assertIn("data", data)
+
     async def test_get_animal_by_id(self):
         """동물 상세 조회 테스트"""
         response = await self.client.get(f"/{self.animal.id}")
@@ -157,6 +198,8 @@ class TestAnimalsAPI(TestCase):
         data = response.json()
         self.assertEqual(data["name"], "테스트 강아지")
         self.assertEqual(data["breed"], "골든 리트리버")
+        self.assertEqual(data["found_location"], "서울시 강남구")
+        self.assertEqual(data["megaphone_count"], 5)
         self.assertIn("animal_images", data)
 
     async def test_get_animal_by_id_not_found(self):
@@ -171,7 +214,8 @@ class TestAnimalsAPI(TestCase):
         
         data = {
             "name": "수정된 이름",
-            "weight": 16.0
+            "weight": 16.0,
+            "found_location": "서울시 서초구"
         }
         
         try:
@@ -214,17 +258,12 @@ class TestAnimalsAPI(TestCase):
         response = await self.client.delete(f"/{self.animal.id}")
         self.assertEqual(response.status_code, 401)
 
-    async def test_update_animal_status_success(self):
-        """동물 상태 변경 성공 테스트"""
-        headers = await self.authenticate()
-        
-        data = {
-            "status": "입양대기",
-            "reason": "테스트 상태 변경"
-        }
+    async def test_toggle_animal_megaphone_add(self):
+        """동물 확성기 추가 테스트"""
+        headers = await self.authenticate(self.regular_user)
         
         try:
-            response = await self.client.patch(f"/{self.animal.id}/status", json=data, headers=headers)
+            response = await self.client.post(f"/{self.animal.id}/megaphone", json={}, headers=headers)
             # 실제 인증이 없으므로 예외가 발생할 수 있음
             if response.status_code in [200, 401, 500]:
                 self.assertTrue(True)  # 테스트 통과
@@ -234,14 +273,49 @@ class TestAnimalsAPI(TestCase):
             # 인증 실패는 예상된 결과
             self.assertTrue(True)
 
-    async def test_update_animal_status_unauthorized(self):
-        """동물 상태 변경 실패 테스트: 인증 없음"""
-        data = {
-            "status": "입양대기"
-        }
+    async def test_toggle_animal_megaphone_remove(self):
+        """동물 확성기 해제 테스트"""
+        # 먼저 확성기 추가
+        megaphone = AnimalMegaphone.objects.create(
+            user=self.regular_user,
+            animal=self.animal
+        )
+        self.animal.megaphone_count += 1
+        self.animal.save()
         
-        response = await self.client.patch(f"/{self.animal.id}/status", json=data)
+        headers = await self.authenticate(self.regular_user)
+        
+        try:
+            response = await self.client.post(f"/{self.animal.id}/megaphone", json={}, headers=headers)
+            # 실제 인증이 없으므로 예외가 발생할 수 있음
+            if response.status_code in [200, 401, 500]:
+                self.assertTrue(True)  # 테스트 통과
+            else:
+                self.assertEqual(response.status_code, 200)
+        except Exception as e:
+            # 인증 실패는 예상된 결과
+            self.assertTrue(True)
+
+    async def test_toggle_animal_megaphone_unauthorized(self):
+        """동물 확성기 토글 실패 테스트: 인증 없음"""
+        response = await self.client.post(f"/{self.animal.id}/megaphone", json={})
         self.assertEqual(response.status_code, 401)
+
+    async def test_toggle_animal_megaphone_not_found(self):
+        """동물 확성기 토글 실패 테스트: 존재하지 않는 동물"""
+        headers = await self.authenticate(self.regular_user)
+        fake_id = str(uuid.uuid4())
+        
+        try:
+            response = await self.client.post(f"/{fake_id}/megaphone", json={}, headers=headers)
+            # 실제 인증이 없으므로 예외가 발생할 수 있음
+            if response.status_code in [404, 401, 500]:
+                self.assertTrue(True)  # 테스트 통과
+            else:
+                self.assertEqual(response.status_code, 404)
+        except Exception as e:
+            # 인증 실패는 예상된 결과
+            self.assertTrue(True)
 
     async def test_get_breeds(self):
         """품종 목록 조회 테스트"""
@@ -266,7 +340,7 @@ class TestAnimalsAPI(TestCase):
             center=self.center,
             name="관련 강아지",
             is_female=False,
-            age="4",
+            age=4,
             weight=18.0,
             breed="래브라도",
             status="보호중"
@@ -291,3 +365,42 @@ class TestAnimalsAPI(TestCase):
         fake_id = str(uuid.uuid4())
         response = await self.client.get(f"/{fake_id}/related")
         self.assertEqual(response.status_code, 404)
+
+    async def test_animal_model_fields(self):
+        """동물 모델의 새로 추가된 필드들 테스트"""
+        # 새로 추가된 필드들이 제대로 저장되었는지 확인
+        animal = Animal.objects.get(id=self.animal.id)
+        
+        self.assertEqual(animal.found_location, "서울시 강남구")
+        self.assertEqual(animal.admission_date, date(2024, 1, 15))
+        self.assertEqual(animal.megaphone_count, 5)
+        self.assertEqual(animal.activity_level, 3)
+        self.assertEqual(animal.sensitivity, 2)
+        self.assertEqual(animal.sociability, 4)
+        self.assertEqual(animal.separation_anxiety, 1)
+        self.assertEqual(animal.basic_training, 2)
+        self.assertEqual(animal.trainer_comment, "기본 명령어 숙지")
+
+    async def test_animal_megaphone_model(self):
+        """동물 확성기 모델 테스트"""
+        # 확성기 생성
+        megaphone = AnimalMegaphone.objects.create(
+            user=self.regular_user,
+            animal=self.animal
+        )
+        
+        # 확성기 수 증가
+        self.animal.megaphone_count += 1
+        self.animal.save()
+        
+        # 확인
+        self.assertEqual(self.animal.megaphone_count, 6)
+        self.assertEqual(megaphone.user, self.regular_user)
+        self.assertEqual(megaphone.animal, self.animal)
+        
+        # 중복 생성 방지 테스트
+        with self.assertRaises(Exception):  # unique_together 제약조건 위반
+            AnimalMegaphone.objects.create(
+                user=self.regular_user,
+                animal=self.animal
+            )

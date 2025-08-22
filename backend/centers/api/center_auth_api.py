@@ -304,6 +304,7 @@ async def get_center_animals(request: HttpRequest, filters: CenterAnimalsQueryIn
                     announce_number=animal.announce_number,
                     announcement_date=getattr(animal, 'announcement_date', None),
                     found_location=getattr(animal, 'found_location', None),
+                    admission_date=animal.admission_date.isoformat() if animal.admission_date else None,
                     personality=animal.personality,
                     center_id=str(animal.center.id),
                     created_at=animal.created_at.isoformat(),

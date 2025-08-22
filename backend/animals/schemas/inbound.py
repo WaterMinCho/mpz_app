@@ -43,34 +43,39 @@ class AnimalUpdateIn(Schema):
     sociability: Optional[str] = Field(None, max_length=50, description="사회성")
     separation_anxiety: Optional[str] = Field(None, max_length=50, description="분리불안 정도")
     special_notes: Optional[str] = Field(None, max_length=1000, description="특이사항")
-    health_notes: Optional[str] = Field(None, max_length=1000, description="건강 정보")
+    health_notes: Optional[str] = Field(None, max_length=50, description="건강 정보")
     basic_training: Optional[str] = Field(None, max_length=500, description="기본 훈련 상태")
     trainer_comment: Optional[str] = Field(None, max_length=1000, description="훈련사 코멘트")
     announce_number: Optional[str] = Field(None, max_length=50, description="공고번호")
-    announcement_date: Optional[date] = Field(None, description="공고일")
+    admission_date: Optional[date] = Field(None, description="공고일")
     found_location: Optional[str] = Field(None, max_length=200, description="발견 장소")
     personality: Optional[str] = Field(None, max_length=500, description="성격")
 
 
 class AnimalStatusUpdateIn(Schema):
     """동물 상태 변경 입력 스키마"""
-    status: str = Field(..., description="변경할 동물 상태 (보호중, 입양대기, 입양완료)")
-    reason: Optional[str] = Field(None, max_length=500, description="상태 변경 사유")
+    status: str = Field(..., description="새로운 상태")
 
 
 class AnimalListQueryIn(Schema):
-    """동물 목록 조회 쿼리 스키마"""
-    status: Optional[str] = Field(None, description="동물 상태 필터링 (보호중, 입양대기, 입양완료)")
-    center_id: Optional[str] = Field(None, description="센터 ID 필터링")
-    gender: Optional[str] = Field(None, pattern="^(female|male)$", description="성별 필터링 (female or male)")
-    weight_min: Optional[Decimal] = Field(None, ge=Decimal('0.01'), le=Decimal('999.99'), description="최소 체중 (kg)")
-    weight_max: Optional[Decimal] = Field(None, ge=Decimal('0.01'), le=Decimal('999.99'), description="최대 체중 (kg)")
-    age_min: Optional[int] = Field(None, ge=0, le=300, description="최소 나이 (개월)")
-    age_max: Optional[int] = Field(None, ge=0, le=300, description="최대 나이 (개월)")
-    has_trainer_comment: Optional[str] = Field(None, pattern="^(true|false)$", description="훈련사 코멘트 존재 여부 (true or false)")
-    breed: Optional[str] = Field(None, max_length=50, description="품종 필터링")
-    region: Optional[str] = Field(None, max_length=50, description="지역 필터링")
+    """동물 목록 조회 쿼리 입력 스키마"""
+    status: Optional[str] = Field(None, description="동물 상태 필터")
+    center_id: Optional[str] = Field(None, description="센터 ID 필터")
+    gender: Optional[str] = Field(None, description="성별 필터 (male/female)")
+    weight_min: Optional[Decimal] = Field(None, description="최소 체중 (kg)")
+    weight_max: Optional[Decimal] = Field(None, description="최대 체중 (kg)")
+    age_min: Optional[int] = Field(None, description="최소 나이 (개월)")
+    age_max: Optional[int] = Field(None, description="최대 나이 (개월)")
+    breed: Optional[str] = Field(None, description="품종 필터")
+    region: Optional[str] = Field(None, description="지역 필터")
+    has_trainer_comment: Optional[str] = Field(None, description="훈련사 코멘트 존재 여부 (true/false)")
+    sort_by: Optional[str] = Field("created_at", description="정렬 기준 (created_at, admission_date, megaphone_count)")
+    sort_order: Optional[str] = Field("desc", description="정렬 순서 (asc/desc)")
 
+
+class MegaphoneToggleIn(Schema):
+    """확성기 토글 입력 스키마"""
+    pass  # 추가 데이터 없음
 
 class RelatedAnimalsQueryIn(Schema):
     """관련 동물 조회 쿼리 스키마"""

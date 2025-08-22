@@ -6,15 +6,15 @@ from django.utils import timezone
 from django.db.models import Q
 from asgiref.sync import sync_to_async
 from typing import List
-from .models import Animal
+from .models import Animal, AnimalMegaphone
 from animals.schemas.inbound import (
     AnimalCreateIn, AnimalUpdateIn, AnimalStatusUpdateIn,
-    AnimalListQueryIn, RelatedAnimalsQueryIn
+    AnimalListQueryIn, MegaphoneToggleIn, RelatedAnimalsQueryIn
 )
 from animals.schemas.outbound import (
     AnimalOut, AnimalStatusUpdateOut,
     BreedsOut, SuccessOut, 
-    ErrorOut
+    ErrorOut, MegaphoneToggleOut
 )
 from api.security import jwt_auth
 from user.models import User
@@ -23,16 +23,16 @@ from centers.models import Center
 router = Router(tags=["Animals"])
 
 
-def get_user_type(user: User) -> str:
+async def get_user_type(user: User) -> str:
     """사용자 타입을 반환합니다."""
     if hasattr(user, 'user_type'):
         return user.user_type
     return "일반사용자"
 
 
-def is_center_owner(user: User, center_id: str) -> bool:
+async def is_center_owner(user: User, center_id: str) -> bool:
     """사용자가 해당 센터의 소유자인지 확인합니다."""
-    return Center.objects.filter(id=center_id, user=user).exists()
+    return await Center.objects.filter(id=center_id, user=user).aexists()
 
 
 @router.post(
@@ -52,7 +52,7 @@ async def create_animal(request: HttpRequest, data: AnimalCreateIn):
     try:
         # 권한 체크
         user = request.user
-        user_type = get_user_type(user)
+        user_type = await get_user_type(user)
         
         if user_type == "일반사용자":
             raise HttpError(403, "센터 관리자 이상의 권한이 필요합니다")
@@ -85,6 +85,8 @@ async def create_animal(request: HttpRequest, data: AnimalCreateIn):
             "health_notes": data.health_notes,
             "special_needs": data.special_notes,  # special_notes를 special_needs에 매핑
             "announce_number": data.announce_number,
+            "found_location": data.found_location,
+            "admission_date": data.announcement_date,  # announcement_date를 admission_date로 매핑
         }
         
         # DB에 동물 정보 삽입
@@ -113,7 +115,10 @@ async def create_animal(request: HttpRequest, data: AnimalCreateIn):
             announce_number=animal.announce_number,
             announcement_date=animal.announcement_date,
             found_location=animal.found_location,
+            admission_date=animal.admission_date.isoformat() if animal.admission_date else None,
             personality=animal.personality,
+            megaphone_count=animal.megaphone_count,
+            is_megaphoned=False,  # 새로 생성된 동물은 기본값
             center_id=str(animal.center_id),
             animal_images=[],
             created_at=animal.created_at.isoformat(),
@@ -175,7 +180,23 @@ async def get_animals(request: HttpRequest, filters: AnimalListQueryIn = Query(A
             if filters.region:
                 queryset = queryset.filter(center__region=filters.region)
             
-            return list(queryset.order_by('-created_at'))
+            # 정렬 기능 추가
+            sort_by = filters.sort_by or "created_at"
+            sort_order = filters.sort_order or "desc"
+            
+            if sort_by == "admission_date":
+                order_field = "admission_date"
+            elif sort_by == "megaphone_count":
+                order_field = "megaphone_count"
+            else:
+                order_field = "created_at"
+            
+            if sort_order == "asc":
+                queryset = queryset.order_by(order_field)
+            else:
+                queryset = queryset.order_by(f"-{order_field}")
+            
+            return list(queryset)
         
         # 동물 목록 조회
         animals_list = await get_animals_list()
@@ -207,8 +228,11 @@ async def get_animals(request: HttpRequest, filters: AnimalListQueryIn = Query(A
                 trainer_comment=None,  # Animal 모델에 없는 필드
                 announce_number=animal.announce_number,
                 announcement_date=None,  # Animal 모델에 없는 필드
-                found_location=None,  # Animal 모델에 없는 필드
+                found_location=animal.found_location,
+                admission_date=animal.admission_date.isoformat() if animal.admission_date else None,
                 personality=animal.personality,
+                megaphone_count=animal.megaphone_count,
+                is_megaphoned=False,  # 목록 조회에서는 기본값
                 center_id=str(animal.center_id),
                 animal_images=[
                     {
@@ -315,8 +339,11 @@ async def get_animal_by_id(request: HttpRequest, animal_id: str):
             trainer_comment=None,  # Animal 모델에 없는 필드
             announce_number=animal.announce_number,
             announcement_date=None,  # Animal 모델에 없는 필드
-            found_location=None,  # Animal 모델에 없는 필드
+            found_location=animal.found_location,
+            admission_date=animal.admission_date.isoformat() if animal.admission_date else None,
             personality=animal.personality,
+            megaphone_count=animal.megaphone_count,
+            is_megaphoned=False,  # 상세 조회에서는 기본값
             center_id=str(animal.center_id),
             animal_images=[
                 {
@@ -407,8 +434,8 @@ async def update_animal(request: HttpRequest, animal_id: str, data: AnimalUpdate
             update_data["trainer_comment"] = data.trainer_comment
         if data.announce_number is not None:
             update_data["announce_number"] = data.announce_number
-        if data.announcement_date is not None:
-            update_data["announcement_date"] = data.announcement_date
+        if data.admission_date is not None:
+            update_data["admission_date"] = data.admission_date
         if data.found_location is not None:
             update_data["found_location"] = data.found_location
         if data.personality is not None:
@@ -440,8 +467,8 @@ async def update_animal(request: HttpRequest, animal_id: str, data: AnimalUpdate
             basic_training=animal.basic_training,
             trainer_comment=animal.trainer_comment,
             announce_number=animal.announce_number,
-            announcement_date=animal.announcement_date,
             found_location=animal.found_location,
+            admission_date=animal.admission_date.isoformat() if animal.admission_date else None,
             personality=animal.personality,
             center_id=str(animal.center_id),
             animal_images=[],
@@ -457,6 +484,74 @@ async def update_animal(request: HttpRequest, animal_id: str, data: AnimalUpdate
         raise
     except Exception as e:
         raise HttpError(500, f"동물 정보 수정 중 오류가 발생했습니다: {str(e)}")
+
+
+@router.post(
+    "/{animal_id}/megaphone",
+    summary="[C/D] 동물 확성기 토글",
+    description="동물의 확성기(좋아요)를 토글합니다. 사용자당 동물마다 한 번만 가능합니다.",
+    response={
+        200: MegaphoneToggleOut,
+        401: ErrorOut,
+        404: ErrorOut,
+        500: ErrorOut,
+    },
+    auth=jwt_auth,
+)
+async def toggle_animal_megaphone(request: HttpRequest, animal_id: str, data: MegaphoneToggleIn):
+    """동물의 확성기(좋아요)를 토글합니다."""
+    try:
+        # JWT 토큰에서 사용자 정보 추출
+        if not hasattr(request, 'auth') or not request.auth:
+            raise HttpError(401, "로그인이 필요합니다")
+
+        current_user = request.auth
+        if hasattr(current_user, '__await__'):
+            current_user = await current_user
+
+        @sync_to_async
+        def toggle_megaphone():
+            # 동물 존재 확인
+            try:
+                animal = Animal.objects.get(id=animal_id)
+            except Animal.DoesNotExist:
+                raise HttpError(404, "동물을 찾을 수 없습니다")
+
+            # 현재 확성기 상태 확인
+            try:
+                megaphone = AnimalMegaphone.objects.get(
+                    user=current_user,
+                    animal=animal
+                )
+                # 확성기 해제
+                megaphone.delete()
+                animal.megaphone_count = max(0, animal.megaphone_count - 1)
+                animal.save()
+                is_megaphoned = False
+                message = "확성기가 해제되었습니다"
+            except AnimalMegaphone.DoesNotExist:
+                # 확성기 추가
+                AnimalMegaphone.objects.create(
+                    user=current_user,
+                    animal=animal
+                )
+                animal.megaphone_count += 1
+                animal.save()
+                is_megaphoned = True
+                message = "확성기를 눌렀습니다"
+
+            return {
+                "is_megaphoned": is_megaphoned,
+                "message": message,
+                "megaphone_count": animal.megaphone_count
+            }
+
+        return await toggle_megaphone()
+
+    except HttpError:
+        raise
+    except Exception as e:
+        raise HttpError(500, f"확성기 토글 중 오류가 발생했습니다: {str(e)}")
 
 
 @router.delete(

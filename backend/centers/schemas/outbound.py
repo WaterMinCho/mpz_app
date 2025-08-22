@@ -90,6 +90,7 @@ class CenterAnimalOut(Schema):
     announce_number: Optional[str] = Field(None, description="공고번호")
     announcement_date: Optional[str] = Field(None, description="공고일 (ISO 형식)")
     found_location: Optional[str] = Field(None, description="발견 장소")
+    admission_date: Optional[str] = Field(None, description="센터 입소일 (ISO 형식)")
     personality: Optional[str] = Field(None, description="성격")
     center_id: str = Field(..., description="센터 ID")
     created_at: str = Field(..., description="생성일시 (ISO 형식)")

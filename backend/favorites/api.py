@@ -51,6 +51,8 @@ def _build_animal_favorite_response(favorite):
         is_female=animal.is_female,
         status=animal.status,
         personality=animal.personality,
+        found_location=animal.found_location,
+        admission_date=animal.admission_date.isoformat() if animal.admission_date else None,
         center_id=str(animal.center.id),
         center_name=animal.center.name,
         is_favorited=True,

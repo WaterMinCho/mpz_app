@@ -51,8 +51,17 @@ class Animal(BaseModel):
     personality = models.TextField(blank=True, null=True, help_text="성격")
     health_notes = models.TextField(blank=True, null=True, help_text="건강 상태 메모")
     special_needs = models.TextField(blank=True, null=True, help_text="특별한 요구사항")
+    found_location = models.CharField(max_length=200, blank=True, null=True, help_text="발견 장소")
+    admission_date = models.DateField(blank=True, null=True, help_text="센터 입소일")
     adoption_fee = models.IntegerField(default=0, help_text="입양비")
+    megaphone_count = models.PositiveIntegerField(default=0, help_text="확성기(좋아요) 수")
     is_public = models.BooleanField(default=True, help_text="공개 여부")
+    activity_level = models.PositiveIntegerField(default=0, help_text="활동량 수준")
+    sensitivity = models.PositiveIntegerField(default=0, help_text="예민함 정도")
+    sociability = models.PositiveIntegerField(default=0, help_text="사회성")
+    separation_anxiety = models.PositiveIntegerField(default=0, help_text="분리불안 정도")
+    basic_training = models.PositiveIntegerField(default=0, help_text="기본 훈련 상태")
+    trainer_comment = models.TextField(blank=True, null=True, help_text="훈련사 코멘트")
     
     class Meta:
         db_table = 'animals'
@@ -81,3 +90,19 @@ class AnimalImage(BaseModel):
     
     def __str__(self):
         return f"{self.animal.name} - 이미지 {self.sequence}"
+
+
+class AnimalMegaphone(BaseModel):
+    """동물 확성기(좋아요) 모델"""
+    
+    user = models.ForeignKey('user.User', on_delete=models.CASCADE, help_text="사용자")
+    animal = models.ForeignKey(Animal, on_delete=models.CASCADE, help_text="동물")
+    
+    class Meta:
+        db_table = 'animal_megaphones'
+        verbose_name = '동물 확성기'
+        verbose_name_plural = '동물 확성기들'
+        unique_together = ['user', 'animal']  # 사용자당 동물마다 한 번만 가능
+    
+    def __str__(self):
+        return f"{self.user.username} -> {self.animal.name}"

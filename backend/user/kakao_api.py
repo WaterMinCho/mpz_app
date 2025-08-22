@@ -80,7 +80,7 @@ async def kakao_login_callback(request, code: str, state: str):
                 },
             )
             if token_request.status_code != 200:
-                error_text = await token_request.atext()
+                error_text = token_request.text
                 raise HttpError(
                     503, f"카카오 토큰 교환 실패: {token_request.status_code} - {error_text}"
                 )

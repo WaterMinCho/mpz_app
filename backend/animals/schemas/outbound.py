@@ -35,7 +35,10 @@ class AnimalOut(Schema):
     announce_number: Optional[str] = Field(None, description="공고번호")
     announcement_date: Optional[str] = Field(None, description="공고일 (ISO 형식)")
     found_location: Optional[str] = Field(None, description="발견 장소")
+    admission_date: Optional[str] = Field(None, description="센터 입소일 (ISO 형식)")
     personality: Optional[str] = Field(None, description="성격")
+    megaphone_count: int = Field(0, description="확성기(좋아요) 수")
+    is_megaphoned: bool = Field(False, description="현재 사용자가 확성기를 눌렀는지 여부")
     center_id: str = Field(..., description="센터 ID")
     animal_images: List[AnimalImageOut] = Field(default_factory=list, description="동물 이미지 목록")
     created_at: str = Field(..., description="생성일시 (ISO 형식)")
@@ -78,6 +81,13 @@ class RelatedAnimalsOut(Schema):
 class SuccessOut(Schema):
     """성공 응답 스키마"""
     message: str = Field(..., description="성공 메시지")
+
+
+class MegaphoneToggleOut(Schema):
+    """확성기 토글 응답 스키마"""
+    is_megaphoned: bool = Field(..., description="확성기 상태")
+    megaphone_count: int = Field(..., description="총 확성기 수")
+    message: str = Field(..., description="결과 메시지")
 
 
 class ErrorOut(Schema):
