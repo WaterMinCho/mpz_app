@@ -78,10 +78,15 @@ SIMPLE_RECOMMENDATION_PROMPT = """
 - 추가 선호사항: {preferences}
 
 다음 단계로 진행해주세요:
-1. 사용자의 성격 테스트 데이터를 조회해주세요
-2. 입양 가능한 동물 목록을 가져와주세요  
-3. 사용자 성격에 맞는 동물들을 필터링해주세요
+1. get_user_personality_test_data 도구를 사용하여 사용자 ID {user_id}의 personality.answers를 조회해주세요
+2. get_available_animals 도구를 사용하여 입양 가능한 동물 목록을 가져와주세요
+3. filter_animals_by_characteristics 도구를 활용하여 사용자 성격에 맞는 동물들을 필터링해주세요
 4. 상위 {limit}마리를 추천하고 상세한 이유를 설명해주세요
+
+각 도구를 사용할 때:
+- get_user_personality_test_data: user_id 파라미터에 "{user_id}" 전달
+- get_available_animals: limit 파라미터에 적절한 수량 (20-30개) 전달
+- filter_animals_by_characteristics: 성격 테스트 결과를 바탕으로 필터링
 
 매칭 점수는 1-5점 사이로 부여해주세요.
 """

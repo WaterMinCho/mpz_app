@@ -237,3 +237,18 @@ else:
 
 # OpenAI Settings for AI Features
 OPENAI_API_KEY = config("OPENAI_API_KEY", default="")
+
+# LangSmith Settings for LangChain Tracing and Monitoring
+LANGCHAIN_TRACING_V2 = config("LANGCHAIN_TRACING_V2", default=False, cast=bool)
+LANGCHAIN_PROJECT = config("LANGCHAIN_PROJECT", default="MPZ-AI-Recommendation")
+LANGCHAIN_API_KEY = config("LANGCHAIN_API_KEY", default="")
+LANGCHAIN_ENDPOINT = config("LANGCHAIN_ENDPOINT", default="https://api.smith.langchain.com")
+
+# Set environment variables for LangSmith if enabled
+import os
+if LANGCHAIN_TRACING_V2:
+    os.environ["LANGCHAIN_TRACING_V2"] = str(LANGCHAIN_TRACING_V2).lower()
+    os.environ["LANGCHAIN_PROJECT"] = LANGCHAIN_PROJECT
+    if LANGCHAIN_API_KEY:
+        os.environ["LANGCHAIN_API_KEY"] = LANGCHAIN_API_KEY
+    os.environ["LANGCHAIN_ENDPOINT"] = LANGCHAIN_ENDPOINT

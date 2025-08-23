@@ -37,9 +37,9 @@ def get_user_personality_test_data(user_id: str) -> Dict[str, Any]:
         return {
             "status": "success",
             "user_id": str(user.id),
-            "test_type": personality_test.test_type,
+            #"test_type": personality_test.test_type,
             "answers": personality_test.answers,
-            "result": personality_test.result,
+            #"result": personality_test.result,
             "completed_at": personality_test.completed_at.isoformat(),
         }
         

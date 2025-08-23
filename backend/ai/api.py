@@ -17,6 +17,7 @@ from ai.tools import (
     get_available_animals,
     filter_animals_by_characteristics
 )
+from favorites.models import PersonalityTest
 
 router = Router(tags=["AI_Animal_Matching"])
 
@@ -117,10 +118,54 @@ async def recommend_animals(request: HttpRequest, data: AnimalRecommendationRequ
         # AI 추천 실행
         ai_result = await run_agent_recommendation()
         
+        # 추천 결과를 PersonalityTest의 result 필드에 저장
+        @sync_to_async
+        def save_recommendation_result():
+            try:
+                # 해당 사용자의 가장 최근 PersonalityTest 가져오기
+                latest_test = PersonalityTest.objects.filter(
+                    user_id=target_user_id
+                ).order_by('-completed_at').first()
+                
+                if latest_test:
+                    # AI 추천 결과를 result 필드에 저장
+                    recommendation_result = {
+                        "ai_recommendation": ai_result,
+                        "recommendation_date": datetime.now().isoformat(),
+                        "model_used": "gpt-4o-mini",
+                        "agent_used": "animal-matching-assistant",
+                        "preferences": data.preferences,
+                        "limit": data.limit
+                    }
+                    
+                    latest_test.result = recommendation_result
+                    latest_test.save()
+                    
+                    return {
+                        "saved": True,
+                        "personality_test_id": str(latest_test.id),
+                        "message": "추천 결과가 성격 테스트 결과에 저장되었습니다."
+                    }
+                else:
+                    return {
+                        "saved": False,
+                        "message": "해당 사용자의 성격 테스트를 찾을 수 없습니다."
+                    }
+                    
+            except Exception as e:
+                return {
+                    "saved": False,
+                    "error": f"결과 저장 중 오류: {str(e)}"
+                }
+        
+        # 추천 결과 저장 실행
+        save_result = await save_recommendation_result()
+        
         # 응답 구성
         response_data = {
             "success": True,
             "data": ai_result,
+            "save_status": save_result,
             "meta": {
                 "user_id": target_user_id,
                 "request_limit": data.limit,

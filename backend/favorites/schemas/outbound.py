@@ -1,5 +1,5 @@
 from ninja import Schema, Field
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 
 
 class FavoriteToggleOut(Schema):
@@ -69,3 +69,11 @@ class AnimalFavoriteListOut(Schema):
 class ErrorOut(Schema):
     """에러 응답 스키마"""
     error: str = Field(..., description="에러 메시지")
+
+
+class PersonalityTestOut(Schema):
+    """성격 테스트 출력 스키마 (간단 버전)"""
+    id: str = Field(..., description="테스트 ID")
+    answers: Dict[str, str] = Field(..., description="질문-답변 쌍")
+    completed_at: str = Field(..., description="완료 시간")
+    message: str = Field(..., description="결과 메시지")

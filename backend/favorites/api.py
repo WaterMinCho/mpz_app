@@ -4,11 +4,12 @@ from ninja.pagination import paginate
 from django.http import HttpRequest
 from asgiref.sync import sync_to_async
 from typing import List
-from favorites.models import CenterFavorite, AnimalFavorite
+from favorites.models import CenterFavorite, AnimalFavorite, PersonalityTest
 from centers.models import Center
 from animals.models import Animal
 from favorites.schemas.inbound import (
     FavoriteListQueryIn,
+    PersonalityTestIn,
 )
 from favorites.schemas.outbound import (
     FavoriteToggleOut,
@@ -17,6 +18,7 @@ from favorites.schemas.outbound import (
     CenterFavoriteListOut,
     AnimalFavoriteOut,
     AnimalFavoriteListOut,
+    PersonalityTestOut,
     ErrorOut
 )
 from api.security import jwt_auth
@@ -390,3 +392,54 @@ async def check_animal_favorite_status(request: HttpRequest, animal_id: str):
         raise
     except Exception as e:
         raise HttpError(500, f"동물 찜 상태 확인 중 오류가 발생했습니다: {str(e)}")
+
+
+@router.post(
+    "/personality-test",
+    summary="[C] 성격 테스트 데이터 생성",
+    description="사용자의 성격 테스트 데이터를 저장합니다.",
+    response={
+        201: PersonalityTestOut,
+        400: ErrorOut,
+        401: ErrorOut,
+        500: ErrorOut,
+    },
+    auth=jwt_auth,
+)
+async def create_personality_test(request: HttpRequest, data: PersonalityTestIn):
+    """성격 테스트 데이터를 생성합니다."""
+    try:
+        # JWT 토큰에서 사용자 정보 추출
+        if not hasattr(request, 'auth') or not request.auth:
+            raise HttpError(401, "로그인이 필요합니다")
+
+        current_user = request.auth
+        if hasattr(current_user, '__await__'):
+            current_user = await current_user
+
+        @sync_to_async
+        def create_test():
+            # 성격 테스트 생성 - 단순하게 answers 필드에 저장
+            personality_test = PersonalityTest.objects.create(
+                user=current_user,
+                test_type="basic",
+                answers=data.answers
+            )
+            
+            return personality_test
+
+        personality_test = await create_test()
+        
+        # 201 응답 반환
+        return 201, {
+            "id": str(personality_test.id),
+            "answers": personality_test.answers,
+            "completed_at": personality_test.completed_at.isoformat(),
+            "message": "성격 테스트가 성공적으로 저장되었습니다."
+        }
+        
+    except HttpError:
+        raise
+    except Exception as e:
+        raise HttpError(500, f"성격 테스트 생성 중 오류가 발생했습니다: {str(e)}")
+

@@ -58,9 +58,9 @@ class PersonalityTest(BaseModel):
     """성격 테스트 모델"""
     
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, help_text="사용자")
-    test_type = models.CharField(max_length=50, help_text="테스트 타입")
+    test_type = models.CharField(max_length=50, default="종합성격검사", help_text="테스트 타입")
     answers = models.JSONField(help_text="테스트 답변들")
-    result = models.JSONField(help_text="테스트 결과")
+    result = models.JSONField(blank=True, null=True, help_text="테스트 결과 (분석 후 생성)")
     completed_at = models.DateTimeField(auto_now_add=True, help_text="완료 시간")
     
     class Meta:
