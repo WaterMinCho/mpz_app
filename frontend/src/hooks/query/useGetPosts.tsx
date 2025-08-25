@@ -1,60 +1,33 @@
 import { useQuery } from "@tanstack/react-query";
-import type {
-  GetPostsResponse,
+import instance from "@/lib/axios-instance";
+import {
+  ApiPostsResponse,
+  ApiPostResponse,
+  Post,
   GetPostsParams,
   PostDetailResponse,
-  Post,
 } from "@/types/posts";
-import instance from "@/lib/axios-instance";
 
-// 실제 API 응답 타입
-interface ApiPostResponse {
-  id: string;
-  title: string;
-  content: string;
-  userId: string;
-  animalId?: string | null;
-  adoptionsId?: string | null;
-  contentTags?: string | null;
-  visibility?: "public" | "center";
-  createdAt: string;
-  updatedAt: string;
-  userNickname: string;
-  userImage?: string | null;
-  tags?: Array<{
-    id: string;
-    postId: string;
-    tagName: string;
-    createdAt: string;
-  }>;
-  images?: Array<{
-    id: string;
-    postId: string;
-    imageUrl: string;
-    orderIndex: number;
-    createdAt: string;
-  }>;
-  postLikes?: Array<{
-    id: string;
-    postId: string;
-    userId: string;
-    createdAt: string;
-  }>;
-  comments?: Array<{
-    id: string;
-    postId: string;
-    userId: string;
-    content: string;
-    createdAt: string;
-    updatedAt: string;
-  }>;
-}
+// API 응답을 Post로 변환하는 함수
+const transformRawPostToPost = (raw: ApiPostResponse): Post => ({
+  id: raw.id,
+  title: raw.title,
+  content: raw.content,
+  userId: raw.user_id,
+  animalId: raw.animal_id,
+  adoptionId: raw.adoption_id,
+  contentTags: raw.content_tags,
+  likeCount: raw.like_count,
+  commentCount: raw.comment_count,
+  createdAt: raw.created_at,
+  updatedAt: raw.updated_at,
+  userNickname: raw.user_nickname,
+  userImage: raw.user_image,
+  tags: raw.tags,
+  images: raw.images,
+});
 
-interface ApiPostsResponse {
-  posts: ApiPostResponse[];
-}
-
-const getPosts = async (params?: GetPostsParams): Promise<GetPostsResponse> => {
+const getPosts = async (params?: GetPostsParams): Promise<ApiPostsResponse> => {
   const searchParams = new URLSearchParams();
 
   if (params) {
@@ -67,32 +40,7 @@ const getPosts = async (params?: GetPostsParams): Promise<GetPostsResponse> => {
 
   const url = `/posts?${searchParams.toString()}`;
   const response = await instance.get<ApiPostsResponse>(url);
-
-  // API 응답을 Post 타입으로 변환
-  const transformedPosts: Post[] = response.data.posts.map(
-    (post: ApiPostResponse) => ({
-      id: post.id,
-      title: post.title,
-      content: post.content,
-      userId: post.userId,
-      animalId: post.animalId || null,
-      adoptionsId: post.adoptionsId || null,
-      contentTags: post.contentTags || null,
-      visibility: post.visibility || "public",
-      createdAt: post.createdAt,
-      updatedAt: post.updatedAt,
-      userNickname: post.userNickname,
-      userImage: post.userImage || null,
-      tags: post.tags || [],
-      images: post.images || [],
-      postLikes: post.postLikes || [],
-      comments: [], // 빈 배열로 설정하여 타입 호환성 문제 해결
-    })
-  );
-
-  return {
-    posts: transformedPosts,
-  };
+  return response.data;
 };
 
 const getPostDetail = async (postId: string): Promise<PostDetailResponse> => {
@@ -100,10 +48,31 @@ const getPostDetail = async (postId: string): Promise<PostDetailResponse> => {
   return response.data;
 };
 
+// 시스템 태그 목록 조회
+const getSystemTags = async (): Promise<string[]> => {
+  const response = await instance.get<string[]>("/posts/tags/system");
+  return response.data;
+};
+
 export const useGetPosts = (params?: GetPostsParams) => {
   return useQuery({
     queryKey: ["posts", params],
     queryFn: () => getPosts(params),
+    select: (data: ApiPostsResponse) => {
+      const transformedPosts = data.data.map(transformRawPostToPost);
+
+      return {
+        posts: transformedPosts,
+        pagination: {
+          count: data.count,
+          totalCnt: data.totalCnt,
+          pageCnt: data.pageCnt,
+          curPage: data.curPage,
+          nextPage: data.nextPage,
+          previousPage: data.previousPage,
+        },
+      };
+    },
     staleTime: 3 * 60 * 1000, // 3분
     gcTime: 10 * 60 * 1000, // 10분
     retry: 1,
@@ -118,5 +87,17 @@ export const useGetPostDetail = (postId: string) => {
     enabled: !!postId,
     staleTime: 3 * 60 * 1000, // 3분
     gcTime: 10 * 60 * 1000, // 10분
+  });
+};
+
+// 시스템 태그 목록 조회 훅
+export const useGetSystemTags = () => {
+  return useQuery({
+    queryKey: ["system-tags"],
+    queryFn: getSystemTags,
+    staleTime: 10 * 60 * 1000, // 10분 (태그는 자주 변경되지 않음)
+    gcTime: 30 * 60 * 1000, // 30분
+    retry: 1,
+    refetchOnWindowFocus: false,
   });
 };

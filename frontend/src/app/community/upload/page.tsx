@@ -6,7 +6,7 @@ import { z } from "zod";
 
 import { Container } from "@/components/common/Container";
 import { TopBar } from "@/components/common/TopBar";
-import { Input } from "@/components/ui/CustomInput";
+import { CustomInput } from "@/components/ui/CustomInput";
 import { BottomSheet } from "@/components/ui/BottomSheet";
 import { CustomModal } from "@/components/ui/CustomModal";
 import { FixedBottomBar } from "@/components/ui/FixedBottomBar";
@@ -23,7 +23,10 @@ import {
 import { IconButton } from "@/components/ui/IconButton";
 import { MiniButton } from "@/components/ui/MiniButton";
 import { useCreatePost, useGetAnimals, useUploadMultipleImages } from "@/hooks";
-import type { AnimalResponseSchema } from "@/server/openapi/routes/animal";
+import {
+  transformRawAnimalToPetCard,
+  type PetCardAnimal,
+} from "@/types/animal";
 
 type PublicType = "center" | "public";
 
@@ -42,7 +45,7 @@ export default function CommunityUploadPage() {
   const router = useRouter();
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-  const [selectedPet, setSelectedPet] = useState<Animal | null>(null);
+  const [selectedPet, setSelectedPet] = useState<PetCardAnimal | null>(null);
   const [uploadedImages, setUploadedImages] = useState<File[]>([]);
   const [uploadedImageUrls, setUploadedImageUrls] = useState<string[]>([]);
   const [tags, setTags] = useState<string[]>([]);
@@ -55,8 +58,6 @@ export default function CommunityUploadPage() {
   const { mutate: createPost, isPending: creating } = useCreatePost();
   const { mutate: uploadImages, isPending: uploadingImages } =
     useUploadMultipleImages();
-
-  type Animal = z.infer<typeof AnimalResponseSchema>;
 
   const { user } = useAuth();
   const isAdmin = user?.userType !== "일반사용자";
@@ -76,7 +77,11 @@ export default function CommunityUploadPage() {
   } = useGetAnimals({ status: "보호중", limit: 20 });
 
   const animals = useMemo(() => {
-    return animalsPages?.pages.flatMap((p) => p.animals) ?? [];
+    return (
+      animalsPages?.pages.flatMap((p) =>
+        p.data.map(transformRawAnimalToPetCard)
+      ) ?? []
+    );
   }, [animalsPages]);
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -99,7 +104,7 @@ export default function CommunityUploadPage() {
     setSelectedPet(null);
   };
 
-  const handlePetSelect = (pet: Animal) => {
+  const handlePetSelect = (pet: PetCardAnimal) => {
     setSelectedPet(pet);
     setShowPetSelection(false);
   };
@@ -170,8 +175,8 @@ export default function CommunityUploadPage() {
       {
         title,
         content,
-        animalId: selectedPet?.id,
-        contentTags: tags.join(","), // 태그를 쉼표로 구분하여 contentTags에 저장
+        animal_id: selectedPet?.id,
+        tags: tags,
         visibility: publicType,
       },
       {
@@ -230,11 +235,13 @@ export default function CommunityUploadPage() {
       <div className="px-4 pb-24">
         {/* 제목 입력 */}
         <div className="mb-6">
-          <Input
+          <CustomInput
             label="제목"
             placeholder="제목을 입력하세요."
             value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setTitle(e.target.value)
+            }
             variant="primary"
           />
         </div>
