@@ -1,12 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
-import { z } from "zod";
-import type { CommentWithRepliesSchema } from "@/server/openapi/routes/posts";
+import type { CommentWithReplies } from "@/types/posts";
 import instance from "@/lib/axios-instance";
 
-type Comment = z.infer<typeof CommentWithRepliesSchema>;
-
 interface GetCommentsResponse {
-  comments: Comment[];
+  comments: CommentWithReplies[];
 }
 
 const getComments = async (postId: string): Promise<GetCommentsResponse> => {

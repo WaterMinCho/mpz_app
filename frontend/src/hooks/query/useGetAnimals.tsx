@@ -1,60 +1,15 @@
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
-import { AnimalResponseSchema } from "@/server/openapi/routes/animal";
-import { z } from "zod";
 import instance from "@/lib/axios-instance";
-
-// 타입 별칭으로 한 번만 정의
-type Animal = z.infer<typeof AnimalResponseSchema>;
-
-interface GetAnimalsParams {
-  status?:
-    | "보호중"
-    | "입양완료"
-    | "무지개다리"
-    | "임시보호중"
-    | "반환"
-    | "방사";
-  centerId?: string;
-  region?:
-    | "서울"
-    | "부산"
-    | "대구"
-    | "인천"
-    | "광주"
-    | "대전"
-    | "울산"
-    | "세종"
-    | "경기"
-    | "강원"
-    | "충북"
-    | "충남"
-    | "전북"
-    | "전남"
-    | "경북"
-    | "경남"
-    | "제주";
-  weight?: "10kg_under" | "25kg_under" | "over_25kg";
-  age?: "2_under" | "7_under" | "over_7";
-  gender?: "male" | "female";
-  hasTrainerComment?: "true" | "false";
-  breed?: string;
-  page?: number;
-  limit?: number;
-}
-
-interface GetAnimalsResponse {
-  animals: Animal[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-  hasNext: boolean;
-  hasPrev: boolean;
-}
+import {
+  Animal,
+  GetAnimalsParams,
+  RawAnimalResponse,
+  ActualGetAnimalsResponse,
+} from "@/types/animal";
 
 const getAnimals = async (
   params?: GetAnimalsParams
-): Promise<GetAnimalsResponse> => {
+): Promise<ActualGetAnimalsResponse> => {
   const searchParams = new URLSearchParams();
 
   if (params) {
@@ -66,8 +21,43 @@ const getAnimals = async (
   }
 
   const endpoint = `/animals/?${searchParams.toString()}`;
-  const response = await instance.get<GetAnimalsResponse>(endpoint);
-  return response.data;
+  const response = await instance.get<ActualGetAnimalsResponse>(endpoint);
+
+  // API 응답의 snake_case를 camelCase로 변환
+  const transformedResponse: ActualGetAnimalsResponse = {
+    ...response.data,
+    data: response.data.data.map((animal) => ({
+      id: animal.id,
+      name: animal.name,
+      is_female: animal.is_female,
+      age: animal.age,
+      weight: animal.weight,
+      color: animal.color,
+      breed: animal.breed,
+      description: animal.description,
+      status: animal.status,
+      waiting_days: animal.waiting_days,
+      activity_level: animal.activity_level,
+      sensitivity: animal.sensitivity,
+      sociability: animal.sociability,
+      separation_anxiety: animal.separation_anxiety,
+      special_notes: animal.special_notes,
+      health_notes: animal.health_notes,
+      basic_training: animal.basic_training,
+      trainer_comment: animal.trainer_comment,
+      announce_number: animal.announce_number,
+      announcement_date: animal.announcement_date,
+      admission_date: animal.admission_date,
+      found_location: animal.found_location,
+      personality: animal.personality,
+      center_id: animal.center_id,
+      animal_images: animal.animal_images || [],
+      created_at: animal.created_at,
+      updated_at: animal.updated_at,
+    })),
+  };
+
+  return transformedResponse;
 };
 
 export const useGetAnimals = (params?: GetAnimalsParams) => {
@@ -75,8 +65,8 @@ export const useGetAnimals = (params?: GetAnimalsParams) => {
     queryKey: ["animals", params],
     queryFn: ({ pageParam = 1 }) => getAnimals({ ...params, page: pageParam }),
     getNextPageParam: (lastPage) => {
-      if (lastPage.hasNext) {
-        return lastPage.page + 1;
+      if (lastPage.nextPage !== null) {
+        return lastPage.nextPage;
       }
       return undefined;
     },
@@ -107,8 +97,41 @@ export const useGetAnimalById = (animalId: string) => {
   return useQuery({
     queryKey: ["animals", animalId],
     queryFn: async (): Promise<Animal> => {
-      const response = await instance.get<Animal>(`/animals/${animalId}/`);
-      return response.data;
+      const response = await instance.get<RawAnimalResponse>(
+        `/animals/${animalId}/`
+      );
+
+      // API 응답의 snake_case를 camelCase로 변환
+      const rawAnimal = response.data;
+      return {
+        id: rawAnimal.id,
+        name: rawAnimal.name,
+        isFemale: rawAnimal.is_female,
+        age: rawAnimal.age,
+        weight: rawAnimal.weight,
+        color: rawAnimal.color,
+        breed: rawAnimal.breed,
+        description: rawAnimal.description,
+        status: rawAnimal.status,
+        waitingDays: rawAnimal.waiting_days,
+        activityLevel: rawAnimal.activity_level,
+        sensitivity: rawAnimal.sensitivity,
+        sociability: rawAnimal.sociability,
+        separationAnxiety: rawAnimal.separation_anxiety,
+        specialNotes: rawAnimal.special_notes,
+        healthNotes: rawAnimal.health_notes,
+        basicTraining: rawAnimal.basic_training,
+        trainerComment: rawAnimal.trainer_comment,
+        announceNumber: rawAnimal.announce_number,
+        announcementDate: rawAnimal.announcement_date,
+        admissionDate: rawAnimal.admission_date,
+        foundLocation: rawAnimal.found_location,
+        personality: rawAnimal.personality,
+        centerId: rawAnimal.center_id,
+        animalImages: rawAnimal.animal_images || [],
+        createdAt: rawAnimal.created_at,
+        updatedAt: rawAnimal.updated_at,
+      };
     },
     enabled: !!animalId,
     staleTime: 3 * 60 * 1000, // 3분

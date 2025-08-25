@@ -3,17 +3,14 @@
 import { useState } from "react";
 import { CommentInput } from "./CommentInput";
 import { CommentItem } from "./CommentItem";
-import type { CommentWithRepliesSchema } from "@/server/openapi/routes/posts";
-import { z } from "zod";
+import type { CommentWithReplies } from "@/types/posts";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useCreateComment, useCreateReply } from "@/hooks/mutation";
 import { CustomModal } from "@/components/ui/CustomModal";
 import { Toast } from "@/components/ui/Toast";
 
-type Comment = z.infer<typeof CommentWithRepliesSchema>;
-
 interface CommentSectionProps {
-  comments: Comment[];
+  comments: CommentWithReplies[];
   postId: string;
   isLoading?: boolean;
   users?: Array<{

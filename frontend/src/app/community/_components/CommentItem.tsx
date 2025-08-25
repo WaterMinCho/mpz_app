@@ -5,16 +5,12 @@ import Image from "next/image";
 import { Avatar } from "@/components/ui/avatar";
 import { ArrowBendDownLeft, ArrowBendDownRight } from "@phosphor-icons/react";
 import { CommentInput } from "@/components/ui/CommentInput";
-import type {
-  CommentWithRepliesSchema,
-  ReplySchema,
-} from "@/server/openapi/routes/posts";
-import { z } from "zod";
+import type { CommentWithReplies, Reply } from "@/types/posts";
 
-type Comment = z.infer<typeof CommentWithRepliesSchema>;
+type Comment = CommentWithReplies;
 
 interface CommentItemProps {
-  comment: Comment | z.infer<typeof ReplySchema>;
+  comment: Comment | Reply;
   variant: "primary" | "reply" | "replyInput";
   onToggleReplies?: () => void;
   onAddReply?: () => void;

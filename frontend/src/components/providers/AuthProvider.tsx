@@ -66,15 +66,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // 세션 토큰으로 사용자 정보 가져오기
   const fetchCurrentUser = async () => {
     try {
-      console.log("fetchCurrentUser 시작");
       const response = await instance.get("/auth/me");
-
-      console.log("API 응답 상태:", response.status);
-      console.log("API 응답 데이터:", response.data);
 
       if (response.status === 200) {
         const data = response.data;
-        console.log("사용자 데이터:", data);
 
         // user 객체가 있으면 그것을 사용, 없으면 응답 데이터 자체를 사용
         const userData = data.user || data;
@@ -97,9 +92,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
           setUser(user);
           setIsAuthenticated(true);
-          console.log("사용자 인증 성공:", user);
         } else {
-          console.log("사용자 데이터가 유효하지 않습니다:", data);
           setUser(null);
           setIsAuthenticated(false);
         }
@@ -125,18 +118,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // 컴포넌트 마운트 시 사용자 정보 확인
   useEffect(() => {
-    console.log("=== useEffect 시작 ===");
-    console.log("전체 쿠키:", document.cookie);
-
-    // HttpOnly 쿠키는 JavaScript에서 접근할 수 없으므로
-    // 항상 서버에 사용자 정보 요청
-    console.log("사용자 정보 확인 시작");
     fetchCurrentUser();
   }, []);
 
   // 로그인 처리
   const login = (userData: User) => {
-    console.log(" login 호출됨:", userData);
     setUser(userData);
     setIsAuthenticated(true);
     setIsLoading(false);
@@ -145,7 +131,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // 로그인 상태 설정
   const setLoggingIn = (status: boolean) => {
-    console.log(" setLoggingIn:", status);
     setIsLoggingIn(status);
   };
 

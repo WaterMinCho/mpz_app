@@ -2,17 +2,15 @@ import Link from "next/link";
 import { CaretDown } from "@phosphor-icons/react";
 import { MiniButton } from "@/components/ui/MiniButton";
 import { PetCard } from "@/components/ui/PetCard";
+import { PetCardSkeleton } from "@/components/ui/PetCardSkeleton";
 import { MainSection } from "@/components/common/MainSection";
 import { PetSectionError } from "@/components/ui/PetSectionError";
-import { z } from "zod";
-import type { AnimalResponseSchema } from "@/server/openapi/routes/animal";
-
-type Animal = z.infer<typeof AnimalResponseSchema>;
+import { RawAnimalResponse, transformRawAnimalToPetCard } from "@/types/animal";
 
 interface PetSectionProps {
-  title?: string;
+  title: string;
   rightSlot?: string;
-  animals: Animal[];
+  animals: RawAnimalResponse[];
   variant: "primary" | "detail" | "variant3";
   showLocationFilter?: boolean;
   locations?: string[];
@@ -36,12 +34,15 @@ export function TopPetSection({
   selectedLocation,
   onLocationSelect,
 }: PetSectionProps) {
+  // 디버깅을 위한 로그 추가
   if (isLoading) {
     if (isExpertAnalysis) {
       return (
         <MainSection>
-          <div className="flex items-center justify-center h-32">
-            <div className="text-lg">동물 정보를 불러오는 중...</div>
+          <div className="flex flex-col gap-3">
+            {[...Array(3)].map((_, index) => (
+              <PetCardSkeleton key={index} variant="detail" />
+            ))}
           </div>
           <MiniButton
             text="전문가 분석 모아보기"
@@ -87,8 +88,18 @@ export function TopPetSection({
           </div>
         )}
 
-        <div className="flex items-center justify-center h-32">
-          <div className="text-lg">동물 정보를 불러오는 중...</div>
+        <div
+          className={`flex gap-3 overflow-x-auto flex-nowrap -mx-4 px-4 ${
+            variant === "detail" ? "flex-col" : ""
+          } ${
+            variant === "variant3"
+              ? "grid grid-cols-3 gap-x-2 gap-y-3 flex-nowrap"
+              : ""
+          }`}
+        >
+          {[...Array(10)].map((_, index) => (
+            <PetCardSkeleton key={index} variant={variant} />
+          ))}
         </div>
       </div>
     );
@@ -127,38 +138,53 @@ export function TopPetSection({
     );
   }
 
+  // 보호중인 동물만 필터링하고 admission_date 높은 순서대로 정렬, 상위 6개만 표시
+  const limitedAnimals = (animals || [])
+    .filter((animal) => animal?.status === "보호중")
+    .sort((a, b) => {
+      // admission_date가 있으면 admission_date 기준으로 정렬, 없으면 waiting_days 기준
+      if (a.admission_date && b.admission_date) {
+        return (
+          new Date(b.admission_date).getTime() -
+          new Date(a.admission_date).getTime()
+        );
+      }
+      // admission_date가 없는 경우 waiting_days 기준
+      return (b.waiting_days || 0) - (a.waiting_days || 0);
+    })
+    .slice(0, 10);
+
   // 지역 필터링
-  let filteredAnimals = animals || [];
+  let filteredAnimals = limitedAnimals;
 
   // 선택된 지역이 있으면 해당 지역에 포함된 동물만 필터링
   if (selectedLocation && selectedLocation !== "") {
-    filteredAnimals = animals.filter((animal) => {
-      const animalLocation = animal.foundLocation || "";
+    filteredAnimals = limitedAnimals.filter((animal) => {
+      const animalLocation = animal.found_location || "";
       const isMatch = animalLocation.includes(selectedLocation);
       return isMatch;
     });
   }
 
-  const sortedAnimals = (filteredAnimals || [])
-    .filter((animal) => animal?.status === "보호중")
-    .sort((a, b) => (b.waitingDays || 0) - (a.waitingDays || 0))
-    .slice(0, 10);
-
   // 필터가 적용된 경우 필터링된 결과를 모두 표시, 필터가 없는 경우 상위 10개만 표시
   const displayAnimals =
     selectedLocation && selectedLocation !== ""
-      ? sortedAnimals
-      : sortedAnimals.slice(0, 10);
+      ? filteredAnimals
+      : filteredAnimals.slice(0, 10);
 
   // ExpertAnalysis 모드일 때
   if (isExpertAnalysis) {
-    const analysisAnimals = displayAnimals.slice(0, 3);
+    const analysisAnimals = limitedAnimals.slice(0, 3);
 
     return (
       <MainSection>
         <div className="flex flex-col gap-3">
           {analysisAnimals.map((animal) => (
-            <PetCard key={animal.id} pet={animal} variant="detail" />
+            <PetCard
+              key={animal.id}
+              pet={transformRawAnimalToPetCard(animal)}
+              variant="detail"
+            />
           ))}
         </div>
         <MiniButton
@@ -204,7 +230,11 @@ export function TopPetSection({
         }`}
       >
         {displayAnimals.map((animal) => (
-          <PetCard key={animal.id} pet={animal} variant={variant} />
+          <PetCard
+            key={animal.id}
+            pet={transformRawAnimalToPetCard(animal)}
+            variant={variant}
+          />
         ))}
       </div>
     </MainSection>

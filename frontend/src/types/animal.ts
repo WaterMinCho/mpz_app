@@ -1,0 +1,223 @@
+// 프론트엔드에서 사용하는 Animal 타입 (자체 정의)
+export interface Animal {
+  id: string;
+  name: string;
+  isFemale: boolean;
+  age: number;
+  weight: number | null;
+  color: string | null;
+  breed: string | null;
+  description: string | null;
+  status: "보호중" | "입양완료" | "무지개다리" | "임시보호중" | "반환" | "방사";
+  waitingDays: number | null;
+  activityLevel: number | null;
+  sensitivity: number | null;
+  sociability: number | null;
+  separationAnxiety: number | null;
+  specialNotes: string | null;
+  healthNotes: string | null;
+  basicTraining: string | null;
+  trainerComment: string | null;
+  announceNumber: string | null;
+  announcementDate: string | null;
+  admissionDate: string | null;
+  foundLocation: string | null;
+  personality: string | null;
+  centerId: string;
+  animalImages: string[] | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// API 요청 파라미터 타입
+export interface GetAnimalsParams {
+  status?:
+    | "보호중"
+    | "입양완료"
+    | "무지개다리"
+    | "임시보호중"
+    | "반환"
+    | "방사";
+  centerId?: string;
+  region?:
+    | "서울"
+    | "부산"
+    | "대구"
+    | "인천"
+    | "광주"
+    | "대전"
+    | "울산"
+    | "세종"
+    | "경기"
+    | "강원"
+    | "충북"
+    | "충남"
+    | "전북"
+    | "전남"
+    | "경북"
+    | "경남"
+    | "제주";
+  weight?: "10kg_under" | "25kg_under" | "over_25kg";
+  age?: "2_under" | "7_under" | "over_7";
+  gender?: "male" | "female";
+  hasTrainerComment?: "true" | "false";
+  breed?: string;
+  page?: number;
+  limit?: number;
+  sortBy?: "admission_date" | "waiting_days" | "created_at";
+  sortOrder?: "asc" | "desc";
+}
+
+// API 응답의 실제 snake_case 구조
+export interface RawAnimalResponse {
+  id: string;
+  name: string;
+  is_female: boolean;
+  age: number;
+  weight: number | null;
+  color: string | null;
+  breed: string | null;
+  description: string | null;
+  status: "보호중" | "입양완료" | "무지개다리" | "임시보호중" | "반환" | "방사";
+  waiting_days: number | null;
+  activity_level: number | null;
+  sensitivity: number | null;
+  sociability: number | null;
+  separation_anxiety: number | null;
+  special_notes: string | null;
+  health_notes: string | null;
+  basic_training: string | null;
+  trainer_comment: string | null;
+  announce_number: string | null;
+  announcement_date: string | null;
+  admission_date: string | null;
+  found_location: string | null;
+  personality: string | null;
+  center_id: string;
+  animal_images: string[] | null;
+  created_at: string;
+  updated_at: string;
+}
+
+// 실제 API 응답 구조
+export interface ActualGetAnimalsResponse {
+  count: number;
+  totalCnt: number;
+  pageCnt: number;
+  curPage: number;
+  nextPage: number | null;
+  previousPage: number | null;
+  data: RawAnimalResponse[];
+}
+
+// PetCard에서 사용하는 타입
+export type PetCardAnimal = {
+  id: string;
+  name?: string;
+  isFemale?: boolean;
+  age?: number;
+  breed?: string | null;
+  status?:
+    | "보호중"
+    | "입양완료"
+    | "자연사"
+    | "무지개다리"
+    | "임시보호중"
+    | "반환"
+    | "방사";
+  personality?: string | null;
+  centerId?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  animalImages?:
+    | Array<{
+        id: string;
+        imageUrl: string;
+        orderIndex: number;
+      }>
+    | string[];
+  waitingDays?: number | null;
+  foundLocation?: string | null;
+  description?: string | null;
+  activityLevel?: number | null;
+  sensitivity?: number | null;
+  sociability?: number | null;
+  weight?: number | null;
+  color?: string | null;
+  separationAnxiety?: number | null;
+  specialNotes?: string | null;
+  healthNotes?: string | null;
+  basicTraining?: string | null;
+  trainerComment?: string | null;
+  announceNumber?: string | null;
+  announcementDate?: string | null;
+  admissionDate?: string | null;
+};
+
+// RawAnimalResponse를 Animal으로 변환하는 함수
+export function transformRawAnimalToAnimal(raw: RawAnimalResponse): Animal {
+  return {
+    id: raw.id,
+    name: raw.name,
+    isFemale: raw.is_female,
+    age: raw.age,
+    weight: raw.weight,
+    color: raw.color,
+    breed: raw.breed,
+    description: raw.description,
+    status: raw.status,
+    waitingDays: raw.waiting_days,
+    activityLevel: raw.activity_level,
+    sensitivity: raw.sensitivity,
+    sociability: raw.sociability,
+    separationAnxiety: raw.separation_anxiety,
+    specialNotes: raw.special_notes,
+    healthNotes: raw.health_notes,
+    basicTraining: raw.basic_training,
+    trainerComment: raw.trainer_comment,
+    announceNumber: raw.announce_number,
+    announcementDate: raw.announcement_date,
+    admissionDate: raw.admission_date,
+    foundLocation: raw.found_location,
+    personality: raw.personality,
+    centerId: raw.center_id,
+    animalImages: raw.animal_images || [],
+    createdAt: raw.created_at,
+    updatedAt: raw.updated_at,
+  };
+}
+
+// RawAnimalResponse를 PetCardAnimal으로 변환하는 함수
+export function transformRawAnimalToPetCard(
+  raw: RawAnimalResponse
+): PetCardAnimal {
+  return {
+    id: raw.id,
+    name: raw.name,
+    isFemale: raw.is_female,
+    age: raw.age,
+    weight: raw.weight,
+    color: raw.color,
+    breed: raw.breed,
+    description: raw.description,
+    status: raw.status,
+    waitingDays: raw.waiting_days,
+    activityLevel: raw.activity_level,
+    sensitivity: raw.sensitivity,
+    sociability: raw.sociability,
+    separationAnxiety: raw.separation_anxiety,
+    specialNotes: raw.special_notes,
+    healthNotes: raw.health_notes,
+    basicTraining: raw.basic_training,
+    trainerComment: raw.trainer_comment,
+    announceNumber: raw.announce_number,
+    announcementDate: raw.announcement_date,
+    admissionDate: raw.admission_date,
+    foundLocation: raw.found_location,
+    personality: raw.personality,
+    centerId: raw.center_id,
+    animalImages: raw.animal_images || [],
+    createdAt: raw.created_at,
+    updatedAt: raw.updated_at,
+  };
+}

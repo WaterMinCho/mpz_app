@@ -1,18 +1,17 @@
 "use client";
 
 import Image from "next/image";
-import { z } from "zod";
 
 import { ThumbsUp, DotsThree, Bell } from "@phosphor-icons/react";
 import { IconButton } from "@/components/ui/IconButton";
 import { MiniButton } from "@/components/ui/MiniButton";
-import type { PostWithExtrasSchema } from "@/server/openapi/routes/posts";
+import type { Post } from "@/types/posts";
 import { getRelativeTime } from "@/lib/utils";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useState, useEffect } from "react";
 import { useToggleLike, useCheckPostLike } from "@/hooks";
 
-type PostDetail = z.infer<typeof PostWithExtrasSchema>;
+type PostDetail = Post;
 
 type User = {
   id: string;
