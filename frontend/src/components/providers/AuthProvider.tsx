@@ -70,15 +70,39 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const response = await instance.get("/auth/me");
 
       console.log("API 응답 상태:", response.status);
-      console.log(
-        "API 응답 헤더:",
-        Object.fromEntries(response.headers.entries())
-      );
+      console.log("API 응답 데이터:", response.data);
 
       if (response.status === 200) {
         const data = response.data;
-        setUser(data.user);
-        setIsAuthenticated(true); // API 호출 성공 시 인증 상태 true
+        console.log("사용자 데이터:", data);
+
+        // user 객체가 있으면 그것을 사용, 없으면 응답 데이터 자체를 사용
+        const userData = data.user || data;
+
+        if (userData && (userData.username || userData.email || userData.id)) {
+          // User 인터페이스에 맞게 데이터 변환
+          const user: User = {
+            id: userData.id || userData.username,
+            email: userData.email || `${userData.username}@kakao.com`,
+            name: userData.name || userData.username,
+            nickname: userData.nickname || userData.username,
+            userType: userData.userType || "일반사용자",
+            // 기타 필드는 기본값으로 설정
+            phoneNumber: userData.phoneNumber,
+            image: userData.image,
+            centers: userData.centers,
+            matchingSession: userData.matchingSession,
+            accounts: userData.accounts,
+          };
+
+          setUser(user);
+          setIsAuthenticated(true);
+          console.log("사용자 인증 성공:", user);
+        } else {
+          console.log("사용자 데이터가 유효하지 않습니다:", data);
+          setUser(null);
+          setIsAuthenticated(false);
+        }
       } else if (response.status === 401) {
         // 인증되지 않은 상태 (정상적인 상황)
         console.log("401 에러 - 인증되지 않은 사용자");
@@ -101,20 +125,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // 컴포넌트 마운트 시 사용자 정보 확인
   useEffect(() => {
-    // 세션 쿠키가 있을 때만 사용자 정보 확인
-    const sessionToken = document.cookie
-      .split("; ")
-      .find((row) => row.startsWith("better-auth.session_token="));
+    console.log("=== useEffect 시작 ===");
+    console.log("전체 쿠키:", document.cookie);
 
-    if (sessionToken) {
-      console.log("세션 토큰 발견, 사용자 정보 확인");
-      fetchCurrentUser();
-    } else {
-      console.log("세션 토큰 없음, 로그인 필요");
-      setUser(null);
-      setIsAuthenticated(false);
-      setIsLoading(false);
-    }
+    // HttpOnly 쿠키는 JavaScript에서 접근할 수 없으므로
+    // 항상 서버에 사용자 정보 요청
+    console.log("사용자 정보 확인 시작");
+    fetchCurrentUser();
   }, []);
 
   // 로그인 처리

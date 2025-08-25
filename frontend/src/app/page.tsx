@@ -15,6 +15,7 @@ import { useAuth } from "@/components/providers/AuthProvider";
 
 export default function Home() {
   const { isAuthenticated } = useAuth();
+  console.log("isAuthenticated", isAuthenticated);
   const [selectedLocation, setSelectedLocation] = useState<string>("");
 
   const { data: animalsData, isLoading, error } = useGetAnimals({ limit: 100 });
