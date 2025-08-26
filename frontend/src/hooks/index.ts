@@ -3,6 +3,7 @@ export { useGetCenterById } from "./query/useGetCenters";
 export { useGetAdoptions } from "./query/useGetAdoptions";
 export { useGetAdoptionsInfinite } from "./query/useGetAdoptions";
 export { useGetUserAdoptions } from "./query/useGetUserAdoptions";
+export { useGetUserAdoptionDetail } from "./query/useGetUserAdoptionDetail";
 export { useGetAnimalAdoptions } from "./query/useGetAdoptions";
 
 export { useGetComments } from "./query/useGetComments";
