@@ -24,12 +24,15 @@ import { IconButton } from "@/components/ui/IconButton";
 import { MiniButton } from "@/components/ui/MiniButton";
 import {
   useCreatePost,
-  useGetAnimals,
+  useGetUserAdoptions,
   useGetAnimalFavorites,
   useUploadImages,
 } from "@/hooks";
-import type { RawAnimalResponse, PetCardAnimal } from "@/types/animal";
-import { transformRawAnimalToPetCard } from "@/types/animal";
+import type { PetCardAnimal } from "@/types/animal";
+import type { UserAdoptionOut } from "@/types/adoption";
+
+// PetCardAnimal을 확장한 타입 (adoptionId 포함)
+type ExtendedPetCardAnimal = PetCardAnimal & { adoptionId?: string };
 
 type PublicType = "center" | "public";
 
@@ -48,7 +51,12 @@ export default function CommunityUploadPage() {
   const router = useRouter();
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-  const [selectedPet, setSelectedPet] = useState<PetCardAnimal | null>(null);
+  const [selectedPet, setSelectedPet] = useState<ExtendedPetCardAnimal | null>(
+    null
+  );
+  const [selectedAdoptionId, setSelectedAdoptionId] = useState<string | null>(
+    null
+  );
 
   const [uploadedImageUrls, setUploadedImageUrls] = useState<string[]>([]);
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
@@ -71,29 +79,40 @@ export default function CommunityUploadPage() {
     setPublicType(isAdmin ? "center" : "public");
   }, [isAdmin, user]);
 
-  // 모든 동물 목록 (무한 스크롤)
-  const {
-    data: allAnimalsPages,
-    fetchNextPage: fetchNextAllAnimals,
-    hasNextPage: hasNextAllAnimals,
-    isFetchingNextPage: isFetchingNextAllAnimals,
-  } = useGetAnimals({ limit: 20 });
+  const { data: adoptionsData } = useGetUserAdoptions({
+    filters: {
+      status: undefined,
+    },
+  });
 
-  const allAnimals = useMemo(() => {
-    if (!allAnimalsPages?.pages) return [];
+  const adoptionAnimals = useMemo(() => {
+    const adoptionsArray =
+      (adoptionsData as { data?: UserAdoptionOut[] })?.data || adoptionsData;
+    if (!adoptionsArray || !Array.isArray(adoptionsArray)) return [];
 
-    const animals = allAnimalsPages.pages
-      .flatMap((page) => (page as { data?: RawAnimalResponse[] }).data || [])
-      .filter((animal) => animal && typeof animal === "object");
+    // PetCardAnimal 형태로 변환
+    const transformedAnimals = adoptionsArray.map((adoption) => ({
+      id: adoption.animal_id,
+      name: adoption.animal_name,
+      breed: adoption.animal_breed,
+      isFemale: adoption.animal_is_female,
+      status: adoption.animal_status as PetCardAnimal["status"],
+      centerId: adoption.center_id,
+      animalImages: adoption.animal_image
+        ? [
+            {
+              id: "1",
+              imageUrl: adoption.animal_image,
+              orderIndex: 1,
+            },
+          ]
+        : undefined,
+      foundLocation: adoption.center_location || "위치 정보 확인 불가",
+      adoptionId: adoption.id, // adoption ID 추가
+    }));
 
-    const transformedAnimals = animals
-      .map((rawAnimal: RawAnimalResponse) =>
-        transformRawAnimalToPetCard(rawAnimal)
-      )
-      .filter(Boolean) as PetCardAnimal[];
-
-    return transformedAnimals;
-  }, [allAnimalsPages]);
+    return transformedAnimals as PetCardAnimal[];
+  }, [adoptionsData]);
   // 찜한 동물 목록
   const { data: favoriteAnimalsData } = useGetAnimalFavorites(1, 100);
 
@@ -107,14 +126,13 @@ export default function CommunityUploadPage() {
         id: favoriteAnimal.id,
         name: favoriteAnimal.name,
         breed: favoriteAnimal.breed,
-        age: favoriteAnimal.age,
         isFemale: favoriteAnimal.isFemale,
         status: favoriteAnimal.status,
-        personality: favoriteAnimal.personality,
         centerId: favoriteAnimal.centerId,
-        // PetCardAnimal 타입에 맞춰 필드 조정
-        animalImages: ["/img/dummyImg.jpeg"], // 기본 이미지 배열로 설정
-        foundLocation: "서울", // 기본 지역 설정
+        animalImages: [
+          { id: "1", imageUrl: "/img/dummyImg.jpeg", orderIndex: 1 },
+        ],
+        foundLocation: "위치 정보 확인 불가", // 기본 지역 설정
       };
     }) as PetCardAnimal[];
 
@@ -123,16 +141,14 @@ export default function CommunityUploadPage() {
 
   // 현재 활성 탭에 따른 동물 목록
   const animals = useMemo(() => {
-    const result = activeTab === "adoption" ? allAnimals : favoriteAnimals;
+    const result = activeTab === "adoption" ? adoptionAnimals : favoriteAnimals;
     return result;
-  }, [activeTab, allAnimals, favoriteAnimals]);
+  }, [activeTab, adoptionAnimals, favoriteAnimals]);
 
-  // 현재 활성 탭에 따른 페이지네이션 정보 (찜한 동물은 무한 스크롤 미지원)
-  const hasNextPage = activeTab === "adoption" ? hasNextAllAnimals : false;
-  const isFetchingNextPage =
-    activeTab === "adoption" ? isFetchingNextAllAnimals : false;
-  const fetchNextPage =
-    activeTab === "adoption" ? fetchNextAllAnimals : () => {};
+  // 현재 활성 탭에 따른 페이지네이션 정보
+  const hasNextPage = false;
+  const isFetchingNextPage = false;
+  const fetchNextPage = () => {};
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
@@ -153,8 +169,9 @@ export default function CommunityUploadPage() {
     setSelectedPet(null);
   };
 
-  const handlePetSelect = (pet: PetCardAnimal) => {
+  const handlePetSelect = (pet: PetCardAnimal, adoptionId: string) => {
     setSelectedPet(pet);
+    setSelectedAdoptionId(adoptionId);
     setShowPetSelection(false);
   };
 
@@ -218,18 +235,28 @@ export default function CommunityUploadPage() {
   }, [title, content, selectedPet, uploadedImageUrls, tags]);
 
   const handleConfirmSave = () => {
+    console.log("전송할 데이터:", {
+      title,
+      content,
+      tags,
+      images: [],
+      adoption_id: selectedAdoptionId || undefined,
+      is_all_access: publicType === "public",
+    });
+
     // 먼저 포스트를 생성
     createPost(
       {
         title,
         content,
         tags,
-        images: [], // 초기에는 빈 배열로 생성
-        adoption_id: selectedPet?.id,
+        images: [],
+        adoption_id: selectedAdoptionId || undefined,
         is_all_access: publicType === "public", // 전체공개 = true, 센터공개 = false
       },
       {
         onSuccess: (postData) => {
+          console.log("포스트 생성 성공:", postData);
           // 포스트 생성 성공 후 이미지가 있으면 업로드
           if (uploadedFiles.length > 0) {
             uploadImages(
@@ -242,6 +269,9 @@ export default function CommunityUploadPage() {
                   setShowSaveModal(false);
                   router.back();
                 },
+                onError: (error) => {
+                  console.error("이미지 업로드 실패:", error);
+                },
               }
             );
           } else {
@@ -249,6 +279,10 @@ export default function CommunityUploadPage() {
             setShowSaveModal(false);
             router.back();
           }
+        },
+        onError: (error) => {
+          console.error("포스트 생성 실패:", error);
+          console.error("에러 상세:", error.message);
         },
       }
     );
@@ -304,7 +338,7 @@ export default function CommunityUploadPage() {
               {tags.map((tag, index) => (
                 <span
                   key={index}
-                  className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full"
+                  className="px-2 py-1 bg-brand-op text-white text-xs rounded-full"
                 >
                   #{tag}
                 </span>
@@ -398,7 +432,7 @@ export default function CommunityUploadPage() {
         variant="variant7"
         title="어떤 공고를 선택할까요?"
         tabs={[
-          { label: "전체 동물", value: "adoption" },
+          { label: "입양 진행중인 동물", value: "adoption" },
           { label: "찜한 동물 리스트", value: "favorite" },
         ]}
         activeTab={activeTab}
@@ -411,7 +445,12 @@ export default function CommunityUploadPage() {
                 {animals.map((pet: PetCardAnimal) => (
                   <div
                     key={pet.id}
-                    onClick={() => handlePetSelect(pet)}
+                    onClick={() =>
+                      handlePetSelect(
+                        pet,
+                        (pet as ExtendedPetCardAnimal).adoptionId || ""
+                      )
+                    }
                     className="cursor-pointer w-[calc(50%-4px)]"
                   >
                     <PetCard
