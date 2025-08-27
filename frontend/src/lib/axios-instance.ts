@@ -1,9 +1,9 @@
 import axios, {
   AxiosInstance,
-  // AxiosError,
-  // InternalAxiosRequestConfig,
+  AxiosError,
+  InternalAxiosRequestConfig,
 } from "axios";
-// import Cookies from "js-cookie";
+import Cookies from "js-cookie";
 
 const BASE_URL = "https://mpzfullstack-production.up.railway.app/v1/";
 
@@ -12,19 +12,19 @@ const instance: AxiosInstance = axios.create({
   withCredentials: true, // 쿠키 자동 전송을 위해 true로 변경
 });
 
-// // header
-// instance.interceptors.request.use(
-//   (config: InternalAxiosRequestConfig) => {
-//     const accessToken = Cookies.get("accessToken");
-//     if (accessToken) {
-//       config.headers.Authorization = `Bearer ${accessToken}`;
-//     }
-//     return config;
-//   },
-//   (error: AxiosError) => {
-//     return Promise.reject(error);
-//   }
-// );
+// header
+instance.interceptors.request.use(
+  (config: InternalAxiosRequestConfig) => {
+    const accessToken = Cookies.get("accessToken");
+    if (accessToken) {
+      config.headers.Authorization = `Bearer ${accessToken}`;
+    }
+    return config;
+  },
+  (error: AxiosError) => {
+    return Promise.reject(error);
+  }
+);
 
 // // refresh token
 // instance.interceptors.response.use(

@@ -4,3 +4,5 @@ export * from "./animal";
 export * from "./posts";
 // Center types
 export * from "./center";
+// AI Matching types
+export * from "./ai-matching";
