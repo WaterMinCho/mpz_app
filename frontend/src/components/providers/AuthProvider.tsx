@@ -2,8 +2,6 @@
 
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useQueryClient } from "@tanstack/react-query";
-import Cookies from "js-cookie";
 import instance from "@/lib/axios-instance";
 
 interface User {
@@ -59,7 +57,6 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-  const queryClient = useQueryClient();
 
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -69,6 +66,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // 세션 토큰으로 사용자 정보 가져오기
   const fetchCurrentUser = async () => {
     try {
+      console.log("fetchCurrentUser 시작");
       const response = await instance.get("/auth/me");
 
       if (response.status === 200) {
@@ -80,7 +78,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (userData && (userData.username || userData.email || userData.id)) {
           // User 인터페이스에 맞게 데이터 변환
           const user: User = {
-            id: userData.id || userData.username,
+            id: userData.id || userData.username, // userData.id가 우선, 없으면 username
             email: userData.email || `${userData.username}@kakao.com`,
             name: userData.name || userData.username,
             nickname: userData.nickname || userData.username,
@@ -96,6 +94,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setUser(user);
           setIsAuthenticated(true);
         } else {
+          console.log("사용자 데이터가 유효하지 않음");
           setUser(null);
           setIsAuthenticated(false);
         }
@@ -137,49 +136,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setIsLoggingIn(status);
   };
 
-  // 모든 인증 데이터 정리 헬퍼 함수
-  const clearAllAuthData = () => {
-    // React Query 캐시 클리어
-    queryClient.clear();
-
-    // 모든 인증 관련 쿠키 삭제
-    const cookiesToDelete = [
-      "better-auth.session_token",
-      "access",
-      "refresh",
-      "sessionid",
-      "csrftoken",
-    ];
-
-    cookiesToDelete.forEach((cookieName) => {
-      // js-cookie를 사용해서 다양한 경로와 도메인으로 쿠키 삭제
-      Cookies.remove(cookieName);
-      Cookies.remove(cookieName, { path: "/" });
-      Cookies.remove(cookieName, {
-        path: "/",
-        domain: window.location.hostname,
-      });
-      Cookies.remove(cookieName, {
-        path: "/",
-        domain: `.${window.location.hostname}`,
-      });
-    });
-
-    // localStorage와 sessionStorage 클리어
-    if (typeof window !== "undefined") {
-      localStorage.clear();
-      sessionStorage.clear();
-    }
-  };
-
   // 로그아웃 처리
   const logout = async () => {
     try {
-      const response = await instance.post("/auth/logout");
+      const response = await instance.delete("/auth/logout");
 
       if (response.status === 200) {
-        // 모든 인증 데이터 정리
-        clearAllAuthData();
+        // 클라이언트 쿠키도 삭제
+        document.cookie =
+          "better-auth.session_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
 
         // 사용자 상태 초기화
         setUser(null);
@@ -190,7 +155,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } else {
         console.error("로그아웃 실패:", response.statusText);
         // 에러가 발생해도 클라이언트 상태는 초기화
-        clearAllAuthData();
         setUser(null);
         setIsAuthenticated(false);
         router.push("/");
@@ -198,7 +162,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch (error) {
       console.error("로그아웃 중 오류:", error);
       // 에러가 발생해도 클라이언트 상태는 초기화
-      clearAllAuthData();
       setUser(null);
       setIsAuthenticated(false);
       router.push("/");
