@@ -99,7 +99,7 @@ function AnimalTab() {
                   })) || [],
                 foundLocation: pet.found_location || "",
               }}
-              variant="detail"
+              variant="variant2"
               imageSize="full"
               className="w-full"
             />

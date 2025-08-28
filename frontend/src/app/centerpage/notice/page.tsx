@@ -7,11 +7,18 @@ import { Container } from "@/components/common/Container";
 import { TopBar } from "@/components/common/TopBar";
 import { IconButton } from "@/components/ui/IconButton";
 import { NotificationCard } from "./_components/NotificationCard";
-import { useGetCenterNotices } from "@/hooks/query";
+import { useGetCenterNotices, useGetMyCenter } from "@/hooks/query";
 
 export default function Notification() {
   const router = useRouter();
-  const { data: centerNotices, error, isLoading } = useGetCenterNotices();
+  const { data: myCenter } = useGetMyCenter();
+  const centerId = myCenter?.id;
+
+  const {
+    data: centerNotices,
+    error,
+    isLoading,
+  } = useGetCenterNotices(centerId || "");
 
   const handleBack = () => {
     router.back();

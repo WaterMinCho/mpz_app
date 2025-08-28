@@ -118,7 +118,7 @@ function MatchedPetsList() {
               })),
               foundLocation: pet.foundLocation || "",
             }}
-            variant="detail"
+            variant="variant2"
             rank={index + 1}
           />
         ))}

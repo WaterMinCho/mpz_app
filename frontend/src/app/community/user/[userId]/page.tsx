@@ -19,7 +19,7 @@ export default function UserProfilePage() {
     data: userProfile,
     isLoading: isUserLoading,
     error: userError,
-  } = useGetUserProfile(userId);
+  } = useGetUserProfile();
   const {
     data: postsData,
     isLoading: isPostsLoading,

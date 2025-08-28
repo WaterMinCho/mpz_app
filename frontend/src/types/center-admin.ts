@@ -45,3 +45,13 @@ export const CenterAdminResponseSchema = {
   address_is_public: false,
   created_at: "string",
 } as const;
+
+// 공지사항 관련 타입
+export interface NoticeResponse {
+  id: string;
+  centerId: string;
+  title: string;
+  content: string;
+  createdAt: string;
+  updatedAt: string;
+}

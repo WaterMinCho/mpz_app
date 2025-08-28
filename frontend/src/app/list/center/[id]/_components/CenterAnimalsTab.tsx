@@ -241,7 +241,7 @@ export function CenterAnimalsTab({
               animalImages: animal.animalImages || [],
               foundLocation: animal.foundLocation || "",
             }}
-            variant="detail"
+            variant="variant2"
             className="w-full"
           />
         ))}

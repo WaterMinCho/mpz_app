@@ -7,10 +7,11 @@ import { MainSection } from "@/components/common/MainSection";
 import { PetSectionError } from "@/components/ui/PetSectionError";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { RawAnimalResponse, transformRawAnimalToPetCard } from "@/types/animal";
+import { PetCardVariant } from "@/types/petcard";
 
 interface HomePetSectionProps {
   animals: RawAnimalResponse[];
-  variant: "primary" | "detail" | "variant3";
+  variant: PetCardVariant;
   showLocationFilter?: boolean;
   locations?: string[];
   isLoading?: boolean;
@@ -157,7 +158,7 @@ export function HomePetSection({
                 )}
                 <div
                   className={`flex gap-3 overflow-x-auto flex-nowrap ${
-                    variant === "detail" ? "flex-col" : ""
+                    variant === "variant2" ? "flex-col" : ""
                   } ${
                     variant === "variant3"
                       ? "grid grid-cols-3 gap-x-2 gap-y-3 flex-nowrap"

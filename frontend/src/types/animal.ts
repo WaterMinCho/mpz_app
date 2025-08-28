@@ -227,7 +227,7 @@ export function transformRawAnimalToPetCard(
       : [],
     foundLocation: raw.found_location,
     weight: raw.weight,
-    color: raw.weight,
+    color: raw.color,
     waitingDays: raw.waiting_days,
     description: raw.description,
     activityLevel: raw.activity_level?.toString() || null,
@@ -256,7 +256,7 @@ export function transformRawAnimalToExtendedPetCard(
   // 새로운 PetCard 타입을 사용하려면 아래 import를 사용하세요:
   // import { defaultTransformRawAnimalToPetCard } from "@/types/petcard";
   // return defaultTransformRawAnimalToPetCard(raw);
-  
+
   // 기존 호환성을 위해 기존 함수 사용
   return transformRawAnimalToPetCard(raw);
 }

@@ -79,7 +79,7 @@ export default function Home() {
 
       <HomePetSection
         animals={animals}
-        variant="detail"
+        variant="variant2"
         isLoading={isLoading}
         error={error}
         isExpertAnalysis={true}
