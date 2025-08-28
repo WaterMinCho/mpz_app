@@ -13,10 +13,7 @@ export { useGetPublicPostDetail } from "./query/useGetPublicPosts";
 export { useGetUserProfile } from "./query/useGetUserProfile";
 export { useGetMyProfile } from "./query/useGetMyProfile";
 export { useGetMyCenter, invalidateMyCenter } from "./query/useGetMyCenter";
-export {
-  useGetCenterNotices,
-  useGetCenterNoticeById,
-} from "./query/useGetCenterNotices";
+export { useGetCenterNotices } from "./query/useGetCenterNotices";
 export { useCreatePost } from "./mutation/useCreatePost";
 export { useUpdatePost } from "./mutation/useUpdatePost";
 export { useDeletePost } from "./mutation/useDeletePost";

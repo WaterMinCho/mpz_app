@@ -5,12 +5,13 @@ import { PetCardSkeleton } from "@/components/ui/PetCardSkeleton";
 import { MainSection } from "@/components/common/MainSection";
 import { PetSectionError } from "@/components/ui/PetSectionError";
 import { RawAnimalResponse, transformRawAnimalToPetCard } from "@/types/animal";
+import { PetCardVariant } from "@/types/petcard";
 
 interface PetSectionProps {
   title: string;
   rightSlot?: string;
   animals: RawAnimalResponse[];
-  variant: "primary" | "detail" | "variant3";
+  variant: PetCardVariant;
   showLocationFilter?: boolean;
   locations?: string[];
   isLoading?: boolean;
@@ -40,7 +41,7 @@ export function TopPetSection({
         <MainSection>
           <div className="flex flex-col gap-3">
             {[...Array(3)].map((_, index) => (
-              <PetCardSkeleton key={index} variant="detail" />
+              <PetCardSkeleton key={index} variant="variant2" />
             ))}
           </div>
           <MiniButton
@@ -91,7 +92,7 @@ export function TopPetSection({
             <PetCard
               key={animal.id}
               pet={transformRawAnimalToPetCard(animal)}
-              variant="detail"
+              variant="variant2"
             />
           ))}
         </div>
@@ -172,7 +173,7 @@ export function TopPetSection({
       {/* 동물 카드 목록 */}
       <div
         className={`flex gap-3 overflow-x-auto flex-nowrap -mx-4 px-4 ${
-          variant === "detail" ? "flex-col" : ""
+          variant === "variant2" ? "flex-col" : ""
         } ${
           variant === "variant3"
             ? "grid grid-cols-3 gap-x-2 gap-y-3 flex-nowrap"

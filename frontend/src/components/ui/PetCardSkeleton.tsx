@@ -1,7 +1,10 @@
 import React from "react";
 import { cn } from "@/lib/utils";
 // 새로운 PetCard 타입 사용
-import { PetCardVariant, ImageSize, PetCardSkeletonProps as PetCardSkeletonPropsNew } from "@/types/petcard";
+import {
+  PetCardVariant,
+  PetCardSkeletonProps as PetCardSkeletonPropsNew,
+} from "@/types/petcard";
 
 // 기존 호환성을 위한 타입 (deprecated)
 type PetCardSkeletonVariant = PetCardVariant;
@@ -13,7 +16,9 @@ interface PetCardSkeletonPropsLegacy {
 }
 
 // 새로운 타입과 기존 타입을 모두 지원
-type PetCardSkeletonProps = PetCardSkeletonPropsNew | PetCardSkeletonPropsLegacy;
+type PetCardSkeletonProps =
+  | PetCardSkeletonPropsNew
+  | PetCardSkeletonPropsLegacy;
 
 export function PetCardSkeleton({
   variant = "primary",
@@ -35,7 +40,7 @@ export function PetCardSkeleton({
     }
   };
 
-  if (variant === "detail") {
+  if (variant === "variant2") {
     return (
       <div className={cn("flex gap-4 items-center h-[154px]", className)}>
         <div className="flex-shrink-0">
