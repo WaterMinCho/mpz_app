@@ -52,7 +52,7 @@ async def upload_file(request: HttpRequest, data: FileUploadIn):
         ext = _ext_from(data.filename, content_type)
         key = f"{folder}/{uuid.uuid4()}{ext}"
 
-        # services에서 str→bytes 변환 처리함
+        # services에서 str→bytes 변환 처리
         r2.upload_file(key=key, data=data.file, content_type=content_type)
 
         url = f"{r2.public_base_url}/{key}"

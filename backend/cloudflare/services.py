@@ -8,7 +8,7 @@ from typing import Union
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
-BytesLike = Union[bytes, bytearray, memoryview]
+BytesLike = Union[bytes, bytearray]
 
 def _decode_base64_maybe_dataurl(s: str) -> bytes:
     """
@@ -53,28 +53,31 @@ class R2Client:
             region_name="auto",
         )
 
-    def _ensure_bytes(self, data: Union[str, BytesLike]) -> BytesLike:
+    def _ensure_bytes(self, data: Union[str, BytesLike, memoryview]) -> BytesLike:
         """
-        bytes-like 보장. str이면 base64로 간주해 디코딩.
+        bytes-like 보장.
+        - str  → base64로 간주해 디코딩
+        - memoryview → bytes로 변환
+        - bytes/bytearray → 그대로
         """
-        if isinstance(data, (bytes, bytearray, memoryview)):
+        if isinstance(data, (bytes, bytearray)):
             return data
+        if isinstance(data, memoryview):
+            return data.tobytes()
         if isinstance(data, str):
             return _decode_base64_maybe_dataurl(data)
         raise TypeError(f"upload_file(data): unsupported type {type(data)}")
 
-    def upload_file(self, key: str, data: Union[str, BytesLike], content_type: str = "application/octet-stream"):
-        """R2 put_object. Body는 반드시 bytes-like."""
+    def upload_file(self, key: str, data: Union[str, BytesLike, memoryview], content_type: str = "application/octet-stream"):
+        """R2 put_object. Body는 반드시 bytes/bytearray."""
         blob = self._ensure_bytes(data)
-        if not isinstance(blob, memoryview):
-            blob = memoryview(blob)
         if not content_type:
             content_type = "application/octet-stream"
 
         resp = self.client.put_object(
             Bucket=self.bucket,
             Key=key,
-            Body=blob,
+            Body=blob,                 # ✅ bytes/bytearray
             ContentType=content_type,
         )
         logger.info(f"[R2] 업로드 성공 key={key} len={len(blob)} ct={content_type}")
