@@ -127,3 +127,19 @@ class QuestionFormListOut(Schema):
 class QuestionFormDeleteOut(Schema):
     """질문 폼 삭제 출력 스키마"""
     message: str = Field(..., description="삭제 완료 메시지")
+
+
+class CenterNoticeOut(Schema):
+    """센터 공지사항 출력 스키마"""
+    id: str = Field(..., description="공지사항 ID")
+    title: str = Field(..., description="공지사항 제목")
+    content: str = Field(..., description="공지사항 내용")
+    is_important: bool = Field(..., description="중요 공지사항 여부")
+    created_at: str = Field(..., description="생성일시 (ISO 형식)")
+    updated_at: str = Field(..., description="수정일시 (ISO 형식)")
+
+
+class CenterNoticeListOut(Schema):
+    """센터 공지사항 목록 출력 스키마"""
+    notices: List[CenterNoticeOut] = Field(..., description="공지사항 목록")
+    total: int = Field(..., description="전체 공지사항 수")
