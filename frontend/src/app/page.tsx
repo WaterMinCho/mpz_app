@@ -78,7 +78,6 @@ export default function Home() {
       />
 
       <MatchingSection
-        animals={animals}
         variant="variant2"
         isLoading={isLoading}
         error={error}
