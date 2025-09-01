@@ -1,4 +1,3 @@
-import { MainSection } from "@/components/common/MainSection";
 import { useGetBanners } from "@/hooks/query/useGetBanners";
 import Image from "next/image";
 
@@ -17,7 +16,7 @@ export function FooterSection() {
   return (
     <>
       {(isLoading || (banners?.data && banners.data.length > 0)) && (
-        <MainSection>
+        <div className="px-4 pb-5">
           <div className="relative w-full h-20 rounded-lg overflow-hidden">
             {isLoading ? (
               <div className="w-full h-full bg-gray-200 animate-pulse" />
@@ -43,7 +42,7 @@ export function FooterSection() {
               </>
             )}
           </div>
-        </MainSection>
+        </div>
       )}
 
       {/* Footer 섹션 */}

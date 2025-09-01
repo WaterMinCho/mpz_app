@@ -289,7 +289,6 @@ export default function MyPage() {
       <NavBar />
 
       {/* 로그인 모달 */}
-      {/* @TODO 모달중복정리 */}
       <CustomModal
         open={isLoginModalOpen}
         onClose={() => setIsLoginModalOpen(false)}

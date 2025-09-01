@@ -55,8 +55,6 @@ export const useGetBreeds = () => {
   });
 };
 
-/** @TODO pet image GET query 추가 */
-
 export const useGetAnimalById = (animalId: string) => {
   return useQuery({
     queryKey: ["animals", animalId],

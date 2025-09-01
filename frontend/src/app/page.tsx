@@ -56,7 +56,7 @@ export default function Home() {
         )}
         {!bannerLoading && banners && banners.data.length > 0 && (
           <div
-            className="cursor-pointer"
+            className="relative w-full h-[232px] cursor-pointer overflow-hidden"
             onClick={() => {
               if (banners.data[0].link_url) {
                 window.open(banners.data[0].link_url, "_blank");
@@ -66,8 +66,10 @@ export default function Home() {
             <Image
               src={banners.data[0].image_url}
               alt={banners.data[0].alt}
-              width={1000}
-              height={232}
+              fill
+              className="object-cover"
+              sizes="100vw"
+              priority
             />
           </div>
         )}

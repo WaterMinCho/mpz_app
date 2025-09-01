@@ -25,7 +25,6 @@ export default function CenterSettingName() {
   // 폼 상태
   const [centerName, setCenterName] = useState("");
   const [centerNumber, setCenterNumber] = useState("");
-  const [isPublicNumber, setIsPublicNumber] = useState("모두에게 공개");
   const [address, setAddress] = useState("");
   const [isPublicAddress, setIsPublicAddress] = useState("모두에게 공개");
   const [adoptionPrice, setAdoptionPrice] = useState("");
@@ -35,6 +34,8 @@ export default function CenterSettingName() {
   // 토스트 상태
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
+
+  const isSubscriber = myCenter?.isSubscriber === true;
 
   // 토스트 표시 함수
   const showToastMessage = (message: string) => {
@@ -48,9 +49,6 @@ export default function CenterSettingName() {
     if (myCenter) {
       setCenterName(myCenter.name || "");
       setCenterNumber(myCenter.centerNumber || "");
-      setIsPublicNumber(
-        myCenter.isPublic ? "모두에게 공개" : "입양자에게만 공개"
-      );
       setAddress(myCenter.location || "");
       setIsPublicAddress(
         myCenter.isPublic ? "모두에게 공개" : "입양자에게만 공개"
@@ -121,9 +119,7 @@ export default function CenterSettingName() {
         name: centerName.trim(),
         centerNumber: centerNumber.trim() || undefined,
         location: address.trim(),
-        isPublic:
-          isPublicNumber === "모두에게 공개" &&
-          isPublicAddress === "모두에게 공개",
+        isPublic: isPublicAddress === "모두에게 공개",
         adoptionPrice: parseInt(adoptionPrice.replace(/,/g, ""), 10),
         imageUrl: imageUrl || undefined,
       });
@@ -239,13 +235,6 @@ export default function CenterSettingName() {
           value={centerNumber}
           onChange={(e) => setCenterNumber(e.target.value)}
         />
-        <CustomInput
-          variant="Variant7"
-          value={isPublicNumber}
-          onChangeOption={setIsPublicNumber}
-          twoOptions={["모두에게 공개", "입양자에게만 공개"]}
-          required={true}
-        />
         <div className="flex flex-col gap-3">
           <h5 className="text-dg">
             보호센터 주소 <span className="text-brand">*</span>
@@ -257,13 +246,15 @@ export default function CenterSettingName() {
             value={address}
             onChange={(e) => setAddress(e.target.value)}
           />
-          <CustomInput
-            variant="Variant7"
-            value={isPublicAddress}
-            onChangeOption={setIsPublicAddress}
-            twoOptions={["모두에게 공개", "입양자에게만 공개"]}
-            required={true}
-          />
+          {isSubscriber && (
+            <CustomInput
+              variant="Variant7"
+              value={isPublicAddress}
+              onChangeOption={setIsPublicAddress}
+              twoOptions={["모두에게 공개", "입양자에게만 공개"]}
+              required={true}
+            />
+          )}
           <CustomInput
             variant="primary"
             label="책임비"
@@ -274,6 +265,27 @@ export default function CenterSettingName() {
           />
           <InfoCard>책임비는 외부에 노출되지 않으니 안심하세요.</InfoCard>
         </div>
+        {/* TODO DB컬럼 추가시 활성화 */}
+        {/* {isSubscriber && (
+          <div>
+            <CustomInput
+              variant="Variant7"
+              title="임시보호 가능 여부"
+              value={isPublicAddress}
+              onChangeOption={setIsPublicAddress}
+              twoOptions={["가능", "뷸가능"]}
+              required={true}
+            />
+            <CustomInput
+              variant="Variant7"
+              title="임시보호 가능 여부"
+              value={isPublicAddress}
+              onChangeOption={setIsPublicAddress}
+              twoOptions={["가능", "뷸가능"]}
+              required={true}
+            />
+          </div>
+        )} */}
       </div>
       <div className="sticky bottom-0 left-0 right-0 pb-6 pt-2 px-5">
         <BigButton
