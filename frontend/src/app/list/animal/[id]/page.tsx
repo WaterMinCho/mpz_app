@@ -96,8 +96,8 @@ export default function AnimalDetailPage({ params }: AnimalDetailPageProps) {
     animal?.center_id
   );
 
-  // 구독자 여부 확인
-  const isSubscriber = center?.isSubscriber === true;
+  // 센터의 구독 상태 확인 (공고를 올린 센터가 구독자인지)
+  const isCenterSubscriber = center?.isSubscriber === true;
 
   // 찜하기 관련
   const { data: favoriteData, isLoading: favoriteLoading } =
@@ -331,7 +331,17 @@ export default function AnimalDetailPage({ params }: AnimalDetailPageProps) {
     );
   }
 
-  const relatedAnimals = relatedAnimalsData?.data?.animals || [];
+  // RelatedAnimalsResponse를 RawAnimalResponse로 변환
+  const relatedAnimals: RawAnimalResponse[] = (relatedAnimalsData || []).map(
+    (item) => ({
+      ...item,
+      status: item.status as RawAnimalResponse["status"],
+      weight: item.weight,
+      color: item.color,
+      breed: item.breed,
+      description: item.description,
+    })
+  );
 
   return (
     <>
@@ -379,12 +389,12 @@ export default function AnimalDetailPage({ params }: AnimalDetailPageProps) {
           description={animal.description || ""}
           foundLocation={animal.found_location || ""}
           center={center?.name || "보호센터 정보 없음"}
-          isSubscriber={isSubscriber}
+          isCenterSubscriber={isCenterSubscriber}
           specialNotes={animal.special_notes || undefined}
         />
         <div className="py-3" />
 
-        {isSubscriber && (
+        {isCenterSubscriber && (
           <SubscriberDetails
             activityLevel={animal.activity_level || 3}
             sensitivity={animal.sensitivity || 3}
@@ -429,13 +439,13 @@ export default function AnimalDetailPage({ params }: AnimalDetailPageProps) {
         />
 
         <CenterInfo
-          variant={isSubscriber ? "subscriber" : "primary"}
+          variant={isCenterSubscriber ? "subscriber" : "primary"}
           centerId={center?.id || ""}
           name={center?.name || "보호센터 정보 없음"}
           location={center?.location || "주소 정보 없음"}
           phoneNumber={center?.phoneNumber || "연락처 정보 없음"}
           adoptionProcedure={
-            isSubscriber && center?.adoptionProcedure
+            isCenterSubscriber && center?.adoptionProcedure
               ? center.adoptionProcedure
               : undefined
           }

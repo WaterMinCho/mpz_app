@@ -32,7 +32,6 @@ export default function CommunityPage() {
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
 
-  // TODO 배너 종류 구분
   const { data: banners, isLoading: bannersLoading } = useGetBanners({
     type: "sub",
   });

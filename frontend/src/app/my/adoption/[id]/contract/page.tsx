@@ -86,7 +86,6 @@ export default function ContractPage() {
                 입양 동물과 센터 정보가 포함된 계약서입니다.
               </p>
             </div>
-            {/*  TODO 멘트 수정 */}
 
             {/* Contract Content */}
             <div className="mb-6">
