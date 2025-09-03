@@ -3,37 +3,37 @@ from ninja.errors import HttpError
 from django.http import HttpRequest
 from asgiref.sync import sync_to_async
 from typing import List
-from centers.models import Center, AdoptionContractTemplate
+from centers.models import Center, AdoptionConsent
 from centers.schemas.inbound import (
-    ContractTemplateCreateIn,
-    ContractTemplateUpdateIn,
+    ConsentCreateIn,
+    ConsentUpdateIn,
 )
 from centers.schemas.outbound import (
-    ContractTemplateOut,
+    ConsentOut,
     SuccessOut,
     ErrorOut
 )
 from api.security import jwt_auth
 
-router = Router(tags=["Contract Template"])
+router = Router(tags=["Consent"])
 
 @router.get(
     "/",
-    summary="[R] 계약서 템플릿 목록 조회",
-    description="센터 관리자가 자신의 센터 계약서 템플릿 목록을 조회합니다.",
+    summary="[R] 동의서 목록 조회",
+    description="센터 관리자가 자신의 센터 동의서 목록을 조회합니다.",
     response={
-        200: List[ContractTemplateOut],
+        200: List[ConsentOut],
         401: ErrorOut,
         403: ErrorOut,
         500: ErrorOut,
     },
     auth=jwt_auth,
 )
-async def get_contract_templates(request: HttpRequest):
-    """계약서 템플릿 목록을 조회합니다."""
+async def get_consents(request: HttpRequest):
+    """동의서 목록을 조회합니다."""
     try:
         @sync_to_async
-        def get_templates():
+        def get_consents_list():
             # JWT 토큰에서 사용자 정보 추출
             if not hasattr(request, 'auth') or not request.auth:
                 raise HttpError(401, "인증이 필요합니다")
@@ -58,38 +58,38 @@ async def get_contract_templates(request: HttpRequest):
                 except AttributeError:
                     raise HttpError(400, "등록된 센터가 없습니다")
             
-            # 해당 센터의 모든 템플릿 조회
-            templates = AdoptionContractTemplate.objects.filter(center=user_center).order_by('-created_at')
+            # 해당 센터의 모든 동의서 조회
+            consents = AdoptionConsent.objects.filter(center=user_center).order_by('-created_at')
             
             # 응답 데이터 변환
             return [
-                ContractTemplateOut(
-                    id=str(template.id),
-                    center_id=str(template.center.id),
-                    title=template.title,
-                    description=template.description,
-                    content=template.content,
-                    is_active=template.is_active,
-                    created_at=template.created_at.isoformat(),
-                    updated_at=template.updated_at.isoformat(),
+                ConsentOut(
+                    id=str(consent.id),
+                    center_id=str(consent.center.id),
+                    title=consent.title,
+                    description=consent.description,
+                    content=consent.content,
+                    is_active=consent.is_active,
+                    created_at=consent.created_at.isoformat(),
+                    updated_at=consent.updated_at.isoformat(),
                 )
-                for template in templates
+                for consent in consents
             ]
         
-        return await get_templates()
+        return await get_consents_list()
         
     except HttpError:
         raise
     except Exception as e:
-        raise HttpError(500, f"계약서 템플릿 목록 조회 중 오류가 발생했습니다: {str(e)}")
+        raise HttpError(500, f"동의서 목록 조회 중 오류가 발생했습니다: {str(e)}")
 
 
 @router.get(
-    "/{template_id}",
-    summary="[R] 계약서 템플릿 상세 조회",
-    description="센터 관리자가 특정 계약서 템플릿을 상세 조회합니다.",
+    "/{consent_id}",
+    summary="[R] 동의서 상세 조회",
+    description="센터 관리자가 특정 동의서의 상세 정보를 조회합니다.",
     response={
-        200: ContractTemplateOut,
+        200: ConsentOut,
         401: ErrorOut,
         403: ErrorOut,
         404: ErrorOut,
@@ -97,11 +97,11 @@ async def get_contract_templates(request: HttpRequest):
     },
     auth=jwt_auth,
 )
-async def get_contract_template(request: HttpRequest, template_id: str):
-    """계약서 템플릿을 상세 조회합니다."""
+async def get_consent(request: HttpRequest, consent_id: str):
+    """동의서 상세 정보를 조회합니다."""
     try:
         @sync_to_async
-        def get_template():
+        def get_consent_detail():
             # JWT 토큰에서 사용자 정보 추출
             if not hasattr(request, 'auth') or not request.auth:
                 raise HttpError(401, "인증이 필요합니다")
@@ -126,53 +126,51 @@ async def get_contract_template(request: HttpRequest, template_id: str):
                 except AttributeError:
                     raise HttpError(400, "등록된 센터가 없습니다")
             
-            # 템플릿이 존재하고 사용자의 센터에 속하는지 확인
+            # 해당 센터의 동의서 조회
             try:
-                template = AdoptionContractTemplate.objects.get(
-                    id=template_id,
-                    center=user_center
-                )
-            except AdoptionContractTemplate.DoesNotExist:
-                raise HttpError(404, "템플릿을 찾을 수 없습니다")
+                consent = AdoptionConsent.objects.get(id=consent_id, center=user_center)
+            except AdoptionConsent.DoesNotExist:
+                raise HttpError(404, "동의서를 찾을 수 없습니다")
             
             # 응답 데이터 변환
-            return ContractTemplateOut(
-                id=str(template.id),
-                center_id=str(template.center.id),
-                title=template.title,
-                description=template.description,
-                content=template.content,
-                is_active=template.is_active,
-                created_at=template.created_at.isoformat(),
-                updated_at=template.updated_at.isoformat(),
+            return ConsentOut(
+                id=str(consent.id),
+                center_id=str(consent.center.id),
+                title=consent.title,
+                description=consent.description,
+                content=consent.content,
+                is_active=consent.is_active,
+                created_at=consent.created_at.isoformat(),
+                updated_at=consent.updated_at.isoformat(),
             )
         
-        return await get_template()
+        return await get_consent_detail()
         
     except HttpError:
         raise
     except Exception as e:
-        raise HttpError(500, f"계약서 템플릿 상세 조회 중 오류가 발생했습니다: {str(e)}")
+        raise HttpError(500, f"동의서 상세 조회 중 오류가 발생했습니다: {str(e)}")
 
 
 @router.post(
     "/",
-    summary="[C] 계약서 템플릿 생성",
-    description="센터 관리자가 계약서 템플릿을 생성합니다.",
+    summary="[C] 동의서 생성",
+    description="센터 관리자가 새 동의서를 생성합니다.",
     response={
-        201: ContractTemplateOut,
+        200: ConsentOut,
+        201: ConsentOut,
         400: ErrorOut,
         401: ErrorOut,
         403: ErrorOut,
         500: ErrorOut,
     },
-    auth=jwt_auth
+    auth=jwt_auth,
 )
-async def create_contract_template(request: HttpRequest, data: ContractTemplateCreateIn):
-    """계약서 템플릿을 생성합니다."""
+async def create_consent(request: HttpRequest, data: ConsentCreateIn):
+    """새 동의서를 생성합니다."""
     try:
         @sync_to_async
-        def create_template():
+        def create_consent_template():
             # JWT 토큰에서 사용자 정보 추출
             if not hasattr(request, 'auth') or not request.auth:
                 raise HttpError(401, "인증이 필요합니다")
@@ -197,58 +195,54 @@ async def create_contract_template(request: HttpRequest, data: ContractTemplateC
                 except AttributeError:
                     raise HttpError(400, "등록된 센터가 없습니다")
             
-            # 계약서 템플릿 데이터 생성
-            template_data = {
-                "center": user_center,
-                "title": data.title,
-                "description": data.description,
-                "content": data.content,
-                "is_active": data.is_active if data.is_active is not None else True,
-            }
-            
-            # DB에 템플릿 생성
-            template = AdoptionContractTemplate.objects.create(**template_data)
+            # 새 동의서 생성
+            consent = AdoptionConsent.objects.create(
+                center=user_center,
+                title=data.title,
+                description=data.description,
+                content=data.content,
+                is_active=data.is_active
+            )
             
             # 응답 데이터 변환
-            return ContractTemplateOut(
-                id=str(template.id),
-                center_id=str(template.center.id),
-                title=template.title,
-                description=template.description,
-                content=template.content,
-                is_active=template.is_active,
-                created_at=template.created_at.isoformat(),
-                updated_at=template.updated_at.isoformat(),
+            return ConsentOut(
+                id=str(consent.id),
+                center_id=str(consent.center.id),
+                title=consent.title,
+                description=consent.description,
+                content=consent.content,
+                is_active=consent.is_active,
+                created_at=consent.created_at.isoformat(),
+                updated_at=consent.updated_at.isoformat(),
             )
         
-        result = await create_template()
-        return 201, result
+        return await create_consent_template()
         
     except HttpError:
         raise
     except Exception as e:
-        raise HttpError(500, f"계약서 템플릿 생성 중 오류가 발생했습니다: {str(e)}")
+        raise HttpError(500, f"동의서 생성 중 오류가 발생했습니다: {str(e)}")
 
 
 @router.put(
-    "/{template_id}",
-    summary="[U] 계약서 템플릿 수정",
-    description="센터 관리자가 계약서 템플릿을 수정합니다.",
+    "/{consent_id}",
+    summary="[U] 동의서 수정",
+    description="센터 관리자가 동의서를 수정합니다.",
     response={
-        200: ContractTemplateOut,
+        200: ConsentOut,
         400: ErrorOut,
         401: ErrorOut,
         403: ErrorOut,
         404: ErrorOut,
         500: ErrorOut,
     },
-    auth=jwt_auth
+    auth=jwt_auth,
 )
-async def update_contract_template(request: HttpRequest, template_id: str, data: ContractTemplateUpdateIn):
-    """계약서 템플릿을 수정합니다."""
+async def update_consent(request: HttpRequest, consent_id: str, data: ConsentUpdateIn):
+    """동의서를 수정합니다."""
     try:
         @sync_to_async
-        def update_template():
+        def update_consent_template():
             # JWT 토큰에서 사용자 정보 추출
             if not hasattr(request, 'auth') or not request.auth:
                 raise HttpError(401, "인증이 필요합니다")
@@ -273,70 +267,67 @@ async def update_contract_template(request: HttpRequest, template_id: str, data:
                 except AttributeError:
                     raise HttpError(400, "등록된 센터가 없습니다")
             
-            # 템플릿이 존재하고 사용자의 센터에 속하는지 확인
+            # 해당 센터의 동의서 조회
             try:
-                template = AdoptionContractTemplate.objects.get(
-                    id=template_id,
-                    center=user_center
-                )
-            except AdoptionContractTemplate.DoesNotExist:
-                raise HttpError(404, "템플릿을 찾을 수 없습니다")
+                consent = AdoptionConsent.objects.get(id=consent_id, center=user_center)
+            except AdoptionConsent.DoesNotExist:
+                raise HttpError(404, "동의서를 찾을 수 없습니다")
             
-            # 업데이트할 데이터 준비
-            update_data = {}
-            if data.title is not None:
-                update_data["title"] = data.title
-            if data.description is not None:
-                update_data["description"] = data.description
-            if data.content is not None:
-                update_data["content"] = data.content
-            if data.is_active is not None:
-                update_data["is_active"] = data.is_active
+            # 업데이트할 데이터만 필터링하여 업데이트
+            update_fields = {
+                'title': data.title,
+                'description': data.description,
+                'content': data.content,
+                'is_active': data.is_active
+            }
             
-            # 템플릿 업데이트
-            for field, value in update_data.items():
-                setattr(template, field, value)
-            template.save()
+            # None이 아닌 값만 업데이트
+            update_data = {k: v for k, v in update_fields.items() if v is not None}
+            
+            # 동의서 정보 업데이트
+            AdoptionConsent.objects.filter(id=consent.id).update(**update_data)
+            
+            # 업데이트된 동의서 정보 조회
+            updated_consent = AdoptionConsent.objects.get(id=consent.id)
             
             # 응답 데이터 변환
-            return ContractTemplateOut(
-                id=str(template.id),
-                center_id=str(template.center.id),
-                title=template.title,
-                description=template.description,
-                content=template.content,
-                is_active=template.is_active,
-                created_at=template.created_at.isoformat(),
-                updated_at=template.updated_at.isoformat(),
+            return ConsentOut(
+                id=str(updated_consent.id),
+                center_id=str(updated_consent.center.id),
+                title=updated_consent.title,
+                description=updated_consent.description,
+                content=updated_consent.content,
+                is_active=updated_consent.is_active,
+                created_at=updated_consent.created_at.isoformat(),
+                updated_at=updated_consent.updated_at.isoformat(),
             )
         
-        return await update_template()
+        return await update_consent_template()
         
     except HttpError:
         raise
     except Exception as e:
-        raise HttpError(500, f"계약서 템플릿 수정 중 오류가 발생했습니다: {str(e)}")
+        raise HttpError(500, f"동의서 수정 중 오류가 발생했습니다: {str(e)}")
 
 
 @router.delete(
-    "/{template_id}",
-    summary="[D] 계약서 템플릿 삭제",
-    description="센터 관리자가 계약서 템플릿을 삭제합니다.",
+    "/{consent_id}",
+    summary="[D] 동의서 삭제",
+    description="센터 관리자가 동의서를 삭제합니다.",
     response={
         200: SuccessOut,
-        400: ErrorOut,
         401: ErrorOut,
         403: ErrorOut,
         404: ErrorOut,
         500: ErrorOut,
     },
-    auth=jwt_auth
+    auth=jwt_auth,
 )
-async def delete_contract_template(request: HttpRequest, template_id: str):
-    """계약서 템플릿을 삭제합니다."""
+async def delete_consent(request: HttpRequest, consent_id: str):
+    """동의서를 삭제합니다."""
     try:
         @sync_to_async
-        def delete_template():
+        def delete_consent_template():
             # JWT 토큰에서 사용자 정보 추출
             if not hasattr(request, 'auth') or not request.auth:
                 raise HttpError(401, "인증이 필요합니다")
@@ -361,23 +352,20 @@ async def delete_contract_template(request: HttpRequest, template_id: str):
                 except AttributeError:
                     raise HttpError(400, "등록된 센터가 없습니다")
             
-            # 템플릿이 존재하고 사용자의 센터에 속하는지 확인
+            # 해당 센터의 동의서 조회
             try:
-                template = AdoptionContractTemplate.objects.get(
-                    id=template_id,
-                    center=user_center
-                )
-            except AdoptionContractTemplate.DoesNotExist:
-                raise HttpError(404, "템플릿을 찾을 수 없습니다")
+                consent = AdoptionConsent.objects.get(id=consent_id, center=user_center)
+            except AdoptionConsent.DoesNotExist:
+                raise HttpError(404, "동의서를 찾을 수 없습니다")
             
-            # 템플릿 삭제
-            template.delete()
+            # 동의서 삭제
+            consent.delete()
             
-            return SuccessOut(message="계약서 템플릿이 성공적으로 삭제되었습니다")
+            return SuccessOut(message="동의서가 성공적으로 삭제되었습니다")
         
-        return await delete_template()
+        return await delete_consent_template()
         
     except HttpError:
         raise
     except Exception as e:
-        raise HttpError(500, f"계약서 템플릿 삭제 중 오류가 발생했습니다: {str(e)}")
+        raise HttpError(500, f"동의서 삭제 중 오류가 발생했습니다: {str(e)}")

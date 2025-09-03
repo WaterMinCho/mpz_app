@@ -213,7 +213,7 @@ export default function CommunityPage() {
       }, 3000);
     } catch (error) {
       console.error("게시글 삭제 실패:", error);
-      setToastMessage("삭제에 실패했습니다.");
+      setToastMessage("삭제에 실패했습니다!");
       setShowToast(true);
     }
   };
