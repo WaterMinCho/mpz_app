@@ -10,6 +10,7 @@ import { Toast } from "@/components/ui/Toast";
 import { useAdoptionVerificationStore } from "@/lib/stores";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useSubmitAdoptionApplication } from "@/hooks/mutation/useSubmitAdoptionApplication";
+import { useGetCenterConsents } from "@/hooks/query";
 import type { AdoptionFormData } from "@/types/adoption-application";
 
 export interface StepProps {
@@ -32,8 +33,20 @@ export function Step7({}: StepProps) {
   const animalId = adoptionStore.data.animalId;
   const centerId = adoptionStore.data.centerId;
 
+  // 센터 동의서 데이터 가져오기
+  const {
+    data: consentsData,
+    isLoading: consentsLoading,
+    error: consentsError,
+  } = useGetCenterConsents(centerId || "");
+
+  // 활성화된 동의서들 필터링 후 두 번째 동의서 선택
+  const activeConsents =
+    consentsData?.filter((consent) => consent.is_active) || [];
+  const secondConsent = activeConsents[1]; // 두 번째 동의서
+
   // 입양신청 제출 핸들러
-  const handleSubmit = async () => {
+  const handleSubmit = React.useCallback(async () => {
     if (!agree || !animalId) {
       return;
     }
@@ -88,7 +101,7 @@ export function Step7({}: StepProps) {
       );
       setShowToast(true);
     }
-  };
+  }, [agree, animalId, adoptionStore, submitMutation, router]);
 
   // 토스트 자동 숨김
   React.useEffect(() => {
@@ -99,6 +112,37 @@ export function Step7({}: StepProps) {
       return () => clearTimeout(timer);
     }
   }, [showToast]);
+
+  // 자동 제출 처리를 위한 useEffect (동의서가 1개 이하인 경우)
+  React.useEffect(() => {
+    if (!consentsLoading && !consentsError && activeConsents.length <= 1) {
+      handleSubmit();
+    }
+  }, [consentsLoading, consentsError, activeConsents.length, handleSubmit]);
+
+  // 로딩 상태 처리
+  if (consentsLoading) {
+    return (
+      <Container className="min-h-screen pb-28">
+        <h2 className="text-bk mb-6">동의서를 불러오는 중...</h2>
+        <div className="flex justify-center items-center py-10">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+        </div>
+      </Container>
+    );
+  }
+
+  // 에러 상태 처리
+  if (consentsError) {
+    return (
+      <Container className="min-h-screen pb-28">
+        <h2 className="text-bk mb-6">오류가 발생했습니다</h2>
+        <p className="text-gray-600">
+          동의서를 불러올 수 없습니다. 다시 시도해주세요.
+        </p>
+      </Container>
+    );
+  }
 
   // 동물 ID가 없는 경우 에러 처리
   if (!animalId || !centerId) {
@@ -114,21 +158,34 @@ export function Step7({}: StepProps) {
     );
   }
 
+  // 두 번째 동의서가 없는 경우 (동의서가 1개 이하인 경우)
+  if (activeConsents.length <= 1) {
+    return (
+      <Container className="min-h-screen pb-28">
+        <h2 className="text-bk mb-6">입양 신청을 제출하는 중...</h2>
+        <div className="flex justify-center items-center py-10">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+        </div>
+      </Container>
+    );
+  }
+
   return (
     <>
       <Container className="min-h-screen pb-28">
         <div className="flex flex-col gap-2 mb-6">
           <h2 className="text-bk">
-            건강한 입양을 위한
-            <br />
-            유의사항 동의문이에요.
+            {secondConsent?.title ||
+              "건강한 입양을 위한 유의사항 동의문이에요."}
           </h2>
-          <p className="body2 text-gr">꼼꼼히 확인 후 서명해주세요.</p>
+          <p className="body2 text-gr">
+            {secondConsent?.description || "꼼꼼히 확인 후 서명해주세요."}
+          </p>
         </div>
         <div className="flex flex-col gap-3">
           <p className="body text-dg">
-            센터제공 동의서 센터제공 동의서 센터제공 동의서 센터제공 동의서
-            센터제공 동의서 센터제공 동의서 센터제공 동의서...
+            {secondConsent?.content ||
+              "센터제공 동의서 센터제공 동의서 센터제공 동의서 센터제공 동의서 센터제공 동의서 센터제공 동의서 센터제공 동의서..."}
           </p>
           <FormListItem
             className="w-full"

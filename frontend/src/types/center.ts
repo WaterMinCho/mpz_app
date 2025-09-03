@@ -217,3 +217,20 @@ export interface UpdateCenterSettingsResponse {
   created_at: string;
   updated_at: string;
 }
+
+// 센터별 절차 질문 관련 타입들
+export interface CenterProcedureQuestion {
+  id: string;
+  center_id: string;
+  question: string;
+  type: string;
+  options: string[];
+  is_required: boolean;
+  sequence: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface GetCenterProcedureQuestionsResponse {
+  questions: CenterProcedureQuestion[];
+}

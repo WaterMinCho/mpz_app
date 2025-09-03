@@ -5,60 +5,105 @@ import React from "react";
 import { CustomInput } from "@/components/ui/CustomInput";
 import { Container } from "@/components/common/Container";
 import { FixedBottomBar } from "@/components/ui/FixedBottomBar";
+import { useGetCenterProcedureQuestions } from "@/hooks/query";
+import { useAdoptionVerificationStore } from "@/lib/stores/adoptionVerificationStore";
 
 export interface StepProps {
   onNext: () => void;
 }
 
-export function Step2({ onNext }: StepProps) {
-  const [name, setName] = React.useState("");
-  const isNameValid = name.trim().length >= 2;
+export function Step5({ onNext }: StepProps) {
+  const { data: storeData } = useAdoptionVerificationStore();
+  const centerId = storeData.centerId;
+
+  const {
+    data: questionsData,
+    isLoading,
+    error,
+  } = useGetCenterProcedureQuestions(
+    { centerId: centerId || "" },
+    { enabled: !!centerId }
+  );
+
+  // 각 질문에 대한 답변을 저장할 상태
+  const [answers, setAnswers] = React.useState<Record<string, string>>({});
+
+  // 답변 변경 핸들러
+  const handleAnswerChange = (questionId: string, value: string) => {
+    setAnswers((prev) => ({
+      ...prev,
+      [questionId]: value,
+    }));
+  };
+
+  // 모든 필수 질문이 답변되었는지 확인
+  const isAllRequiredAnswered = React.useMemo(() => {
+    if (!questionsData?.questions) return false;
+
+    const requiredQuestions = questionsData.questions.filter(
+      (q) => q.is_required
+    );
+    return requiredQuestions.every((q) => answers[q.id]?.trim().length > 0);
+  }, [questionsData, answers]);
+
+  // 로딩 상태 처리
+  if (isLoading) {
+    return (
+      <Container className="min-h-screen pb-28">
+        <h2 className="text-bk mb-6">질문을 불러오는 중...</h2>
+        <div className="flex justify-center items-center py-10">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+        </div>
+      </Container>
+    );
+  }
+
+  // 에러 상태 처리
+  if (error) {
+    return (
+      <Container className="min-h-screen pb-28">
+        <h2 className="text-bk mb-6">오류가 발생했습니다</h2>
+        <p className="text-gray-600">
+          질문을 불러올 수 없습니다. 다시 시도해주세요.
+        </p>
+      </Container>
+    );
+  }
+
+  // centerId가 없는 경우
+  if (!centerId) {
+    return (
+      <Container className="min-h-screen pb-28">
+        <h2 className="text-bk mb-6">센터 정보가 필요합니다</h2>
+        <p className="text-gray-600">
+          입양 신청을 진행하려면 센터 정보가 필요합니다.
+        </p>
+      </Container>
+    );
+  }
 
   return (
     <>
       <Container className="min-h-screen pb-28">
         <h2 className="text-bk mb-6">답변을 작성해주세요.</h2>
         <div className="flex flex-col gap-3">
-          <CustomInput
-            variant="primary"
-            label="당신의 성함은 무엇인가요?"
-            placeholder="자유롭게 작성해주세요."
-            required={true}
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            inputMode="text"
-            maxLength={15}
-          />
-          <CustomInput
-            variant="primary"
-            label="현재 반려동물 유무를 알려주세요."
-            placeholder="자유롭게 작성해주세요."
-            required={true}
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            inputMode="text"
-            maxLength={15}
-          />
-          <CustomInput
-            variant="primary"
-            label="입양 동기를 알려주세요."
-            placeholder="자유롭게 작성해주세요."
-            required={true}
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            inputMode="text"
-            maxLength={15}
-          />
-          <CustomInput
-            variant="primary"
-            label="직업과 직장 형태를 알려주세요."
-            placeholder="자유롭게 작성해주세요."
-            required={true}
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            inputMode="text"
-            maxLength={15}
-          />
+          {questionsData?.questions
+            ?.sort((a, b) => a.sequence - b.sequence)
+            .map((question) => (
+              <CustomInput
+                key={question.id}
+                variant="primary"
+                label={question.question}
+                placeholder="자유롭게 작성해주세요."
+                required={question.is_required}
+                value={answers[question.id] || ""}
+                onChange={(e) =>
+                  handleAnswerChange(question.id, e.target.value)
+                }
+                inputMode="text"
+                maxLength={500}
+              />
+            ))}
         </div>
       </Container>
 
@@ -66,10 +111,10 @@ export function Step2({ onNext }: StepProps) {
         variant="variant1"
         primaryButtonText="확인"
         onPrimaryButtonClick={onNext}
-        primaryButtonDisabled={!isNameValid}
+        primaryButtonDisabled={!isAllRequiredAnswered}
       />
     </>
   );
 }
 
-export default Step2;
+export default Step5;
