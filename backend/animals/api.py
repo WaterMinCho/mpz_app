@@ -127,7 +127,7 @@ async def create_animal(request: HttpRequest, data: AnimalCreateIn):
             trainer_comment=animal.trainer_comment,
             announce_number=animal.announce_number,
             display_notice_number=animal.display_notice_number,  # 표시용 공고번호
-            announcement_date=animal.admission_date,
+            announcement_date=animal.admission_date.isoformat() if animal.admission_date else None,
             found_location=animal.found_location,
             admission_date=animal.admission_date.isoformat() if animal.admission_date else None,
             personality=animal.personality,
