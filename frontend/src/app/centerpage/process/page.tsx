@@ -12,6 +12,7 @@ import { CustomInput } from "@/components/ui/CustomInput";
 import { BigButton } from "@/components/ui/BigButton";
 import { AddButton } from "@/components/ui/AddButton";
 import { InfoCard } from "@/components/ui/InfoCard";
+import { NotificationToast } from "@/components/ui/NotificationToast";
 import {
   useGetQuestionForms,
   useGetCenterProcedureSettings,
@@ -30,6 +31,17 @@ export default function CenterProcess() {
   const [monitoringDescription, setMonitoringDescription] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
+  // 토스트 상태
+  const [toast, setToast] = useState<{
+    show: boolean;
+    message: string;
+    type: "success" | "error";
+  }>({
+    show: false,
+    message: "",
+    type: "success",
+  });
+
   // 입양 신청서 데이터
   const { data: questionFormsData, isLoading: isLoadingQuestions } =
     useGetQuestionForms();
@@ -44,6 +56,15 @@ export default function CenterProcess() {
   // 센터 프로시저 설정 생성/수정
   const createSettings = useCreateCenterProcedureSettings();
   const updateSettings = useUpdateCenterProcedureSettings();
+
+  // 토스트 표시 함수
+  const showToast = (message: string, type: "success" | "error") => {
+    setToast({ show: true, message, type });
+  };
+
+  const hideToast = () => {
+    setToast({ ...toast, show: false });
+  };
 
   // 기존 설정이 있으면 폼에 로드
   useEffect(() => {
@@ -65,7 +86,7 @@ export default function CenterProcess() {
   // 저장하기 함수
   const handleSave = async () => {
     if (!isMonitoring || !period) {
-      alert("모니터링 설정을 완료해주세요.");
+      showToast("모니터링 설정을 완료해주세요.", "error");
       return;
     }
 
@@ -91,10 +112,11 @@ export default function CenterProcess() {
         await createSettings.mutateAsync(settingsData);
       }
 
-      alert("프로시저 설정이 저장되었습니다.");
+      showToast("프로시저 설정이 저장되었습니다.", "success");
+      router.push("/centerpage");
     } catch (error) {
       console.error("저장 실패:", error);
-      alert("저장에 실패했습니다. 다시 시도해주세요.");
+      showToast("저장에 실패했습니다. 다시 시도해주세요.", "error");
     } finally {
       setIsLoading(false);
     }
@@ -137,7 +159,11 @@ export default function CenterProcess() {
                       variant="text"
                       placeholder={`질문${index + 1}`}
                       value={question.question}
-                      disabled={true}
+                      readOnly={true}
+                      className="cursor-pointer hover:bg-gray-50 rounded-md transition-colors"
+                      onClick={() =>
+                        router.push("/centerpage/process/customform")
+                      }
                     />
                   ))}
               </div>
@@ -145,7 +171,7 @@ export default function CenterProcess() {
               <CustomInput
                 variant="text"
                 placeholder="등록된 질문이 없습니다"
-                disabled={true}
+                readOnly={true}
                 className="text-gr"
               />
             )}
@@ -162,14 +188,6 @@ export default function CenterProcess() {
           </div>
           <div className="w-full flex flex-col gap-3">
             <h5 className="text-dg">입양 유의사항</h5>
-            <CustomInput
-              variant="text"
-              placeholder="입양 유의사항을 입력해주세요"
-              value={adoptionGuidelines}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                setAdoptionGuidelines(e.target.value)
-              }
-            />
             {isLoadingConsents ? (
               <CustomInput
                 variant="text"
@@ -185,7 +203,8 @@ export default function CenterProcess() {
                     variant="text"
                     placeholder={`동의서${index + 1}`}
                     value={consent.title}
-                    className="cursor-pointer hover:bg-gray-50 rounded-md transition-colors read-only"
+                    readOnly={true}
+                    className="cursor-pointer hover:bg-gray-50 rounded-md transition-colors"
                     onClick={() =>
                       router.push(
                         `/centerpage/process/edit-consent/${consent.id}`
@@ -320,6 +339,15 @@ export default function CenterProcess() {
           {isLoading ? "저장 중..." : "저장하기"}
         </BigButton>
       </div>
+
+      {/* 토스트 */}
+      {toast.show && (
+        <NotificationToast
+          message={toast.message}
+          type={toast.type}
+          onClose={hideToast}
+        />
+      )}
     </Container>
   );
 }
