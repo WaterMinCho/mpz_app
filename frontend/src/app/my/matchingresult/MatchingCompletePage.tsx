@@ -301,7 +301,7 @@ export default function MatchingCompletePage() {
   const [isLoading, setIsLoading] = React.useState(true);
   const { user } = useAuth();
   const { aiMatchingResult, answers, setAIMatchingResult } =
-    useMatchingStepStore();
+    useMatchingStepStore(user?.id);
 
   const { mutate: postAnimalMatching } = usePostAnimalMatching({
     onSuccess: (data) => {
