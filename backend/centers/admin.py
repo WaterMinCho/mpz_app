@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.db import models
 from centers.models import Center, AdoptionContractTemplate, QuestionForm
 
 
@@ -52,9 +53,10 @@ class CenterAdmin(admin.ModelAdmin):
         """owner 필드에 대한 안전한 폼 필드 설정"""
         if db_field.name == "owner":
             from user.models import User
+            # 올바른 user_type 선택지 사용 ('최고관리자' -> '센터최고관리자')
             kwargs["queryset"] = User.objects.filter(
-                user_type__in=['센터관리자', '최고관리자']
-            ).exclude(owned_center__isnull=False)
+                user_type__in=['센터관리자', '센터최고관리자']
+            )
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 
