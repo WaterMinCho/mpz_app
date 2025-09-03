@@ -28,9 +28,9 @@ def _build_center_response(center, show_private_location=False):
         name=center.name,
         center_number=center.center_number,
         description=center.description,
-        location=center.location if (show_private_location or center.is_public) else None,
+        location=center.location if (show_private_location or (center.is_public and center.show_location)) else None,
         region=center.region,
-        phone_number=center.phone_number,
+        phone_number=center.phone_number if (show_private_location or (center.is_public and center.show_phone_number)) else None,
         adoption_procedure=center.adoption_procedure,
         adoption_guidelines=center.adoption_guidelines,
         has_monitoring=center.has_monitoring,
@@ -41,6 +41,11 @@ def _build_center_response(center, show_private_location=False):
         is_public=center.is_public,
         adoption_price=center.adoption_price,
         image_url=center.image_url,
+        is_subscribed=center.is_subscribed,
+        has_volunteer=center.has_volunteer,
+        has_foster_care=center.has_foster_care,
+        show_phone_number=center.show_phone_number,
+        show_location=center.show_location,
         created_at=center.created_at.isoformat(),
         updated_at=center.updated_at.isoformat(),
     )
@@ -164,7 +169,11 @@ async def update_center_settings(request: HttpRequest, data: CenterUpdateIn):
                 'monitoring_description': data.monitoring_description,
                 'is_public': data.is_public,
                 'adoption_price': data.adoption_price,
-                'image_url': data.image_url
+                'image_url': data.image_url,
+                'has_volunteer': data.has_volunteer,
+                'has_foster_care': data.has_foster_care,
+                'show_phone_number': data.show_phone_number,
+                'show_location': data.show_location
             }
             
             # None이 아니고 빈 문자열이 아닌 값만 업데이트 (단, image_url은 빈 문자열도 허용)

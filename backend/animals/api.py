@@ -33,6 +33,7 @@ router = Router(tags=["Animals"])
     summary="[C] 동물 등록",
     description="새로운 동물을 등록합니다. 센터 관리자 이상의 권한이 필요합니다.",
     response={
+        200: AnimalOut,
         201: AnimalOut,
         400: ErrorOut,
         401: ErrorOut,
@@ -53,9 +54,17 @@ async def create_animal(request: HttpRequest, data: AnimalCreateIn):
         center_id = None
         if user.user_type == "센터관리자":
             # 센터 관리자는 자신의 센터에만 등록 가능
-            user_center = await sync_to_async(Center.objects.filter(user=user).first)()
-            if not user_center:
-                raise HttpError(400, "등록된 센터가 없습니다")
+            # 먼저 owner로 조회 시도
+            try:
+                user_center = await sync_to_async(Center.objects.get)(owner=user)
+            except Center.DoesNotExist:
+                # owner가 아니면 center 필드로 조회
+                try:
+                    user_center = await sync_to_async(lambda: user.center)()
+                    if not user_center:
+                        raise HttpError(400, "등록된 센터가 없습니다")
+                except AttributeError:
+                    raise HttpError(400, "등록된 센터가 없습니다")
             center_id = user_center.id
         else:
             # 훈련사나 최고관리자는 센터 ID를 요청에서 받아야 함
@@ -92,7 +101,7 @@ async def create_animal(request: HttpRequest, data: AnimalCreateIn):
             is_female=animal.is_female,
             age=animal.age,
             weight=animal.weight,
-            color=animal.color,
+
             breed=animal.breed,
             description=animal.description,
             status=animal.status,
@@ -101,13 +110,13 @@ async def create_animal(request: HttpRequest, data: AnimalCreateIn):
             sensitivity=animal.sensitivity,
             sociability=animal.sociability,
             separation_anxiety=animal.separation_anxiety,
-            special_notes=animal.special_notes,
+            special_notes=animal.special_needs,
             health_notes=animal.health_notes,
             basic_training=animal.basic_training,
             trainer_comment=animal.trainer_comment,
             announce_number=animal.announce_number,
             display_notice_number=animal.display_notice_number,  # 표시용 공고번호
-            announcement_date=animal.announcement_date,
+            announcement_date=animal.admission_date,
             found_location=animal.found_location,
             admission_date=animal.admission_date.isoformat() if animal.admission_date else None,
             personality=animal.personality,
@@ -427,8 +436,7 @@ async def update_animal(request: HttpRequest, animal_id: str, data: AnimalUpdate
             update_data["age"] = data.age
         if data.weight is not None:
             update_data["weight"] = data.weight
-        if data.color is not None:
-            update_data["color"] = data.color
+
         if data.breed is not None:
             update_data["breed"] = data.breed
         if data.description is not None:
@@ -444,7 +452,7 @@ async def update_animal(request: HttpRequest, animal_id: str, data: AnimalUpdate
         if data.separation_anxiety is not None:
             update_data["separation_anxiety"] = data.separation_anxiety
         if data.special_notes is not None:
-            update_data["special_notes"] = data.special_notes
+            update_data["special_needs"] = data.special_notes
         if data.health_notes is not None:
             update_data["health_notes"] = data.health_notes
         if data.basic_training is not None:
@@ -472,7 +480,7 @@ async def update_animal(request: HttpRequest, animal_id: str, data: AnimalUpdate
             is_female=animal.is_female,
             age=animal.age,
             weight=animal.weight,
-            color=animal.color,
+
             breed=animal.breed,
             description=animal.description,
             status=animal.status,
@@ -481,7 +489,7 @@ async def update_animal(request: HttpRequest, animal_id: str, data: AnimalUpdate
             sensitivity=animal.sensitivity,
             sociability=animal.sociability,
             separation_anxiety=animal.separation_anxiety,
-            special_notes=animal.special_notes,
+            special_notes=animal.special_needs,
             health_notes=animal.health_notes,
             basic_training=animal.basic_training,
             trainer_comment=animal.trainer_comment,
