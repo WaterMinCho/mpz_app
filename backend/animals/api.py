@@ -838,7 +838,7 @@ async def get_related_animals_by_distance(
 @router.get(
     "/public-data/sync",
     summary="[R] 공공데이터 동기화",
-    description="공공데이터 API에서 유기동물 정보를 가져와서 DB에 동기화합니다. (관리자 전용 또는 qstash 스케줄러용)",
+    description="공공데이터 API에서 유기동물 정보를 가져와서 DB에 동기화합니다. (QStash 스케줄러용)",
     response={
         200: PublicDataSyncResponseOut,
         400: PublicDataErrorOut,
@@ -846,7 +846,6 @@ async def get_related_animals_by_distance(
         403: PublicDataErrorOut,
         500: PublicDataErrorOut,
     },
-    auth=jwt_auth,
 )
 async def sync_public_data(
     request: HttpRequest,
@@ -860,10 +859,15 @@ async def sync_public_data(
 ):
     """공공데이터 API에서 유기동물 정보를 동기화합니다."""
     try:
-        # 관리자 권한 확인
-        current_user = request.auth
-        if current_user.user_type not in ["최고관리자", "센터관리자"]:
-            raise HttpError(403, "관리자 권한이 필요합니다")
+        # 헤더 기반 인증 확인 (QStash용)
+        x_api_key = request.headers.get('X-API-Key')
+        expected_api_key = getattr(settings, 'PUBLIC_DATA_API_KEY', None)
+        
+        if not expected_api_key:
+            raise HttpError(500, "공공데이터 API 키가 설정되지 않았습니다")
+        
+        if not x_api_key or x_api_key != expected_api_key:
+            raise HttpError(401, "유효하지 않은 API 키입니다")
         
         # 서비스 키 확인
         service_key = getattr(settings, 'PUBLIC_DATA_SERVICE_KEY', None)
