@@ -63,38 +63,6 @@ const loadingImages = [
   "/illust/result04.svg",
 ];
 
-// 성격 유형별 라벨 반환 함수
-function getPersonalityTypeLabel(personalityType: string): string {
-  switch (personalityType) {
-    case "perfect":
-      return "완벽한 매칭";
-    case "good":
-      return "좋은 매칭";
-    case "silent":
-      return "조용한 매칭";
-    case "unsuitable":
-      return "신중한 검토 필요";
-    default:
-      return "매칭 분석";
-  }
-}
-
-// 성격 유형별 설명 반환 함수
-function getPersonalityTypeDescription(personalityType: string): string {
-  switch (personalityType) {
-    case "perfect":
-      return "당신은 반려동물과 완벽한 조화를 이룰 수 있는 이상적인 보호자입니다.";
-    case "good":
-      return "당신의 활기찬 에너지가 반려동물에게 큰 도움이 될 것입니다.";
-    case "silent":
-      return "조용하고 차분한 환경을 선호하는 당신과 잘 맞는 아이들이 있습니다.";
-    case "unsuitable":
-      return "반려동물 입양 전 충분한 준비와 고려가 필요합니다.";
-    default:
-      return "AI가 당신의 성향을 분석했습니다.";
-  }
-}
-
 // AI 매칭 결과를 기반으로 매칭 타입 결정하는 함수
 function getMatchingTypeFromAIResult(
   aiResult: AIRecommendResponse | null
@@ -121,8 +89,8 @@ function getMatchingTypeFromAIResult(
 // 매칭 결과 컴포넌트
 function MatchingResult({
   type,
-  aiResult,
-}: {
+}: //aiResult,
+{
   type: MatchingResultType | null;
   aiResult: AIRecommendResponse | null;
 }) {
@@ -149,7 +117,6 @@ function MatchingResult({
 
   const result = matchingResults[type];
   // AI 매칭 결과가 있으면 분석 이유 정보 사용
-  const analysisReason = aiResult?.data?.analysis_reason;
 
   return (
     <div className="flex flex-col gap-2 items-center">
@@ -171,51 +138,6 @@ function MatchingResult({
         ))}
       </h6>
       {/* AI 분석 결과 표시 */}
-      {analysisReason && (
-        <div className="mt-4 p-4 bg-white rounded-lg border border-gray-200 max-w-sm">
-          <h6 className="text-sm font-semibold text-bk mb-2">
-            AI 분석 결과 *디버깅용
-          </h6>
-
-          {/* 성격 유형에 따른 맞춤형 메시지 */}
-          <div className="mb-3 p-2 rounded-md bg-brand-light/10">
-            <p className="text-xs text-brand font-medium mb-1">
-              매칭 유형:{" "}
-              {getPersonalityTypeLabel(analysisReason.user_personality_type)}
-            </p>
-            <p className="text-xs text-dg">
-              {getPersonalityTypeDescription(
-                analysisReason.user_personality_type
-              )}
-            </p>
-          </div>
-
-          <p className="text-xs text-dg mb-2">
-            <strong>라이프스타일:</strong> {analysisReason.lifestyle_match}
-          </p>
-          <p className="text-xs text-dg mb-2">
-            <strong>경험 수준:</strong> {analysisReason.experience_level}
-          </p>
-
-          {/* 주요 특성 표시 */}
-          {analysisReason.key_traits &&
-            analysisReason.key_traits.length > 0 && (
-              <div className="mt-2">
-                <p className="text-xs text-dg font-medium mb-1">주요 특성:</p>
-                <div className="flex flex-wrap gap-1">
-                  {analysisReason.key_traits.map((trait, index) => (
-                    <span
-                      key={index}
-                      className="px-2 py-1 bg-gray-100 text-xs text-dg rounded-full"
-                    >
-                      {trait}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-        </div>
-      )}
     </div>
   );
 }
@@ -391,9 +313,10 @@ export default function MatchingCompletePage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = React.useState(true);
   const { user } = useAuth();
-  const { aiMatchingResult, clearAIMatchingResult } = useMatchingStepStore(
-    user?.id
-  );
+  const userStore = useMatchingStepStore(user?.id);
+  const anonStore = useMatchingStepStore();
+  const aiMatchingResult =
+    userStore.aiMatchingResult || anonStore.aiMatchingResult;
 
   // AI 매칭 결과를 기반으로 매칭 타입 결정
   const matchingType: MatchingResultType | null =
@@ -446,15 +369,6 @@ export default function MatchingCompletePage() {
               leftIcon={<ArrowClockwise size={16} />}
               variant="primary"
               onClick={() => router.push("/matching")}
-            />
-            {/* 디버깅용 버튼 */}
-            <MiniButton
-              text="결과 초기화"
-              variant="outline"
-              onClick={() => {
-                clearAIMatchingResult();
-                window.location.reload();
-              }}
             />
           </div>
         </div>

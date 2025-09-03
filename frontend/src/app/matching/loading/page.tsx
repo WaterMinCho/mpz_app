@@ -6,13 +6,16 @@ import Image from "next/image";
 
 import { Container } from "@/components/common/Container";
 import { TopBar } from "@/components/common/TopBar";
+import { usePostAnimalMatching } from "@/hooks/mutation/usePostAnimalMatching";
 import { useMatchingStepStore } from "@/lib/stores/matchingStepStore";
+import type { AIRecommendRequest } from "@/types/ai-matching";
+import { useAuth } from "@/components/providers/AuthProvider";
 
 // 매칭 진행 단계별 데이터
 const matchingSteps = [
   {
     message: "당신의 성향을 분석하고 있어요",
-    subtitle: "잠시만 기다려주세요...",
+    subtitle: "잠시만 기다려주세요. 최대 3분이 소요됩니다...",
     image: "/illust/result01.svg",
     imageAlt: "분석 중 일러스트",
   },
@@ -30,83 +33,63 @@ const matchingSteps = [
   },
 ];
 
-// SearchParams를 사용하는 컴포넌트를 별도로 분리
 function MatchingLoadingContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const resultParam = searchParams.get("result"); // 서버에서 매칭 ID 같은 값 전달받는다고 가정
   const [currentStep, setCurrentStep] = useState(0);
-  const { aiMatchingResult } = useMatchingStepStore();
+  const { user } = useAuth();
+  const { setAIMatchingResult } = useMatchingStepStore(user?.id);
 
-  // URL에서 매칭 결과 데이터 가져오기
-  const resultParam = searchParams.get("result");
+  const { mutate, isPending } = usePostAnimalMatching({
+    onSuccess: (res) => {
+      setAIMatchingResult(res);
+      router.replace("/matching/result");
+    },
+    onError: () => {
+      router.replace("/matching/result"); // 실패해도 결과 페이지로 이동
+    },
+  });
 
+  // 페이지 진입 시 요청 실행
   useEffect(() => {
-    // AI 매칭 결과가 이미 있다면 바로 결과 페이지로 이동
-    if (aiMatchingResult) {
-      router.push("/matching/result?type=perfect");
-      return;
+    if (resultParam) {
+      const payload: AIRecommendRequest = {
+        user_id: resultParam, // 실제 API 스펙에 맞게 수정
+        preferences: {},
+        limit: 5,
+      };
+      mutate(payload);
     }
+  }, [resultParam, mutate]);
 
-    const stepInterval = setInterval(() => {
-      setCurrentStep((prev) => {
-        if (prev < matchingSteps.length - 1) {
-          return prev + 1;
-        } else {
-          // 마지막 단계에서도 AI 매칭 결과를 확인
-          clearInterval(stepInterval);
-          setTimeout(() => {
-            if (aiMatchingResult) {
-              router.push("/matching/result?type=perfect");
-            } else if (resultParam) {
-              // 결과 데이터가 있으면 결과 페이지로 전달
-              router.push(
-                `/matching/result?type=perfect&result=${resultParam}`
-              );
-            } else {
-              // AI 매칭 결과가 없어도 결과 페이지로 이동 (기본 데이터 사용)
-              router.push("/matching/result?type=perfect");
-            }
-          }, 3000);
-          return prev;
-        }
-      });
-    }, 1500);
+  // 로딩 단계 애니메이션
+  useEffect(() => {
+    if (!isPending) return;
+    const interval = setInterval(() => {
+      setCurrentStep((prev) =>
+        prev < matchingSteps.length - 1 ? prev + 1 : prev
+      );
+    }, 8000); // 8초마다 다음 단계로
+    return () => clearInterval(interval);
+  }, [isPending]);
 
-    return () => clearInterval(stepInterval);
-  }, [router, resultParam, aiMatchingResult]);
-
-  const currentStepData = matchingSteps[currentStep];
+  const stepData = matchingSteps[currentStep];
 
   return (
     <div className="flex flex-col px-4 py-20 items-center gap-9 flex-1 justify-center">
       {/* 매칭 진행 상태 */}
       <div className="flex flex-col gap-2 items-center">
-        <h6 className="text-brand">매칭 진행 중</h6>
-        <h2 className="text-bk text-center">
-          {currentStepData.message.split("\n").map((line, index) => (
-            <span key={index}>
-              {line}
-              {index < currentStepData.message.split("\n").length - 1 && <br />}
-            </span>
-          ))}
-        </h2>
-        <h6 className="text-dg text-center">
-          {currentStepData.subtitle.split("\n").map((line, index) => (
-            <span key={index}>
-              {line}
-              {index < currentStepData.subtitle.split("\n").length - 1 && (
-                <br />
-              )}
-            </span>
-          ))}
-        </h6>
+        <h6 className="text-brand">매칭 진행 중...</h6>
+        <h2 className="text-bk text-center">{stepData.message}</h2>
+        <h6 className="text-dg text-center">{stepData.subtitle}</h6>
       </div>
 
       {/* 애니메이션 이미지 */}
       <div className="flex justify-center">
         <Image
-          src={currentStepData.image}
-          alt={currentStepData.imageAlt}
+          src={stepData.image}
+          alt={stepData.imageAlt}
           width={330}
           height={240}
           className="object-contain transition-all duration-500 ease-in-out"
@@ -132,12 +115,12 @@ function MatchingLoadingContent() {
   );
 }
 
-// 로딩 상태를 표시하는 fallback 컴포넌트
+// 로딩 상태 fallback
 function LoadingFallback() {
   return (
     <div className="flex flex-col px-4 py-20 items-center gap-9 flex-1 justify-center">
       <div className="flex flex-col gap-2 items-center">
-        <h6 className="text-brand">매칭 진행 중</h6>
+        <h6 className="text-brand">매칭 진행 중...</h6>
         <h2 className="text-bk text-center">당신의 성향을 분석하고 있어요</h2>
         <h6 className="text-dg text-center">잠시만 기다려주세요...</h6>
       </div>
@@ -165,7 +148,6 @@ export default function MatchingLoadingPage() {
   return (
     <Container className="min-h-screen flex flex-col bg-gradient-to-b from-brand-light/10 to-transparent">
       <TopBar variant="variant6" />
-
       <Suspense fallback={<LoadingFallback />}>
         <MatchingLoadingContent />
       </Suspense>
