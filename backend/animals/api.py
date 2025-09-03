@@ -337,16 +337,9 @@ async def get_animal_by_id(request: HttpRequest, animal_id: str):
         try:
             auth_header = request.headers.get('Authorization')
             if auth_header and auth_header.startswith('Bearer '):
-                from api.security import jwt_auth
-                # JWT 토큰 수동 파싱
-                token = auth_header.split(' ')[1]
                 from user import utils
-                payload = utils.validate_access_token(token)
-                if payload:
-                    from user.models import User
-                    user_id = payload.get('user_id')
-                    if user_id:
-                        current_user = await sync_to_async(User.objects.get)(id=user_id)
+                # JWT 토큰 수동 파싱
+                current_user = await utils.decodeJWT(auth_header)
         except Exception:
             # 인증 실패 시 로그인하지 않은 사용자로 처리
             current_user = None
@@ -365,10 +358,19 @@ async def get_animal_by_id(request: HttpRequest, animal_id: str):
                 # 사용자의 메가폰 상태 확인
                 is_megaphoned = False
                 if current_user:
-                    is_megaphoned = AnimalMegaphone.objects.filter(
+                    megaphone_count = AnimalMegaphone.objects.filter(
                         user=current_user,
                         animal=animal
-                    ).exists()
+                    ).count()
+                    is_megaphoned = megaphone_count > 0
+                    print(f"🔍 User {current_user.id} megaphone count for animal {animal.id}: {megaphone_count}")
+                    print(f"🔍 is_megaphoned: {is_megaphoned}")
+                    
+                    # 전체 메가폰 현황도 확인
+                    total_megaphones = AnimalMegaphone.objects.filter(animal=animal).count()
+                    print(f"🔍 Total megaphones for animal {animal.id}: {total_megaphones}")
+                else:
+                    print(f"🔍 No current user found")
                 
                 return animal, images, is_megaphoned
             except Animal.DoesNotExist:
