@@ -6,7 +6,7 @@ import { Container } from "@/components/common/Container";
 import { FixedBottomBar } from "@/components/ui/FixedBottomBar";
 import { FormListItem } from "@/components/ui/FormListItem";
 import { useGetCenterConsents } from "@/hooks/query";
-import { useAdoptionVerificationStore } from "@/lib/stores/adoptionVerificationStore";
+import { useAdoptionVerificationStore } from "@/lib/stores";
 import { useAuth } from "@/components/providers/AuthProvider";
 
 export interface StepProps {
@@ -27,7 +27,6 @@ export function Step6({ onNext }: StepProps) {
   const [agree, setAgree] = React.useState(false);
 
   // 활성화된 동의서들 필터링
-
   const activeConsents =
     consentsData?.filter((consent) => consent.is_active) || [];
 
@@ -63,7 +62,7 @@ export function Step6({ onNext }: StepProps) {
   if (error) {
     return (
       <Container className="min-h-screen pb-28">
-        <h2 className="text-bk mb-6">오류가 발생했습니다</h2>
+        <h2 className="text-bk mb-6">오류가 발생했습니다 !</h2>
         <p className="text-gray-600">
           동의서를 불러올 수 없습니다. 다시 시도해주세요.
         </p>

@@ -6,7 +6,7 @@ import { CustomInput } from "@/components/ui/CustomInput";
 import { Container } from "@/components/common/Container";
 import { FixedBottomBar } from "@/components/ui/FixedBottomBar";
 import { useGetCenterProcedureQuestions } from "@/hooks/query";
-import { useAdoptionVerificationStore } from "@/lib/stores/adoptionVerificationStore";
+import { useAdoptionVerificationStore } from "@/lib/stores";
 import { useAuth } from "@/components/providers/AuthProvider";
 
 export interface StepProps {
