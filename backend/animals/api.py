@@ -57,15 +57,16 @@ async def create_animal(request: HttpRequest, data: AnimalCreateIn):
             # 먼저 owner로 조회 시도
             try:
                 user_center = await sync_to_async(Center.objects.get)(owner=user)
+                center_id = user_center.id
             except Center.DoesNotExist:
                 # owner가 아니면 center 필드로 조회
                 try:
                     user_center = await sync_to_async(lambda: user.center)()
                     if not user_center:
                         raise HttpError(400, "등록된 센터가 없습니다")
+                    center_id = user_center.id
                 except AttributeError:
                     raise HttpError(400, "등록된 센터가 없습니다")
-            center_id = user_center.id
         elif user.user_type == "센터최고관리자":
             # 센터 최고관리자는 자신이 소유한 센터에 등록 가능
             try:
@@ -73,11 +74,14 @@ async def create_animal(request: HttpRequest, data: AnimalCreateIn):
                 center_id = user_center.id
             except Center.DoesNotExist:
                 raise HttpError(400, "등록된 센터가 없습니다")
-        else:
+        elif user.user_type == "훈련사":
             # 훈련사는 센터 ID를 요청 body에서 받아야 함
             center_id = data.center_id
             if not center_id:
                 raise HttpError(400, "센터 ID가 필요합니다")
+        else:
+            # 예상하지 못한 사용자 타입
+            raise HttpError(403, f"동물 등록 권한이 없습니다. 현재 사용자 타입: {user.user_type}")
         
         # 동물 정보 생성 (실제 모델 필드만 사용)
         animal_data = {
@@ -431,7 +435,21 @@ async def update_animal(request: HttpRequest, animal_id: str, data: AnimalUpdate
         
         # 센터 관리자인 경우 자신의 센터 동물인지 확인
         if user.user_type == "센터관리자":
-            raise HttpError(403, "해당 동물에 대한 권한이 없습니다")
+            # 센터 관리자는 자신의 센터 동물만 수정 가능
+            user_center_id = None
+            try:
+                user_center = await sync_to_async(Center.objects.get)(owner=user)
+                user_center_id = user_center.id
+            except Center.DoesNotExist:
+                try:
+                    user_center = await sync_to_async(lambda: user.center)()
+                    if user_center:
+                        user_center_id = user_center.id
+                except AttributeError:
+                    pass
+            
+            if not user_center_id or animal.center_id != user_center_id:
+                raise HttpError(403, "해당 동물에 대한 권한이 없습니다")
         
         # 업데이트할 데이터 준비
         update_data = {}
@@ -615,7 +633,21 @@ async def delete_animal(request: HttpRequest, animal_id: str):
         
         # 센터 관리자인 경우 자신의 센터 동물인지 확인
         if user.user_type == "센터관리자":
-            raise HttpError(403, "해당 동물에 대한 권한이 없습니다")
+            # 센터 관리자는 자신의 센터 동물만 삭제 가능
+            user_center_id = None
+            try:
+                user_center = await sync_to_async(Center.objects.get)(owner=user)
+                user_center_id = user_center.id
+            except Center.DoesNotExist:
+                try:
+                    user_center = await sync_to_async(lambda: user.center)()
+                    if user_center:
+                        user_center_id = user_center.id
+                except AttributeError:
+                    pass
+            
+            if not user_center_id or animal.center_id != user_center_id:
+                raise HttpError(403, "해당 동물에 대한 권한이 없습니다")
         
         # 동물 정보 삭제
         await sync_to_async(animal.delete)()
@@ -658,7 +690,21 @@ async def update_animal_status(request: HttpRequest, animal_id: str, data: Anima
         
         # 센터 관리자인 경우 자신의 센터 동물인지 확인
         if user.user_type == "센터관리자":
-            raise HttpError(403, "해당 동물에 대한 권한이 없습니다")
+            # 센터 관리자는 자신의 센터 동물만 상태 변경 가능
+            user_center_id = None
+            try:
+                user_center = await sync_to_async(Center.objects.get)(owner=user)
+                user_center_id = user_center.id
+            except Center.DoesNotExist:
+                try:
+                    user_center = await sync_to_async(lambda: user.center)()
+                    if user_center:
+                        user_center_id = user_center.id
+                except AttributeError:
+                    pass
+            
+            if not user_center_id or animal.center_id != user_center_id:
+                raise HttpError(403, "해당 동물에 대한 권한이 없습니다")
         
         # 상태 변경 로직
         previous_status = animal.status
@@ -762,13 +808,22 @@ async def get_related_animals_by_distance(
                 basic_training=None,  # Animal 모델에 없는 필드
                 trainer_comment=None,  # Animal 모델에 없는 필드
                 announce_number=related_animal.announce_number,
+                display_notice_number=related_animal.display_notice_number,  # 표시용 공고번호
                 announcement_date=None,  # Animal 모델에 없는 필드
-                found_location=None,  # Animal 모델에 없는 필드
+                found_location=related_animal.found_location,
+                admission_date=related_animal.admission_date.isoformat() if related_animal.admission_date else None,
                 personality=related_animal.personality,
+                megaphone_count=related_animal.megaphone_count,
+                is_megaphoned=False,  # 관련 동물 조회에서는 기본값
                 center_id=str(related_animal.center_id),
                 animal_images=[],  # 빈 배열 임시설정
                 created_at=related_animal.created_at.isoformat(),
                 updated_at=related_animal.updated_at.isoformat(),
+                
+                # 공공데이터 관련 필드
+                is_public_data=related_animal.is_public_data,
+                public_notice_number=related_animal.public_notice_number,
+                comment=related_animal.comment,  # 공공데이터 특이사항 코멘트
             )
             animals_response.append(animal_data)
         
