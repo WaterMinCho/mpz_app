@@ -191,8 +191,8 @@ export function Step7({}: StepProps) {
     );
   }
 
-  // 두 번째 동의서가 없는 경우 (동의서가 1개 이하인 경우)
-  if (activeConsents.length <= 1) {
+  // API 호출 중이거나 두 번째 동의서가 없는 경우 (동의서가 1개 이하인 경우)
+  if (submitMutation.isPending || activeConsents.length <= 1) {
     return (
       <Container className="min-h-screen pb-28">
         <h2 className="text-bk mb-6">입양 신청을 제출하는 중...</h2>

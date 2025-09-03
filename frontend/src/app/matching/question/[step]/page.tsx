@@ -82,7 +82,7 @@ export default function MatchingQuestionPage() {
           </Link>
         }
         right={
-          <Link href="/">
+          <Link href="/list/animal">
             <IconButton
               icon={({ size }) => <X size={size} weight="bold" />}
               size="iconM"
