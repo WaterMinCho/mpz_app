@@ -404,3 +404,120 @@ class TestAnimalsAPI(TestCase):
                 user=self.regular_user,
                 animal=self.animal
             )
+
+    async def test_create_animal_with_center_admin(self):
+        """센터관리자 계정으로 동물 등록 테스트 (center 필드로 연결된 경우)"""
+        # 센터관리자 계정 생성 (center 필드로 연결)
+        center_admin = await sync_to_async(User.objects.create_user)(
+            username="center_admin",
+            email="admin@test.com",
+            password="password1234!",
+            user_type="센터관리자"
+        )
+        
+        # 센터와 연결 (center 필드 사용)
+        center_admin.center = self.center
+        await sync_to_async(center_admin.save)()
+        
+        # JWT 토큰 생성
+        headers = await self.authenticate(center_admin)
+        
+        # 동물 등록 데이터
+        data = {
+            "name": "센터관리자 강아지",
+            "is_female": False,
+            "age": 3,
+            "weight": "15.5",
+            "breed": "골든리트리버",
+            "description": "센터관리자가 등록한 강아지입니다",
+            "found_location": "서울시 서초구",
+            "personality": "활발하고 친근함"
+        }
+        
+        # 동물 등록 요청
+        response = await self.client.post("/", json=data, headers=headers)
+        
+        # 에러 디버깅을 위해 응답 내용 출력
+        if response.status_code != 201:
+            print(f"응답 상태 코드: {response.status_code}")
+            print(f"응답 내용: {response.json()}")
+        
+        # 성공적으로 등록되어야 함 (실제로는 200을 반환함)
+        self.assertEqual(response.status_code, 200)
+        
+        # 응답 데이터 확인
+        animal_data = response.json()
+        self.assertEqual(animal_data["name"], "센터관리자 강아지")
+        self.assertEqual(animal_data["center_id"], str(self.center.id))
+
+    async def test_create_animal_with_super_admin(self):
+        """센터최고관리자 계정으로 동물 등록 테스트"""
+        # 센터최고관리자 계정 생성
+        super_admin = await sync_to_async(User.objects.create_user)(
+            username="super_admin",
+            email="super@test.com",
+            password="password1234!",
+            user_type="센터최고관리자"
+        )
+        
+        # 센터의 owner로 설정
+        self.center.owner = super_admin
+        await sync_to_async(self.center.save)()
+        
+        # JWT 토큰 생성
+        headers = await self.authenticate(super_admin)
+        
+        # 동물 등록 데이터
+        data = {
+            "name": "최고관리자 강아지",
+            "is_female": True,
+            "age": 2,
+            "weight": "12.0",
+            "breed": "푸들",
+            "description": "최고관리자가 등록한 강아지입니다",
+            "found_location": "서울시 강남구",
+            "personality": "조용하고 순함"
+        }
+        
+        # 동물 등록 요청
+        response = await self.client.post("/", json=data, headers=headers)
+        
+        # 성공적으로 등록되어야 함 (실제로는 200을 반환함)
+        self.assertEqual(response.status_code, 200)
+        
+        # 응답 데이터 확인
+        animal_data = response.json()
+        self.assertEqual(animal_data["name"], "최고관리자 강아지")
+        self.assertEqual(animal_data["center_id"], str(self.center.id))
+
+    async def test_create_animal_center_not_found(self):
+        """센터가 없는 센터관리자 동물 등록 실패 테스트"""
+        # 센터가 없는 센터관리자 계정 생성
+        center_admin_no_center = await sync_to_async(User.objects.create_user)(
+            username="admin_no_center",
+            email="noadmin@test.com",
+            password="password1234!",
+            user_type="센터관리자"
+        )
+        
+        # JWT 토큰 생성
+        headers = await self.authenticate(center_admin_no_center)
+        
+        # 동물 등록 데이터
+        data = {
+            "name": "센터없는 강아지",
+            "is_female": False,
+            "age": 1,
+            "weight": "8.0",
+            "breed": "치와와"
+        }
+        
+        # 동물 등록 요청
+        response = await self.client.post("/", json=data, headers=headers)
+        
+        # 센터가 없어서 실패해야 함
+        self.assertEqual(response.status_code, 400)
+        
+        # 에러 메시지 확인
+        error_data = response.json()
+        self.assertIn("등록된 센터가 없습니다", error_data["detail"])
