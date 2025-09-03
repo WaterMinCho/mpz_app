@@ -2,14 +2,14 @@
 
 import React from "react";
 import Image from "next/image";
-import { X, ShareNetwork, ArrowClockwise } from "@phosphor-icons/react";
+import { X, ArrowClockwise } from "@phosphor-icons/react";
 import { useRouter } from "next/navigation";
 
 import { IconButton } from "@/components/ui/IconButton";
 import { TopBar } from "@/components/common/TopBar";
 import { Container } from "@/components/common/Container";
 import { PetCard } from "@/components/ui/PetCard";
-import { BigButton } from "@/components/ui/BigButton";
+// import { BigButton } from "@/components/ui/BigButton";
 import { MiniButton } from "@/components/ui/MiniButton";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useMatchingStepStore } from "@/lib/stores/matchingStepStore";
@@ -341,13 +341,14 @@ export default function MatchingCompletePage() {
         />
 
         <div className="flex flex-col gap-3 w-full mt-8">
-          <BigButton
+          {/* TODO 공유 기능 추가 필요 - 현재 '내 결과'만 접근 가능 */}
+          {/* <BigButton
             variant="variant5"
             left={<ShareNetwork size={20} />}
             className="w-full py-4"
           >
             결과 공유하기
-          </BigButton>
+          </BigButton> */}
           <div className="flex justify-center">
             <MiniButton
               text="다시 해보기"
