@@ -6,6 +6,7 @@ import { useRouter, useParams } from "next/navigation";
 import { matchingStepConfig } from "@/lib/matchingStepConfig";
 import { X, ArrowLeft } from "@phosphor-icons/react";
 import { useMatchingStepStore } from "@/lib/stores/matchingStepStore";
+import { useAuth } from "@/components/providers/AuthProvider";
 
 import { TopBar } from "@/components/common/TopBar";
 import { Container } from "@/components/common/Container";
@@ -26,9 +27,10 @@ export default function MatchingQuestionPage() {
   const router = useRouter();
   const { step } = useParams();
   const currentStep = Number(step);
+  const { user } = useAuth();
 
   const { setCurrentStep, markStepCompleted, goToNextStep, canGoToStep } =
-    useMatchingStepStore();
+    useMatchingStepStore(user?.id);
 
   useEffect(() => {
     if (currentStep && canGoToStep(currentStep)) {

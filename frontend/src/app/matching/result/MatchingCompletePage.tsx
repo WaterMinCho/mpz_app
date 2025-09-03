@@ -20,8 +20,8 @@ import { AIRecommendResponse } from "@/types/ai-matching";
 type MatchingResultType =
   | "perfect" // 완벽한 매칭
   | "good" // 좋은 매칭
-  | "moderate" // 적당한 매칭
-  | "silent"; // 조용한
+  | "silent" // 조용한
+  | "unsuitable"; // 부적합한 매칭
 
 // 매칭 결과별 데이터
 const matchingResults = {
@@ -33,18 +33,18 @@ const matchingResults = {
     imageAlt: "결과1 일러스트",
   },
   good: {
-    message: "반려동물과의 삶은 소중하지만 \n쉬운 일만은 아니에요.",
-    subtitle:
-      "배변훈련, 건강관리, 예상치 못한 병원비까지...\n함께 잘 할 수 있을까?\n스스로에게 한번 더 물어봐주세요\n충분히 고민해보고, 여유가 생겼을 때 다시 만나는 것도 괜찮아요.",
-    image: "/illust/result02.svg",
-    imageAlt: "결과2 일러스트",
-  },
-  moderate: {
     message: "당신의 에너지가\n누군가에게 큰 선물이 될 수 있어요.",
     subtitle:
       "함께 달리고, 함께 배우고, \n매일을 모험처럼 살아가는 걸 좋아하는 아이가 있어요.\n활기찬 하루를 함께 나눌 친구를 소개해드릴게요.",
-    image: "/illust/result03.svg",
-    imageAlt: "결과3 일러스트",
+    image: "/illust/result02.svg",
+    imageAlt: "결과2 일러스트",
+  },
+  unsuitable: {
+    message: "반려동물과의 삶은 소중하지만 \n쉬운 일만은 아니에요.",
+    subtitle:
+      "배변훈련, 건강관리, 예상치 못한 병원비까지...\n함께 잘 할 수 있을까? 스스로에게 한번 더 물어봐주세요\n충분히 고민해보고, 여유가 생겼을 때 다시 만나는 것도 괜찮아요.",
+    image: "/illust/result02.svg",
+    imageAlt: "결과2 일러스트",
   },
   silent: {
     message: "조용한 일상을 즐기는 당신\n그리고 그런 아이들이 있어요.",
@@ -63,21 +63,59 @@ const loadingImages = [
   "/illust/result04.svg",
 ];
 
-// 매칭된 동물 목록 데이터는 컴포넌트 내에서 동적으로 가져옴
+// 성격 유형별 라벨 반환 함수
+function getPersonalityTypeLabel(personalityType: string): string {
+  switch (personalityType) {
+    case "perfect":
+      return "완벽한 매칭";
+    case "good":
+      return "좋은 매칭";
+    case "silent":
+      return "조용한 매칭";
+    case "unsuitable":
+      return "신중한 검토 필요";
+    default:
+      return "매칭 분석";
+  }
+}
+
+// 성격 유형별 설명 반환 함수
+function getPersonalityTypeDescription(personalityType: string): string {
+  switch (personalityType) {
+    case "perfect":
+      return "당신은 반려동물과 완벽한 조화를 이룰 수 있는 이상적인 보호자입니다.";
+    case "good":
+      return "당신의 활기찬 에너지가 반려동물에게 큰 도움이 될 것입니다.";
+    case "silent":
+      return "조용하고 차분한 환경을 선호하는 당신과 잘 맞는 아이들이 있습니다.";
+    case "unsuitable":
+      return "반려동물 입양 전 충분한 준비와 고려가 필요합니다.";
+    default:
+      return "AI가 당신의 성향을 분석했습니다.";
+  }
+}
 
 // AI 매칭 결과를 기반으로 매칭 타입 결정하는 함수
 function getMatchingTypeFromAIResult(
   aiResult: AIRecommendResponse | null
-): MatchingResultType {
-  if (!aiResult?.data?.matching_report) return "perfect";
+): MatchingResultType | null {
+  if (!aiResult?.data?.analysis_reason?.user_personality_type) return null;
 
-  const { confidence_level, recommended_count } = aiResult.data.matching_report;
+  const personalityType = aiResult.data.analysis_reason.user_personality_type;
 
-  // 신뢰도와 추천 수를 기반으로 매칭 타입 결정
-  if (confidence_level === "높음" && recommended_count >= 4) return "perfect";
-  if (confidence_level === "높음" && recommended_count >= 2) return "good";
-  if (confidence_level === "보통" && recommended_count >= 2) return "moderate";
-  return "silent";
+  // user_personality_type에 따라 매칭 타입 결정
+  switch (personalityType) {
+    case "perfect":
+      return "perfect";
+    case "good":
+      return "good";
+    case "silent":
+      return "silent";
+    case "unsuitable":
+      return "unsuitable";
+    default:
+      return null; // AI 결과가 없으면 null 반환
+  }
 }
 
 // 매칭 결과 컴포넌트
@@ -85,12 +123,31 @@ function MatchingResult({
   type,
   aiResult,
 }: {
-  type: MatchingResultType;
+  type: MatchingResultType | null;
   aiResult: AIRecommendResponse | null;
 }) {
   const { user } = useAuth();
-  const result = matchingResults[type];
 
+  // 매칭 타입이 없으면 기본 메시지 표시
+  if (!type) {
+    return (
+      <div className="flex flex-col gap-2 items-center">
+        <h6 className="text-brand">{user?.name} 님의 매칭 결과</h6>
+        <h2 className="text-bk text-center">
+          매칭 분석을 위해
+          <br />
+          성향 테스트를 완료해주세요
+        </h2>
+        <h6 className="text-dg text-center">
+          더 정확한 매칭을 위해
+          <br />
+          성향 테스트 결과가 필요합니다
+        </h6>
+      </div>
+    );
+  }
+
+  const result = matchingResults[type];
   // AI 매칭 결과가 있으면 분석 이유 정보 사용
   const analysisReason = aiResult?.data?.analysis_reason;
 
@@ -113,19 +170,50 @@ function MatchingResult({
           </span>
         ))}
       </h6>
-      {/* 디버깅용 */}
+      {/* AI 분석 결과 표시 */}
       {analysisReason && (
         <div className="mt-4 p-4 bg-white rounded-lg border border-gray-200 max-w-sm">
-          <h6 className="text-sm font-semibold text-bk mb-2">AI 분석 결과</h6>
-          <p className="text-xs text-dg mb-2">
-            <strong>성격 유형:</strong> {analysisReason.user_personality_type}
-          </p>
+          <h6 className="text-sm font-semibold text-bk mb-2">
+            AI 분석 결과 *디버깅용
+          </h6>
+
+          {/* 성격 유형에 따른 맞춤형 메시지 */}
+          <div className="mb-3 p-2 rounded-md bg-brand-light/10">
+            <p className="text-xs text-brand font-medium mb-1">
+              매칭 유형:{" "}
+              {getPersonalityTypeLabel(analysisReason.user_personality_type)}
+            </p>
+            <p className="text-xs text-dg">
+              {getPersonalityTypeDescription(
+                analysisReason.user_personality_type
+              )}
+            </p>
+          </div>
+
           <p className="text-xs text-dg mb-2">
             <strong>라이프스타일:</strong> {analysisReason.lifestyle_match}
           </p>
-          <p className="text-xs text-dg">
+          <p className="text-xs text-dg mb-2">
             <strong>경험 수준:</strong> {analysisReason.experience_level}
           </p>
+
+          {/* 주요 특성 표시 */}
+          {analysisReason.key_traits &&
+            analysisReason.key_traits.length > 0 && (
+              <div className="mt-2">
+                <p className="text-xs text-dg font-medium mb-1">주요 특성:</p>
+                <div className="flex flex-wrap gap-1">
+                  {analysisReason.key_traits.map((trait, index) => (
+                    <span
+                      key={index}
+                      className="px-2 py-1 bg-gray-100 text-xs text-dg rounded-full"
+                    >
+                      {trait}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
         </div>
       )}
     </div>
@@ -258,10 +346,10 @@ function MatchingResultImage({
   type,
   isLoading = false,
 }: {
-  type: MatchingResultType;
+  type: MatchingResultType | null;
   isLoading?: boolean;
 }) {
-  const result = matchingResults[type];
+  const result = type ? matchingResults[type] : null;
   const [currentImageIndex, setCurrentImageIndex] = React.useState(0);
 
   React.useEffect(() => {
@@ -280,10 +368,10 @@ function MatchingResultImage({
 
   const currentImage = isLoading
     ? loadingImages[currentImageIndex]
-    : result.image;
+    : result?.image || "/illust/matching.svg"; // 기본 이미지
   const currentAlt = isLoading
     ? `로딩 중 일러스트 ${currentImageIndex + 1}`
-    : result.imageAlt;
+    : result?.imageAlt || "매칭 대기 이미지";
 
   return (
     <div className="flex justify-center">
@@ -302,10 +390,13 @@ function MatchingResultImage({
 export default function MatchingCompletePage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = React.useState(true);
-  const { aiMatchingResult } = useMatchingStepStore();
+  const { user } = useAuth();
+  const { aiMatchingResult, clearAIMatchingResult } = useMatchingStepStore(
+    user?.id
+  );
 
   // AI 매칭 결과를 기반으로 매칭 타입 결정
-  const matchingType: MatchingResultType =
+  const matchingType: MatchingResultType | null =
     getMatchingTypeFromAIResult(aiMatchingResult);
 
   React.useEffect(() => {
@@ -349,12 +440,21 @@ export default function MatchingCompletePage() {
           >
             결과 공유하기
           </BigButton> */}
-          <div className="flex justify-center">
+          <div className="flex justify-center gap-2">
             <MiniButton
               text="다시 해보기"
               leftIcon={<ArrowClockwise size={16} />}
               variant="primary"
               onClick={() => router.push("/matching")}
+            />
+            {/* 디버깅용 버튼 */}
+            <MiniButton
+              text="결과 초기화"
+              variant="outline"
+              onClick={() => {
+                clearAIMatchingResult();
+                window.location.reload();
+              }}
             />
           </div>
         </div>
