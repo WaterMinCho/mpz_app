@@ -58,9 +58,9 @@ export function SafariLoginGuide({ onRetry, onClose }: SafariLoginGuideProps) {
               </h4>
               <ol className="text-sm space-y-1 text-gray-600">
                 <li>1. 설정 앱 → Safari</li>
-                <li>2. '개인정보 보호 및 보안' 섹션</li>
-                <li>3. '모든 쿠키 차단' → OFF</li>
-                <li>4. '크로스 사이트 추적 방지' → OFF</li>
+                <li>2. &apos;개인정보 보호 및 보안&apos; 섹션</li>
+                <li>3. &apos;모든 쿠키 차단&apos; → OFF</li>
+                <li>4. &apos;크로스 사이트 추적 방지&apos; → OFF</li>
               </ol>
             </div>
 
@@ -68,9 +68,9 @@ export function SafariLoginGuide({ onRetry, onClose }: SafariLoginGuideProps) {
               <h4 className="font-semibold text-sm mb-2">🖥️ Mac Safari 설정</h4>
               <ol className="text-sm space-y-1 text-gray-600">
                 <li>1. Safari → 설정...</li>
-                <li>2. '개인정보 보호' 탭</li>
-                <li>3. '크로스 사이트 추적 방지' 체크 해제</li>
-                <li>4. '웹사이트 데이터 관리' → 삭제</li>
+                <li>2. &apos;개인정보 보호&apos; 탭</li>
+                <li>3. &apos;크로스 사이트 추적 방지&apos; 체크 해제</li>
+                <li>4. &apos;웹사이트 데이터 관리&apos; → 삭제</li>
               </ol>
             </div>
 
