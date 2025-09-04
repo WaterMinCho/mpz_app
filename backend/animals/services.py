@@ -52,7 +52,7 @@ class PublicDataService:
                     params['state'] = state
                 
                 async with httpx.AsyncClient() as client:
-                    response = await client.get(f"{self.BASE_URL}/abandonmentPublicService/abandonmentPublic", params=params)
+                    response = await client.get(f"{self.BASE_URL}/abandonmentPublicService_v2/abandonmentPublic", params=params)
                     
                     # 500 에러 처리
                     if response.status_code == 500:
