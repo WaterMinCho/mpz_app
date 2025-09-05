@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import { QueryProvider } from "@/components/providers/QueryProvider";
 import { AuthProvider } from "@/components/providers/AuthProvider";
 import { KakaoProvider } from "@/components/providers/KakaoProvider";
+import { SocketProvider } from "@/components/providers/SocketProvider";
 import KakaoMapScript from "@/components/common/KakaoMapScript";
 import DaumPostcodeScript from "@/components/common/DaumPostcodeScript";
 import "./globals.css";
@@ -26,7 +27,9 @@ export default function RootLayout({
         <KakaoProvider />
         <KakaoMapScript />
         <QueryProvider>
-          <AuthProvider>{children}</AuthProvider>
+          <AuthProvider>
+            <SocketProvider>{children}</SocketProvider>
+          </AuthProvider>
         </QueryProvider>
       </body>
     </html>
