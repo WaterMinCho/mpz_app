@@ -117,21 +117,7 @@ export default function WritingPage({
             <BigButton
               variant="primary"
               onClick={() => {
-                const contractData = {
-                  adoptionId: id,
-                  animalName: adoption.animal_name,
-                  centerName: adoption.center_name,
-                  contractContent:
-                    adoptionDetail.contract?.contract_content ||
-                    "계약서 내용이 준비되지 않았습니다.",
-                  guidelinesContent:
-                    adoptionDetail.contract?.guidelines_content ||
-                    "동의서 내용이 준비되지 않았습니다.",
-                };
-                const encodedData = encodeURIComponent(
-                  JSON.stringify(contractData)
-                );
-                router.push(`/adoption/contract?data=${encodedData}`);
+                router.push(`/adoption/contract?adoptionId=${id}`);
               }}
               className="w-full py-4 my-3"
             >

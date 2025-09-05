@@ -272,20 +272,7 @@ export default function AdoptionCompletePage({
               <BigButton
                 variant="variant5"
                 onClick={() => {
-                  const contractData = {
-                    adoptionId: id,
-                    animalName: adoption.animal_name,
-                    centerName: adoption.center_name,
-                    contractContent:
-                      adoptionDetail.contract?.contract_content ||
-                      "계약서 내용이 준비되지 않았습니다.",
-                  };
-                  const encodedData = encodeURIComponent(
-                    JSON.stringify(contractData)
-                  );
-                  router.push(
-                    `/my/adoption/${id}/contract?data=${encodedData}`
-                  );
+                  router.push(`/adoption/contract?adoptionId=${id}`);
                 }}
                 className="w-full py-4 my-3"
               >
