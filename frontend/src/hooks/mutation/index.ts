@@ -11,7 +11,6 @@ export { useToggleAnimalFavorite } from "./useToggleAnimalFavorite";
 export { useToggleAnimalRecommend } from "./useToggleAnimalRecommend";
 export { useToggleCenterFavorite } from "./useToggleCenterFavorite";
 export { usePostAnimalMatching } from "./usePostAnimalMatching";
-
 export { useCreateFeedback } from "./useCreateFeedback";
 export { useCreateAnimal } from "./useCreateAnimal";
 export { useUploadImages } from "./useUploadImages";
@@ -34,6 +33,9 @@ export { useWithdrawAdoption } from "./useWithdrawAdoption";
 export { useSubmitAdoptionApplication } from "./useSubmitAdoptionApplication";
 export { useMarkNotificationRead } from "./useMarkNotificationRead";
 export { useMarkAllNotificationsRead } from "./useMarkAllNotificationsRead";
-export { useCreateNotification } from "./useCreateNotification";
-export { useRegisterPushToken } from "./useRegisterPushToken";
-export { useDeletePushToken } from "./useDeletePushToken";
+export {
+  useRegisterPushToken,
+  useDeletePushToken,
+  useWebPushNotification,
+  detectPlatform,
+} from "./usePushToken";
