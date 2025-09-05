@@ -61,6 +61,7 @@ export default function VeriticationPage() {
           <IconButton
             icon={({ size }) => <X size={size} weight="bold" />}
             size="iconM"
+            onClick={() => router.push("/list/animal")}
           />
         }
       />
