@@ -322,7 +322,8 @@ async def get_center_animals(request: HttpRequest, filters: CenterAnimalsQueryIn
                     color=getattr(animal, 'color', None),
                     breed=animal.breed,
                     description=animal.description,
-                    status=animal.status,
+                    protection_status=animal.protection_status,
+                    adoption_status=animal.adoption_status,
                     waiting_days=0,  # 기본값
                     activity_level=getattr(animal, 'activity_level', None),
                     sensitivity=getattr(animal, 'sensitivity', None),
