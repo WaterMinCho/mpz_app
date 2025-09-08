@@ -893,7 +893,8 @@ async def get_related_animals_by_distance(
                 color=None,  # Animal 모델에 없는 필드
                 breed=related_animal.breed,
                 description=related_animal.description,
-                status=related_animal.status,
+                protection_status=related_animal.protection_status,
+                adoption_status=related_animal.adoption_status,
                 waiting_days=0,
                 activity_level=None,  # Animal 모델에 없는 필드
                 sensitivity=None,  # Animal 모델에 없는 필드
