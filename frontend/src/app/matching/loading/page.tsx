@@ -192,7 +192,7 @@ export default function MatchingLoadingPage() {
   return (
     <Container className="min-h-screen flex flex-col bg-gradient-to-b from-brand-light/10 to-transparent">
       <TopBar
-        variant="variant6"
+        variant="primary"
         right={
           <IconButton
             icon={({ size }) => <X size={size} weight="bold" />}
