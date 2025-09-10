@@ -1,3 +1,5 @@
+import { AIRecommendResponse } from "@/types/ai-matching";
+
 // iOS Safari 호환성을 위한 스토리지 유틸리티 함수들
 
 /**
@@ -208,7 +210,7 @@ export const isPrivateMode = async (): Promise<boolean> => {
  */
 export const checkMatchingCompletion = (): {
   isCompleted: boolean;
-  result: any | null;
+  result: AIRecommendResponse | null;
   error: boolean;
 } => {
   const isCompleted = safeGetItem("matchingCompleted") === "true";

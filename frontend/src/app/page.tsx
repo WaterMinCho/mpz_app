@@ -16,6 +16,7 @@ import { useGetBanners } from "@/hooks/query/useGetBanners";
 import { useMatchingStepStore } from "@/lib/stores/matchingStepStore";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { RawAnimalResponse } from "@/types/animal";
+import { AIRecommendResponse } from "@/types/ai-matching";
 import {
   checkMatchingCompletion,
   clearMatchingData,
@@ -64,7 +65,7 @@ export default function Home() {
 
     if (matchingStatus.isCompleted && matchingStatus.result) {
       // 매칭 결과를 스토어에 저장
-      setAIMatchingResult(matchingStatus.result);
+      setAIMatchingResult(matchingStatus.result as AIRecommendResponse);
       setShowMatchingNotification(true);
 
       // 5초 후 알림 자동 숨김
