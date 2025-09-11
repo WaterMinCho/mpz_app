@@ -123,9 +123,7 @@ export default function CommunityUploadPage() {
         protection_status: "보호중",
         adoption_status: "입양가능",
         centerId: favoriteAnimal.centerId,
-        animalImages: [
-          { id: "1", imageUrl: "/img/dummyImg.png", orderIndex: 1 },
-        ],
+        animalImages: [],
         foundLocation: "위치 정보 확인 불가", // 기본 지역 설정
       };
     }) as PetCardAnimal[];

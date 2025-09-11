@@ -43,9 +43,10 @@ export default function Home() {
     isLoading,
     error,
   } = useGetAnimals({
-    limit: 100,
-    sortBy: "admission_date",
-    sortOrder: "desc",
+    page_size: 100,
+    sort_by: "admission_date",
+    sort_order: "desc",
+    region: selectedLocation || undefined,
   });
 
   const animals: RawAnimalResponse[] =

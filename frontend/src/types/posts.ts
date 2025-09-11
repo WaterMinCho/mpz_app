@@ -4,8 +4,7 @@ export interface ApiPostResponse {
   title: string;
   content: string;
   user_id: string;
-  animal_id: string;
-  adoption_id: string;
+  animal_id: string | null;
   content_tags: Record<string, unknown>;
   like_count: number;
   comment_count: number;
@@ -17,13 +16,11 @@ export interface ApiPostResponse {
   user_image: string;
   tags: Array<{
     id: string;
-    postId: string;
-    tagName: string;
-    createdAt: string;
+    tag_name: string;
+    created_at: string;
   }>;
   images: Array<{
     id: string;
-    postId: string;
     image_url: string;
     order_index: number;
     created_at: string;
@@ -90,11 +87,13 @@ export interface PostDetailResponse {
 
 // 게시글 목록 조회 파라미터
 export interface GetPostsParams {
+  user_id?: string;
+  is_all_access?: boolean;
+  sort_by?: string;
   page?: number;
   page_size?: number;
   search?: string;
   tags?: string[];
-  userId?: string;
   animalId?: string;
   adoptionId?: string;
 }

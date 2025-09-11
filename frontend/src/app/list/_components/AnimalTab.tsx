@@ -1,22 +1,17 @@
 "use client";
 
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useEffect, useMemo, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
-import { PetCard, PetCardSkeleton, FilterChip } from "@/components/ui";
+import { PetCard, PetCardSkeleton } from "@/components/ui";
 import { useGetAnimals } from "@/hooks/query/useGetAnimals";
-import {
-  transformRawAnimalToPetCard,
-  RawAnimalResponse,
-  GetAnimalsParams,
-} from "@/types/animal";
+import { transformRawAnimalToPetCard, GetAnimalsParams } from "@/types/animal";
 
 const ITEMS_PER_PAGE = 20;
 
 function AnimalTab() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [allAnimals, setAllAnimals] = useState<RawAnimalResponse[]>([]);
 
   // URL 파라미터에서 필터 상태 읽기
   const filters = useMemo(() => {
@@ -36,9 +31,9 @@ function AnimalTab() {
   // 필터 파라미터를 API 요청에 맞게 변환
   const apiParams = useMemo(() => {
     const params: GetAnimalsParams = {
-      limit: ITEMS_PER_PAGE,
-      sortBy: "waiting_days", // 오래기다린순 정렬
-      sortOrder: "desc",
+      page_size: ITEMS_PER_PAGE,
+      sort_by: "created_at", // 기본 정렬
+      sort_order: "desc",
     };
 
     // 품종 필터
@@ -48,123 +43,48 @@ function AnimalTab() {
 
     // 체중 필터 (weights 배열의 첫 번째 값 사용)
     if (filters.weights.length > 0) {
-      const weightMap: {
-        [key: string]: "10kg_under" | "25kg_under" | "over_25kg";
-      } = {
-        "10kg 이하": "10kg_under",
-        "25kg 이하": "25kg_under",
-        "그 이상": "over_25kg",
-      };
-      const weightValue = weightMap[filters.weights[0]];
-      if (weightValue) {
-        params.weight = weightValue;
+      const weightValue = filters.weights[0];
+      if (weightValue === "10kg 이하") {
+        params.weight_max = 10;
+      } else if (weightValue === "25kg 이하") {
+        params.weight_max = 25;
+      } else if (weightValue === "그 이상") {
+        params.weight_min = 25;
       }
     }
 
     // 지역 필터 (regions 배열의 첫 번째 값 사용)
     if (filters.regions.length > 0) {
-      const regionMap: {
-        [key: string]:
-          | "서울"
-          | "부산"
-          | "대구"
-          | "인천"
-          | "광주"
-          | "대전"
-          | "울산"
-          | "세종"
-          | "경기"
-          | "강원"
-          | "충북"
-          | "충남"
-          | "전북"
-          | "전남"
-          | "경북"
-          | "경남"
-          | "제주";
-      } = {
-        서울: "서울",
-        부산: "부산",
-        대구: "대구",
-        인천: "인천",
-        광주: "광주",
-        대전: "대전",
-        울산: "울산",
-        세종: "세종",
-        경기: "경기",
-        강원: "강원",
-        충북: "충북",
-        충남: "충남",
-        전북: "전북",
-        전남: "전남",
-        경북: "경북",
-        경남: "경남",
-        제주: "제주",
-      };
-      const regionValue = regionMap[filters.regions[0]];
-      if (regionValue) {
-        params.region = regionValue;
-      }
+      params.region = filters.regions[0];
     }
 
-    // 나이 필터 (ages 배열의 첫 번째 값 사용)
+    // 나이 필터 (ages 배열의 첫 번째 값 사용) - 개월 단위로 변환
     if (filters.ages.length > 0) {
-      const ageMap: { [key: string]: "2_under" | "7_under" | "over_7" } = {
-        "2살 이하": "2_under",
-        "7살 이하": "7_under",
-        "그 이상": "over_7",
-      };
-      const ageValue = ageMap[filters.ages[0]];
-      if (ageValue) {
-        params.age = ageValue;
+      const ageValue = filters.ages[0];
+      if (ageValue === "2살 이하") {
+        params.age_max = 24; // 2년 = 24개월
+      } else if (ageValue === "7살 이하") {
+        params.age_max = 84; // 7년 = 84개월
+      } else if (ageValue === "그 이상") {
+        params.age_min = 84; // 7년 이상
       }
     }
 
     // 성별 필터 (genders 배열의 첫 번째 값 사용)
     if (filters.genders.length > 0) {
-      const genderMap: { [key: string]: "male" | "female" } = {
-        남아: "male",
-        여아: "female",
-      };
-      const genderValue = genderMap[filters.genders[0]];
-      if (genderValue) {
-        params.gender = genderValue;
+      const genderValue = filters.genders[0];
+      if (genderValue === "남아") {
+        params.gender = "male";
+      } else if (genderValue === "여아") {
+        params.gender = "female";
       }
     }
 
     // 보호상태 필터 (protectionStatus 배열의 첫 번째 값 사용)
     if (filters.protectionStatus.length > 0) {
-      const protectionStatusMap: {
-        [key: string]: "보호중" | "안락사" | "자연사" | "반환";
-      } = {
-        보호중: "보호중",
-        안락사: "안락사",
-        자연사: "자연사",
-        반환: "반환",
-        무지개다리: "안락사", // 무지개다리는 안락사로 매핑
-      };
-
-      const protectionStatusValue =
-        protectionStatusMap[filters.protectionStatus[0]];
-      if (protectionStatusValue) {
-        params.protection_status = protectionStatusValue;
-      }
-
-      // 입양 관련 필터를 별도 처리
-      const adoptionStatusMap: {
-        [key: string]: "입양가능" | "입양진행중" | "입양완료" | "입양불가";
-      } = {
-        입양가능: "입양가능",
-        입양진행중: "입양진행중",
-        입양완료: "입양완료",
-        입양불가: "입양불가",
-      };
-
-      const adoptionStatusValue =
-        adoptionStatusMap[filters.protectionStatus[0]];
-      if (adoptionStatusValue) {
-        params.adoption_status = adoptionStatusValue;
-      }
+      const statusValue = filters.protectionStatus[0];
+      // 백엔드 API는 status 하나의 필드로 처리
+      params.status = statusValue as GetAnimalsParams["status"];
     }
 
     // 전문가 의견 필터
@@ -172,7 +92,7 @@ function AnimalTab() {
       filters.expertOpinion.length > 0 &&
       filters.expertOpinion[0] === "포함"
     ) {
-      params.hasTrainerComment = "true";
+      params.has_trainer_comment = "true";
     }
 
     return params;
@@ -188,17 +108,22 @@ function AnimalTab() {
     isFetchingNextPage,
   } = useGetAnimals(apiParams);
 
-  // 데이터가 로드되면 상태 업데이트
+  // 필터가 변경될 때 스크롤 위치 초기화
   useEffect(() => {
-    if (data) {
-      const allAnimalsData = data.pages
-        .flatMap((page) => {
-          // API 응답 구조에 따라 data 또는 animals 필드에서 데이터 추출
-          return page.data || page.animals || [];
-        })
-        .filter((animal) => animal && typeof animal === "object");
-      setAllAnimals(allAnimalsData);
-    }
+    window.scrollTo(0, 0);
+  }, [apiParams]);
+
+  // React Query 데이터에서 직접 동물 목록 추출
+  const allAnimals = useMemo(() => {
+    if (!data) return [];
+    const result = data.pages
+      .flatMap((page) => {
+        // 백엔드 CustomPageNumberPagination 응답 구조에 맞게 data 필드에서 추출
+        return page.data || [];
+      })
+      .filter((animal) => animal && typeof animal === "object");
+
+    return result;
   }, [data]);
 
   const loadMoreAnimals = useCallback(() => {
@@ -222,7 +147,8 @@ function AnimalTab() {
         const documentHeight = document.documentElement.scrollHeight;
 
         // 페이지 하단에서 800px 이내에 도달하면 다음 페이지 로드
-        if (scrollTop + windowHeight >= documentHeight - 800) {
+        const isNearBottom = scrollTop + windowHeight >= documentHeight - 600;
+        if (isNearBottom) {
           loadMoreAnimals();
         }
       }, 100);
@@ -253,32 +179,6 @@ function AnimalTab() {
     const targetUrl = queryString ? `?${queryString}` : "";
     router.push(`/list/animal${targetUrl}`, { scroll: false });
   }, [searchParams, router]);
-
-  // 필터 제거 함수
-  const handleRemoveFilter = useCallback(
-    (filterType: string, value: string) => {
-      const params = new URLSearchParams(searchParams.toString());
-
-      if (filterType === "breed") {
-        params.delete("breed");
-      } else {
-        const currentValues =
-          params.get(filterType)?.split(",").filter(Boolean) || [];
-        const newValues = currentValues.filter((v) => v !== value);
-
-        if (newValues.length > 0) {
-          params.set(filterType, newValues.join(","));
-        } else {
-          params.delete(filterType);
-        }
-      }
-
-      const queryString = params.toString();
-      const targetUrl = queryString ? `?${queryString}` : "";
-      router.push(`/list/animal${targetUrl}`, { scroll: false });
-    },
-    [searchParams, router]
-  );
 
   // 현재 적용된 필터가 있는지 확인
   const hasActiveFilters = useMemo(() => {
@@ -336,63 +236,10 @@ function AnimalTab() {
       {hasActiveFilters && (
         <div className="mx-4 mb-4">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-gray-600">적용된 필터</span>
-            <button
-              onClick={handleClearFilters}
-              className="text-sm text-blue-500 hover:text-blue-700"
-            >
+            <span className="text-sm text-gray-600">필터링된 결과</span>
+            <button onClick={handleClearFilters} className="text-sm text-gr">
               전체 해제
             </button>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {filters.breed && (
-              <FilterChip
-                label={filters.breed}
-                onRemove={() => handleRemoveFilter("breed", filters.breed)}
-              />
-            )}
-            {filters.weights.map((weight) => (
-              <FilterChip
-                key={weight}
-                label={weight}
-                onRemove={() => handleRemoveFilter("weights", weight)}
-              />
-            ))}
-            {filters.regions.map((region) => (
-              <FilterChip
-                key={region}
-                label={region}
-                onRemove={() => handleRemoveFilter("regions", region)}
-              />
-            ))}
-            {filters.ages.map((age) => (
-              <FilterChip
-                key={age}
-                label={age}
-                onRemove={() => handleRemoveFilter("ages", age)}
-              />
-            ))}
-            {filters.genders.map((gender) => (
-              <FilterChip
-                key={gender}
-                label={gender}
-                onRemove={() => handleRemoveFilter("genders", gender)}
-              />
-            ))}
-            {filters.protectionStatus.map((status) => (
-              <FilterChip
-                key={status}
-                label={status}
-                onRemove={() => handleRemoveFilter("protectionStatus", status)}
-              />
-            ))}
-            {filters.expertOpinion.map((opinion) => (
-              <FilterChip
-                key={opinion}
-                label={opinion}
-                onRemove={() => handleRemoveFilter("expertOpinion", opinion)}
-              />
-            ))}
           </div>
         </div>
       )}

@@ -80,6 +80,7 @@ export function KakaoMap({
 
       try {
         console.log("지도 로딩 시작:", address);
+        console.log("카카오 맵 API 사용 가능 여부:", !!window.kakao?.maps);
 
         const mapOption = {
           center: new window.kakao.maps.LatLng(37.5665, 126.978), // 서울 시청 기본 위치
@@ -122,13 +123,16 @@ export function KakaoMap({
 
     // KakaoMapScript가 이미 로드되어 있는지 확인
     if (window.kakao?.maps?.load) {
+      console.log("카카오 맵 API가 이미 로드됨, 지도 생성 시작");
       window.kakao.maps.load(() => {
         loadMap();
       });
     } else {
+      console.log("카카오 맵 API 로드 대기 중...");
       // 스크립트가 로드될 때까지 기다림
       const interval = setInterval(() => {
         if (window.kakao?.maps?.load) {
+          console.log("카카오 맵 API 로드 완료, 지도 생성 시작");
           clearInterval(interval);
           window.kakao.maps.load(() => {
             loadMap();
@@ -139,6 +143,11 @@ export function KakaoMap({
       // 10초 후 타임아웃
       setTimeout(() => {
         clearInterval(interval);
+        if (!window.kakao?.maps?.load) {
+          console.error("카카오 맵 API 로드 타임아웃");
+          setError("지도 API를 불러올 수 없습니다");
+          setIsLoading(false);
+        }
       }, 10000);
     }
   }, [address]);

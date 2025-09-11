@@ -42,7 +42,7 @@ const getCenterPostDetail = async (
   );
 
   return {
-    post: response.data.post as unknown as Post,
+    post: transformRawPostToPost(response.data.post),
   };
 };
 

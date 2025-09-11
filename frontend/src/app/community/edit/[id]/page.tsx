@@ -97,11 +97,12 @@ export default function CommunityEditPage({
         protection_status: "보호중",
         adoption_status: "입양가능",
         centerId: rawAnimal.center_id,
-        animalImages: rawAnimal.animal_images?.map((img) => ({
-          id: img.id,
-          imageUrl: img.image_url,
-          orderIndex: img.order_index,
-        })) || [{ id: "1", imageUrl: "/img/dummyImg.png", orderIndex: 1 }],
+        animalImages:
+          rawAnimal.animal_images?.map((img) => ({
+            id: img.id,
+            imageUrl: img.image_url,
+            orderIndex: img.order_index,
+          })) || [],
         foundLocation: rawAnimal.found_location || "위치 정보 확인 불가",
         adoptionId: undefined,
         waitingDays: rawAnimal.waiting_days,
@@ -237,9 +238,7 @@ export default function CommunityEditPage({
         protection_status: "보호중",
         adoption_status: "입양가능",
         centerId: favoriteAnimal.centerId,
-        animalImages: [
-          { id: "1", imageUrl: "/img/dummyImg.png", orderIndex: 1 },
-        ],
+        animalImages: [],
         foundLocation: "위치 정보 확인 불가", // 기본 지역 설정
       };
     }) as PetCardAnimal[];

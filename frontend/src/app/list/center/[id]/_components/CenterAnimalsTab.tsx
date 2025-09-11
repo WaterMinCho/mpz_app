@@ -5,8 +5,9 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { PetCard } from "@/components/ui/PetCard";
 import { MiniButton } from "@/components/ui/MiniButton";
 import { CaretDown } from "@phosphor-icons/react";
-import { useGetMyCenterAnimals } from "@/hooks/query/useGetCenterAnimals";
+import { useGetAnimals } from "@/hooks/query/useGetAnimals";
 import type { Animal } from "./types";
+import { transformRawAnimalToAnimal } from "@/types/animal";
 
 interface CenterAnimalsTabProps {
   showFilters?: boolean;
@@ -47,19 +48,19 @@ export function CenterAnimalsTab({
     data: animalsData,
     isLoading,
     error,
-  } = useGetMyCenterAnimals(
-    {
-      center_id: centerId,
-      page: 1,
-      page_size: 50,
-    },
-    {
-      enabled: !!centerId,
-    }
-  );
+  } = useGetAnimals({
+    center_id: centerId,
+    page: 1,
+    page_size: 50,
+  });
 
   // animals 배열을 useMemo로 감싸서 성능 최적화
-  const animals = useMemo(() => animalsData?.animals || [], [animalsData]);
+  const animals = useMemo(() => {
+    if (!animalsData?.pages) return [];
+    return animalsData.pages.flatMap((page) =>
+      (page.data || []).map(transformRawAnimalToAnimal)
+    );
+  }, [animalsData]);
 
   // URL 파라미터에서 필터 상태 읽기
   const filters = useMemo((): FilterState | null => {

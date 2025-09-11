@@ -64,15 +64,16 @@ export interface CenterListResponse {
 
 // Center 검색/필터링용 타입
 export interface CenterSearchParams {
+  location?: string;
   region?: string;
+  page?: number;
+  page_size?: number;
   verified?: boolean;
   isPublic?: boolean;
   hasMonitoring?: boolean;
   minPrice?: number;
   maxPrice?: number;
   search?: string;
-  page?: number;
-  limit?: number;
 }
 
 // API 응답의 실제 snake_case 구조 (새로운 스키마 기반)
@@ -95,12 +96,14 @@ export interface RawCenterResponse {
   is_public: boolean;
   adoption_price: number;
   image_url: string;
-  has_foster_care?: boolean;
-  has_volunteer?: boolean;
+  is_subscribed: boolean;
+  has_volunteer: boolean;
+  has_foster_care: boolean;
+  show_phone_number: boolean;
+  show_location: boolean;
   created_at: string;
   updated_at: string;
   is_fav?: boolean; // 찜하기 상태 추가
-  is_subscribed?: boolean; // 구독자 여부 추가
 }
 
 // 센터 목록 API 응답 구조 (새로운 스키마 기반)
@@ -137,7 +140,7 @@ export function transformRawCenterToCenter(raw: RawCenterResponse): Center {
     imageUrl: raw.image_url,
     hasFosterCare: raw.has_foster_care,
     hasVolunteer: raw.has_volunteer,
-    isSubscriber: raw.is_subscribed || false, // is_subscribed를 isSubscriber로 변환
+    isSubscriber: raw.is_subscribed,
     createdAt: raw.created_at,
     updatedAt: raw.updated_at,
     isFavorited: raw.is_fav || false, // is_fav를 isFavorited로 변환

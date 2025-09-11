@@ -44,38 +44,30 @@ export interface Animal {
   updatedAt: string;
 }
 
-// API 요청 파라미터 타입
+// API 요청 파라미터 타입 (백엔드 API 문서에 맞게 수정)
 export interface GetAnimalsParams {
-  protection_status?: "보호중" | "안락사" | "자연사" | "반환";
-  adoption_status?: "입양가능" | "입양진행중" | "입양완료" | "입양불가";
-  centerId?: string;
-  region?:
-    | "서울"
-    | "부산"
-    | "대구"
-    | "인천"
-    | "광주"
-    | "대전"
-    | "울산"
-    | "세종"
-    | "경기"
-    | "강원"
-    | "충북"
-    | "충남"
-    | "전북"
-    | "전남"
-    | "경북"
-    | "경남"
-    | "제주";
-  weight?: "10kg_under" | "25kg_under" | "over_25kg";
-  age?: "2_under" | "7_under" | "over_7";
+  status?:
+    | "보호중"
+    | "안락사"
+    | "자연사"
+    | "반환"
+    | "입양가능"
+    | "입양진행중"
+    | "입양완료"
+    | "입양불가";
+  center_id?: string;
   gender?: "male" | "female";
-  hasTrainerComment?: "true" | "false";
+  weight_min?: number;
+  weight_max?: number;
+  age_min?: number;
+  age_max?: number;
   breed?: string;
+  region?: string;
+  has_trainer_comment?: "true" | "false";
+  sort_by?: "created_at" | "admission_date" | "megaphone_count";
+  sort_order?: "asc" | "desc";
   page?: number;
-  limit?: number;
-  sortBy?: "admission_date" | "waiting_days" | "created_at";
-  sortOrder?: "asc" | "desc";
+  page_size?: number;
 }
 
 // API 응답의 실제 snake_case 구조
@@ -116,23 +108,15 @@ export interface RawAnimalResponse {
   updated_at: string;
 }
 
-// 실제 API 응답 구조
+// 실제 API 응답 구조 (백엔드 CustomPageNumberPagination)
 export interface ActualGetAnimalsResponse {
-  animals: RawAnimalResponse[];
-  data?: RawAnimalResponse[]; // 실제 API 응답에서 사용되는 필드
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-  hasNext: boolean;
-  hasPrev: boolean;
-  // 실제 API 응답에 맞는 추가 필드들
-  count?: number;
-  totalCnt?: number;
-  pageCnt?: number;
-  curPage?: number;
-  nextPage?: number;
-  previousPage?: number | null;
+  data: RawAnimalResponse[]; // 실제 동물 데이터
+  count: number; // 현재 페이지 아이템 수
+  totalCnt: number; // 전체 아이템 수
+  pageCnt: number; // 전체 페이지 수
+  curPage: number; // 현재 페이지
+  nextPage: number | null; // 다음 페이지 (없으면 null)
+  previousPage: number | null; // 이전 페이지 (없으면 null)
 }
 
 // PetCard에서 사용하는 타입 (기존 호환성을 위해 유지)
