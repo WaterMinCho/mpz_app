@@ -1,5 +1,5 @@
 export { useGetAnimals, useGetAnimalById } from "./query/useGetAnimals";
-export { useGetCenterById } from "./query/useGetCenters";
+export { useGetCenters, useGetCenterById } from "./query/useGetCenters";
 export { useGetAdoptions } from "./query/useGetAdoptions";
 export { useGetAdoptionsInfinite } from "./query/useGetAdoptions";
 export { useGetUserAdoptions } from "./query/useGetUserAdoptions";
@@ -18,6 +18,7 @@ export {
 } from "./query/useGetCenterPosts";
 export { useGetSystemTags } from "./query/useGetSystemTags";
 export { useGetUserProfile } from "./query/useGetUserProfile";
+export { useGetUserById } from "./query/useGetUserById";
 export { useGetMyProfile } from "./query/useGetMyProfile";
 export { useGetMyCenter, invalidateMyCenter } from "./query/useGetMyCenter";
 export { useGetCenterNotices } from "./query/useGetCenterNotices";

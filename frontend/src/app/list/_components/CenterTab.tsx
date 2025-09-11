@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useSearchParams } from "next/navigation";
 import { CenterCard } from "@/components/ui/CenterCard";
 import { useGetCenters } from "@/hooks/query/useGetCenters";
 import { useCheckCenterFavorite } from "@/hooks/query/useCheckCenterFavorite";
@@ -10,12 +11,16 @@ import { Center, transformRawCenterToCenter } from "@/types/center";
 import { CenterCardSkeleton } from "@/components/ui/CenterCardSkeleton";
 
 function CenterTab() {
+  const searchParams = useSearchParams();
   const [allCenters, setAllCenters] = useState<Center[]>([]);
   const [localFavorites, setLocalFavorites] = useState<Record<string, boolean>>(
     {}
   );
   const { isAuthenticated } = useAuth();
   const toggleFavorite = useToggleCenterFavorite();
+
+  // URL에서 region 파라미터 읽기
+  const regionFromUrl = searchParams.get("region");
 
   const {
     data,
@@ -24,7 +29,9 @@ function CenterTab() {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
-  } = useGetCenters();
+  } = useGetCenters({
+    region: regionFromUrl || undefined,
+  });
 
   // 데이터가 로드되면 상태 업데이트
   useEffect(() => {
@@ -95,7 +102,7 @@ function CenterTab() {
     toggleFavorite.mutate(
       { centerId },
       {
-        onSuccess: (data) => {
+        onSuccess: (data: { is_favorited: boolean }) => {
           // 성공 시 로컬 상태를 서버 응답으로 업데이트
           const isFavorited = data.is_favorited ?? false;
           setLocalFavorites((prev) => ({

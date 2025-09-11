@@ -47,7 +47,10 @@ export interface AdoptionFormData {
   address: string;
   addressIsPublic?: boolean;
 
-  // 추가 질문 응답
+  // 질문 응답 (API 스펙에 맞는 형식)
+  questionResponses?: QuestionResponse[];
+
+  // 추가 질문 응답 (하위 호환성을 위해 유지)
   occupation?: string;
   income?: string;
   familyMembers?: string;

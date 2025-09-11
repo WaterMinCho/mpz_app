@@ -8,7 +8,7 @@ import {
   CenterSearchParams,
 } from "@/types/center";
 
-const ITEMS_PER_PAGE = 20;
+const ITEMS_PER_PAGE = 10; // API 기본값에 맞춤
 
 // 센터 목록 조회 API 함수
 const getCenters = async (
@@ -31,14 +31,20 @@ const getCenters = async (
 };
 
 // 무한스크롤을 지원하는 센터 목록 조회 훅
-export const useGetCenters = (params?: Omit<CenterSearchParams, "page">) => {
+export const useGetCenters = (
+  params?: Omit<CenterSearchParams, "page" | "page_size">
+) => {
   return useInfiniteQuery({
     queryKey: ["centers", params],
     queryFn: ({ pageParam = 1 }) => {
-      return getCenters({ ...params, page: pageParam, limit: ITEMS_PER_PAGE });
+      return getCenters({
+        ...params,
+        page: pageParam,
+        page_size: ITEMS_PER_PAGE,
+      });
     },
     getNextPageParam: (lastPage) => {
-      // 여러 가능한 필드 확인
+      // API 응답 구조에 맞춰 다음 페이지 확인
       const hasNext =
         (lastPage.nextPage !== null && lastPage.nextPage !== undefined) ||
         (lastPage.curPage &&
@@ -68,36 +74,6 @@ export const useGetCentersLegacy = () => {
     queryKey: ["centers-legacy"],
     queryFn: async () => {
       const response = await instance.get("/centers");
-      return response.data;
-    },
-    staleTime: 3 * 60 * 1000, // 3분
-    gcTime: 10 * 60 * 1000, // 10분
-    retry: 1,
-    refetchOnWindowFocus: false,
-    enabled: true,
-  });
-};
-
-// 센터 지역별 검색 훅
-export const useGetCenterByLocation = (params?: {
-  location?: string;
-  region?: string;
-}) => {
-  return useQuery({
-    queryKey: ["centers", "location", params],
-    queryFn: async () => {
-      const searchParams = new URLSearchParams();
-
-      if (params) {
-        Object.entries(params).forEach(([key, value]) => {
-          if (value !== undefined && value !== "") {
-            searchParams.append(key, value.toString());
-          }
-        });
-      }
-
-      const url = `/centers?${searchParams.toString()}`;
-      const response = await instance.get(url);
       return response.data;
     },
     staleTime: 3 * 60 * 1000, // 3분

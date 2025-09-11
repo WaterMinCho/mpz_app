@@ -66,7 +66,7 @@ export function CommentSection({
             allUsers.get(reply.user_id) || {
               id: reply.user_id,
               nickname: `사용자${reply.user_id?.slice(-4) || ""}`,
-              image: "/img/dummyImg.png",
+              image: "",
             },
         })) || [],
     }));

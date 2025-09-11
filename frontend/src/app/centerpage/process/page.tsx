@@ -293,7 +293,7 @@ export default function CenterProcess() {
           />
           <CustomInput
             variant="bottomsheet"
-            label="상태"
+            label="모니터링 기간"
             placeholder="모니터링 기간을 입력해주세요"
             options={[
               "1개월",

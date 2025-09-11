@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 
-import { ThumbsUp, DotsThree, Bell } from "@phosphor-icons/react";
+import { ThumbsUp, DotsThree, Bell, User } from "@phosphor-icons/react";
 import { IconButton } from "@/components/ui/IconButton";
 import { MiniButton } from "@/components/ui/MiniButton";
 import type { Post } from "@/types/posts";
@@ -40,15 +40,24 @@ export function CommunityDetail({
   onLoginRequired,
   isAuthorSubscriber,
 }: CommunityDetailProps) {
-  const { images, title, content, created_at, user_id, tags, like_count } =
-    post;
+  const {
+    images,
+    title,
+    content,
+    created_at,
+    user_id,
+    tags,
+    like_count,
+    is_liked,
+  } = post;
   const { isAuthenticated } = useAuth();
   const [currentLikeCount, setCurrentLikeCount] = useState(like_count || 0);
-  const [isLiked, setIsLiked] = useState(false);
+  const [isLiked, setIsLiked] = useState(is_liked || false);
 
   const toggleLikeMutation = useToggleLike();
   const { data: likeData, isLoading: isLikeLoading } = useCheckPostLike(
-    post.id
+    post.id,
+    isAuthenticated
   );
 
   const user = users.find((u) => u.id === user_id);
@@ -57,22 +66,23 @@ export function CommunityDetail({
 
   // 좋아요 상태 초기화
   useEffect(() => {
-    if (likeData) {
-      setIsLiked(likeData.isLiked);
-      setCurrentLikeCount(likeData.likeCount);
+    if (isAuthenticated && likeData) {
+      setIsLiked(likeData.is_liked);
+      setCurrentLikeCount(likeData.total_likes);
+    } else {
+      setIsLiked(is_liked || false);
+      setCurrentLikeCount(like_count || 0);
     }
-  }, [likeData]);
-
-  // 게시글의 기본 좋아요 개수로 초기화
-  useEffect(() => {
-    if (like_count !== undefined) {
-      setCurrentLikeCount(like_count);
-    }
-  }, [like_count]);
+  }, [isAuthenticated, likeData, is_liked, like_count]);
 
   const handleLikeToggle = async () => {
     if (!isAuthenticated) {
       onLoginRequired?.();
+      return;
+    }
+
+    // 로딩 중이면 중복 요청 방지
+    if (toggleLikeMutation.isPending || isLikeLoading) {
       return;
     }
 
@@ -82,15 +92,18 @@ export function CommunityDetail({
         ? currentLikeCount + 1
         : currentLikeCount - 1;
 
+      // 낙관적 업데이트
       setIsLiked(newIsLiked);
       setCurrentLikeCount(newLikeCount);
 
       const result = await toggleLikeMutation.mutateAsync({ postId: post.id });
 
-      setIsLiked(result.isLiked);
-      setCurrentLikeCount(result.likeCount);
+      // 서버 응답으로 최종 상태 업데이트
+      setIsLiked(result.is_liked);
+      setCurrentLikeCount(result.total_likes);
     } catch (error) {
       console.error("좋아요 처리 실패:", error);
+      // 실패 시 이전 상태로 롤백
       setIsLiked(!isLiked);
       setCurrentLikeCount(
         isLiked ? currentLikeCount - 1 : currentLikeCount + 1
@@ -161,7 +174,7 @@ export function CommunityDetail({
   return (
     <div className="w-full">
       {/* 사용자 정보 */}
-      <div className="flex items-center justify-between border-b border-bg pb-3 px-4">
+      <div className="flex items-center justify-between pb-3 px-4">
         <div
           className={`flex items-center gap-3 ${
             onUserClick
@@ -171,12 +184,24 @@ export function CommunityDetail({
           onClick={onUserClick ? () => onUserClick(user_id) : undefined}
         >
           <div className="relative w-10 h-10 rounded-full overflow-hidden">
-            <Image
-              src={profileImage || "/img/dummyImg.png"}
-              alt={author}
-              fill
-              className="object-cover"
-            />
+            {profileImage && profileImage !== "" ? (
+              <Image
+                src={profileImage}
+                alt={author}
+                fill
+                className="object-cover rounded-full w-10 h-10"
+                unoptimized
+                onError={(e) => {
+                  console.error("ProfileInfo Image load error:", e);
+                }}
+              />
+            ) : (
+              <div
+                className={`w-10 h-10 bg-lg flex items-center justify-center p-1 rounded-full`}
+              >
+                <User size={28} weight="regular" className="text-gr" />
+              </div>
+            )}
           </div>
           <div className="flex items-center gap-2">
             <h4 className="font-semibold text-sm">{author}</h4>
@@ -236,8 +261,14 @@ export function CommunityDetail({
           leftIcon={<ThumbsUp />}
           variant={isLiked ? "filterOn" : "filterOff"}
           onClick={handleLikeToggle}
-          disabled={toggleLikeMutation.isPending || isLikeLoading}
-          className={toggleLikeMutation.isPending ? "cursor-not-allowed" : ""}
+          disabled={
+            !isAuthenticated || toggleLikeMutation.isPending || isLikeLoading
+          }
+          className={
+            !isAuthenticated || toggleLikeMutation.isPending || isLikeLoading
+              ? "cursor-not-allowed opacity-50"
+              : ""
+          }
         />
         {tags &&
           Array.isArray(tags) &&

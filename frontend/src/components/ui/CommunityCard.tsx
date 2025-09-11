@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from "react";
 import Image from "next/image";
 
-import { ThumbsUp, ChatCircle } from "@phosphor-icons/react";
+import { ThumbsUp, ChatCircle, User } from "@phosphor-icons/react";
 import { ProfileInfo } from "./ProfileInfo";
 import { IconButton } from "./IconButton";
 import { BottomSheet } from "./BottomSheet";
@@ -22,9 +22,20 @@ const FallbackImage = ({
   fill?: boolean;
 }) => {
   const [hasError, setHasError] = useState(false);
+
+  if (hasError || !src || src === "") {
+    return (
+      <div
+        className={`bg-lg flex items-center justify-center rounded-full ${className}`}
+      >
+        <User size={24} weight="regular" className="text-gr" />
+      </div>
+    );
+  }
+
   return (
     <Image
-      src={hasError ? "/img/dummyImg.png" : src}
+      src={src}
       alt={alt}
       className={className}
       {...(fill ? { fill: true } : {})}

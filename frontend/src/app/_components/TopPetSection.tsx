@@ -48,7 +48,6 @@ export function TopPetSection({
   } = useGeolocation();
   const [userLocation, setUserLocation] = useState<string>("");
 
-  // 위치정보가 변경될 때마다 사용자 위치 기반 지역을 계산
   useEffect(() => {
     if (latitude && longitude && isValidLocation(latitude, longitude)) {
       const region = getLocationBasedRegion(latitude, longitude);
@@ -164,8 +163,10 @@ export function TopPetSection({
   }
 
   // 보호중인 동물만 필터링하고 admission_date 높은 순서대로 정렬
-  const limitedAnimals = (animals || [])
+  // 서버에서 이미 필터링된 데이터이므로 클라이언트에서는 정렬만 수행
+  const displayAnimals = (animals || [])
     .filter((animal) => animal?.protection_status === "보호중")
+    .filter((animal) => animal?.adoption_status === "입양가능")
     .sort((a, b) => {
       if (a.admission_date && b.admission_date) {
         return (
@@ -175,26 +176,6 @@ export function TopPetSection({
       }
       return (b.waiting_days || 0) - (a.waiting_days || 0);
     });
-
-  // 지역 필터링
-  let filteredAnimals = limitedAnimals;
-  if (selectedLocation && selectedLocation !== "") {
-    filteredAnimals = limitedAnimals.filter((animal) => {
-      const animalLocation = animal.found_location || "";
-      // "내 주변" 또는 사용자 위치 기반 필터링인 경우
-      if (selectedLocation === "내 주변" || selectedLocation === userLocation) {
-        return userLocation ? animalLocation.includes(userLocation) : false;
-      }
-      // 일반 지역 필터링
-      return animalLocation.includes(selectedLocation);
-    });
-  }
-
-  // 필터가 적용된 경우 필터링된 결과를 모두 표시, 필터가 없는 경우 상위 10개만 표시
-  const displayAnimals =
-    selectedLocation && selectedLocation !== ""
-      ? filteredAnimals
-      : filteredAnimals.slice(0, 10);
 
   return (
     <MainSection

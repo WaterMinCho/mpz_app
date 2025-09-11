@@ -425,8 +425,8 @@ export function PetCard({
           );
         })()}
         <h4 className="text-bk">
-          {(breed || "종 미등록").length > 4
-            ? (breed || "종 미등록").slice(0, 4) + "..."
+          {(breed || "종 미등록").length > 3
+            ? (breed || "종 미등록").slice(0, 3) + "..."
             : breed || "종 미등록"}
         </h4>
         {isFemale ? (

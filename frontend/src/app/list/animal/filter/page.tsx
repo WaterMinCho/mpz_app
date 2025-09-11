@@ -9,7 +9,6 @@ import { TopBar } from "@/components/common/TopBar";
 import { IconButton } from "@/components/ui/IconButton";
 import { FixedBottomBar } from "@/components/ui/FixedBottomBar";
 import { InfoCard } from "@/components/ui/InfoCard";
-import { location } from "@/app/mock";
 import { FilterState } from "@/lib/filter-utils";
 
 import BreedFilter from "./_components/BreedFilter";
@@ -20,7 +19,8 @@ import {
   genderOptions,
   protectionStatusOptions,
   expertOpinionOptions,
-} from "@/app/mock";
+  regionOptions,
+} from "@/data/filterOptions";
 
 function AnimalFilterContent() {
   const router = useRouter();
@@ -224,7 +224,7 @@ function AnimalFilterContent() {
         {/* 지역 (Region) */}
         <MultiSelectFilter
           title="지역"
-          options={location}
+          options={regionOptions}
           selectedValues={selectedRegions}
           onSelectionChange={setSelectedRegions}
           layout="grid"

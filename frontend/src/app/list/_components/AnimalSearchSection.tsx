@@ -40,72 +40,59 @@ export function AnimalSearchSection({
     isLoading: isSearchLoading,
     error: searchError,
   } = useGetAnimals({
-    breed: searchValue.trim() || undefined,
-    limit: 20,
-    // 필터 값들도 포함
-    ...(filters.breed && { breed: filters.breed }),
+    breed: searchValue.trim() || filters.breed || undefined,
+    page_size: 20,
+    // 체중 필터
     ...(filters.weights.length > 0 && {
-      weight:
+      weight_max:
         filters.weights[0] === "10kg 이하"
-          ? "10kg_under"
+          ? 10
           : filters.weights[0] === "25kg 이하"
-          ? "25kg_under"
-          : filters.weights[0] === "그 이상"
-          ? "over_25kg"
+          ? 25
           : undefined,
+      weight_min: filters.weights[0] === "그 이상" ? 25 : undefined,
     }),
+    // 지역 필터
     ...(filters.regions.length > 0 && {
-      region: filters.regions[0] as
-        | "서울"
-        | "부산"
-        | "대구"
-        | "인천"
-        | "광주"
-        | "대전"
-        | "울산"
-        | "세종"
-        | "경기"
-        | "강원"
-        | "충북"
-        | "충남"
-        | "전북"
-        | "전남"
-        | "경북"
-        | "경남"
-        | "제주",
+      region: filters.regions[0],
     }),
+    // 나이 필터
     ...(filters.ages.length > 0 && {
-      age:
+      age_max:
         filters.ages[0] === "2살 이하"
-          ? "2_under"
+          ? 24
           : filters.ages[0] === "7살 이하"
-          ? "7_under"
-          : filters.ages[0] === "그 이상"
-          ? "over_7"
+          ? 84
           : undefined,
+      age_min: filters.ages[0] === "그 이상" ? 84 : undefined,
     }),
+    // 성별 필터
     ...(filters.genders.length > 0 && {
-      gender:
-        filters.genders[0] === "남아"
-          ? "male"
-          : filters.genders[0] === "여아"
-          ? "female"
-          : undefined,
+      gender: filters.genders[0] === "남아" ? "male" : "female",
     }),
+    // 보호상태 필터
     ...(filters.protectionStatus.length > 0 && {
       status:
         filters.protectionStatus[0] === "무지개다리"
           ? "자연사"
+          : filters.protectionStatus[0] === "임시보호중"
+          ? "보호중"
+          : filters.protectionStatus[0] === "방사"
+          ? "반환"
           : (filters.protectionStatus[0] as
               | "보호중"
-              | "입양완료"
-              | "임시보호중"
+              | "안락사"
+              | "자연사"
               | "반환"
-              | "방사"),
+              | "입양가능"
+              | "입양진행중"
+              | "입양완료"
+              | "입양불가"),
     }),
+    // 전문가 의견 필터
     ...(filters.expertOpinion.length > 0 &&
       filters.expertOpinion[0] === "포함" && {
-        hasTrainerComment: "true",
+        has_trainer_comment: "true",
       }),
   });
 
@@ -113,17 +100,14 @@ export function AnimalSearchSection({
   const { data: breedSearchData, isLoading: isBreedSearchLoading } =
     useGetAnimals({
       breed: breedSearchTerm.trim() || undefined,
-      limit: 50,
+      page_size: 50,
     });
 
   // 검색 결과가 있는지 확인
   const hasSearchResults = (searchData?.pages?.[0]?.data?.length ?? 0) > 0;
 
-  // 검색 상태 업데이트 - 텍스트 검색 또는 필터 적용 중 하나라도 활성화되어 있으면 true
-  const hasActiveFilters = Object.values(filters).some((value) =>
-    Array.isArray(value) ? value.length > 0 : Boolean(value)
-  );
-  const showSearchResults = isSearching || hasActiveFilters;
+  // 검색 상태 업데이트 - 텍스트 검색만 활성화되어 있으면 true
+  const showSearchResults = isSearching; // 텍스트 검색만 검색 결과로 표시
 
   // 검색 상태가 변경될 때마다 부모 컴포넌트에 알림
   React.useEffect(() => {
@@ -249,15 +233,31 @@ export function AnimalSearchSection({
         </div>
       </div>
 
-      {/* 검색 결과 표시 */}
+      {/* 필터 미니버튼들은 항상 표시 */}
+      <div className="px-4 pb-4">
+        <div className="flex gap-2 overflow-x-auto scrollbar-hide">
+          {filterOptions.map((option) => (
+            <MiniButton
+              key={option.label}
+              text={`${option.label}${
+                option.count > 0 ? ` ${option.count}` : ""
+              }`}
+              rightIcon={<CaretDown size={12} />}
+              variant={option.hasFilters ? "filterOn" : "filterOff"}
+              onClick={() => onFilterClick(option.path)}
+              className="flex-shrink-0"
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* 검색 결과 표시 - 텍스트 검색만 */}
       {showSearchResults && (
         <div className="px-4 pt-4">
           <div className="flex items-center justify-between mb-3">
             <h5 className="text-dg">
               {isSearching && searchValue.trim().length > 0
                 ? `"${searchValue}" 검색 결과`
-                : hasActiveFilters
-                ? "필터링된 결과"
                 : "검색 결과"}
               {searchData && ` (${searchTotal}건)`}
             </h5>
@@ -265,9 +265,7 @@ export function AnimalSearchSection({
               onClick={handleSearchClear}
               className="text-sm text-gray-500 hover:text-gray-700 cursor-pointer"
             >
-              {isSearching && searchValue.trim().length > 0
-                ? "검색 초기화"
-                : "필터 초기화"}
+              검색 초기화
             </button>
           </div>
 
@@ -349,25 +347,6 @@ export function AnimalSearchSection({
                 ))}
             </div>
           )}
-        </div>
-      )}
-
-      {!showSearchResults && (
-        <div className="px-4 pb-4">
-          <div className="flex gap-2 overflow-x-auto scrollbar-hide">
-            {filterOptions.map((option) => (
-              <MiniButton
-                key={option.label}
-                text={`${option.label}${
-                  option.count > 0 ? ` ${option.count}` : ""
-                }`}
-                rightIcon={<CaretDown size={12} />}
-                variant={option.hasFilters ? "filterOn" : "filterOff"}
-                onClick={() => onFilterClick(option.path)}
-                className="flex-shrink-0"
-              />
-            ))}
-          </div>
         </div>
       )}
 

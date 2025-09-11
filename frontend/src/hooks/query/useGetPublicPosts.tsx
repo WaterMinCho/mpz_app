@@ -5,7 +5,9 @@ import {
   GetPostsParams,
   PostDetailResponse,
   Post,
+  ApiPostResponse,
 } from "@/types/posts";
+import { transformRawPostToPost } from "./posts/utils";
 
 const getPublicPosts = async (
   params?: GetPostsParams
@@ -17,6 +19,10 @@ const getPublicPosts = async (
       if (value !== undefined) {
         if (key === "tags" && Array.isArray(value)) {
           value.forEach((tag) => searchParams.append("tags", tag));
+        } else if (key === "animalId") {
+          searchParams.append("animal_id", value.toString());
+        } else if (key === "adoptionId") {
+          searchParams.append("adoption_id", value.toString());
         } else {
           searchParams.append(key, value.toString());
         }
@@ -35,17 +41,23 @@ const getPublicPostDetail = async (
 ): Promise<PostDetailResponse> => {
   // 먼저 전체공개 글에서 시도
   try {
-    const response = await instance.get<{ post: Post }>(`/posts/all/${postId}`);
+    const response = await instance.get<{ post: ApiPostResponse }>(
+      `/posts/all/${postId}`
+    );
 
-    return response.data;
+    return {
+      post: transformRawPostToPost(response.data.post),
+    };
   } catch (error) {
     // 전체공개에서 찾을 수 없으면 센터공개에서 시도
     console.log("전체공개에서 찾을 수 없음, 센터공개에서 시도:", error);
-    const response = await instance.get<{ post: Post }>(
+    const response = await instance.get<{ post: ApiPostResponse }>(
       `/posts/center/${postId}`
     );
 
-    return response.data;
+    return {
+      post: transformRawPostToPost(response.data.post),
+    };
   }
 };
 

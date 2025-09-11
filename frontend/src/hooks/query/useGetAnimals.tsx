@@ -23,36 +23,23 @@ const getAnimals = async (
   const endpoint = `/animals/?${searchParams.toString()}`;
 
   const response = await instance.get<ActualGetAnimalsResponse>(endpoint);
-
   return response.data;
 };
 
 export const useGetAnimals = (params?: GetAnimalsParams) => {
   return useInfiniteQuery({
-    queryKey: ["animals", params],
+    queryKey: ["animals", params ? JSON.stringify(params) : null],
     queryFn: ({ pageParam = 1 }) => {
       return getAnimals({ ...params, page: pageParam });
     },
     getNextPageParam: (lastPage) => {
-      // 여러 가능한 필드 확인
-      const hasNext =
-        lastPage.hasNext ||
-        (lastPage.nextPage !== null && lastPage.nextPage !== undefined) ||
-        (lastPage.page &&
-          lastPage.totalPages &&
-          lastPage.page < lastPage.totalPages) ||
-        (lastPage.curPage &&
-          lastPage.pageCnt &&
-          lastPage.curPage < lastPage.pageCnt);
-
-      const nextPage =
-        lastPage.nextPage ||
-        (lastPage.page ? lastPage.page + 1 : undefined) ||
-        (lastPage.curPage ? lastPage.curPage + 1 : undefined);
-
-      if (hasNext && nextPage) {
-        return nextPage;
+      // 백엔드 CustomPageNumberPagination 응답 구조에 맞게 처리
+      // nextPage가 명시적으로 제공되면 사용
+      if (lastPage.nextPage !== null && lastPage.nextPage !== undefined) {
+        return lastPage.nextPage;
       }
+
+      // nextPage가 null이면 더 이상 페이지가 없음
       return undefined;
     },
     initialPageParam: 1,

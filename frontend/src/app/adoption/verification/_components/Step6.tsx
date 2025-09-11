@@ -1,12 +1,14 @@
 "use client";
 
 import React from "react";
+import { useRouter } from "next/navigation";
 
 import { Container } from "@/components/common/Container";
 import { FixedBottomBar } from "@/components/ui/FixedBottomBar";
 import { FormListItem } from "@/components/ui/FormListItem";
 import { NotificationToast } from "@/components/ui/NotificationToast";
 import { useGetCenterConsents } from "@/hooks/query";
+import { useSubmitAdoptionApplication } from "@/hooks/mutation";
 import { useAdoptionVerificationStore } from "@/lib/stores";
 import { useAuth } from "@/components/providers/AuthProvider";
 
@@ -15,6 +17,7 @@ export interface StepProps {
 }
 
 export function Step6({ onNext }: StepProps) {
+  const router = useRouter();
   const { user } = useAuth();
   const { data: storeData } = useAdoptionVerificationStore(user?.id);
   const centerId = storeData.centerId;
@@ -25,14 +28,28 @@ export function Step6({ onNext }: StepProps) {
     error,
   } = useGetCenterConsents(centerId || "");
 
+  // 입양 신청 제출 훅
+  const { mutate: submitAdoption, isPending: isSubmitting } =
+    useSubmitAdoptionApplication();
+
   const [agree, setAgree] = React.useState(false);
 
   // toast state
   const [showToast, setShowToast] = React.useState(false);
   const [toastMessage, setToastMessage] = React.useState("");
+  const [toastType, setToastType] = React.useState<"error" | "success">(
+    "error"
+  );
 
   const showErrorToast = (message: string) => {
     setToastMessage(message);
+    setToastType("error");
+    setShowToast(true);
+  };
+
+  const showSuccessToast = (message: string) => {
+    setToastMessage(message);
+    setToastType("success");
     setShowToast(true);
   };
 
@@ -45,6 +62,77 @@ export function Step6({ onNext }: StepProps) {
 
   const isValid = agree;
 
+  // 스토어에서 폼 데이터를 가져와서 API 요청 형식으로 변환
+  const prepareFormData = () => {
+    if (!storeData || !storeData.animalId) {
+      throw new Error("필수 데이터가 없습니다.");
+    }
+
+    // sessionStorage에서 답변 데이터 가져오기
+    const answersData = sessionStorage.getItem("verification.answers");
+    const answers = answersData ? JSON.parse(answersData) : {};
+
+    // 질문 응답 배열 생성 (API 스펙에 맞게)
+    const questionResponses = Object.entries(answers).map(
+      ([questionId, answer]) => ({
+        question_id: questionId,
+        answer: answer as string,
+      })
+    );
+
+    return {
+      // 기본 사용자 정보
+      phone: storeData.phone || "",
+      phoneVerification: storeData.phoneVerification || false,
+      name: storeData.name || "",
+      birth: storeData.birth || "",
+      address: storeData.address || "",
+      addressIsPublic: false, // 기본값으로 설정
+
+      // 질문 응답 (API 스펙에 맞게)
+      questionResponses: questionResponses,
+
+      // 동의 사항
+      monitoringAgreement: true, // 동의서에 동의했다면 모니터링도 동의한 것으로 간주
+      guidelinesAgreement: true, // 동의서에 동의했다면 가이드라인도 동의한 것으로 간주
+      isTemporaryProtection: false, // 기본값
+      notes: "",
+
+      // 메타 정보
+      animalId: storeData.animalId,
+    };
+  };
+
+  // 입양 신청 제출 처리
+  const handleSubmit = () => {
+    if (!agree) {
+      showErrorToast("동의서에 동의해주세요.");
+      return;
+    }
+
+    try {
+      const formData = prepareFormData();
+
+      submitAdoption(formData, {
+        onSuccess: (data) => {
+          console.log("입양 신청 성공:", data);
+          showSuccessToast("입양 신청이 완료되었습니다!");
+          // 성공 시 내 입양 목록으로 이동
+          setTimeout(() => {
+            router.push("/my/adoption");
+          }, 2000);
+        },
+        onError: (error) => {
+          console.error("입양 신청 실패:", error);
+          showErrorToast("입양 신청에 실패했습니다. 다시 시도해주세요.");
+        },
+      });
+    } catch (error) {
+      console.error("폼 데이터 준비 실패:", error);
+      showErrorToast("입력 정보를 확인해주세요.");
+    }
+  };
+
   // 다음 단계 처리 (동의서가 2개 이상이면 Step7로, 1개 이하면 Step7 건너뛰기)
   const handleNext = () => {
     if (!agree) {
@@ -55,7 +143,7 @@ export function Step6({ onNext }: StepProps) {
       sessionStorage.setItem("verification.firstConsentAgreed", "true");
       if (activeConsents.length <= 1) {
         // 동의서가 1개 이하면 Step7을 건너뛰고 바로 제출 처리
-        onNext();
+        handleSubmit();
       } else {
         // 동의서가 2개 이상이면 Step7로 이동
         onNext();
@@ -112,7 +200,7 @@ export function Step6({ onNext }: StepProps) {
       <Container className="min-h-screen pb-28">
         <div className="flex flex-col gap-2 mb-6">
           <h2 className="text-bk">
-            {firstConsent?.title || "원활한 서비스 사용을 위한 동의문이에요."}
+            {"원활한 서비스 사용을 위한 동의문이에요."}
           </h2>
           <p className="body2 text-gr">
             {firstConsent?.description ||
@@ -136,15 +224,21 @@ export function Step6({ onNext }: StepProps) {
 
       <FixedBottomBar
         variant="variant1"
-        primaryButtonText={activeConsents.length <= 1 ? "제출하기" : "확인"}
+        primaryButtonText={
+          activeConsents.length <= 1
+            ? isSubmitting
+              ? "제출 중..."
+              : "제출하기"
+            : "확인"
+        }
         onPrimaryButtonClick={handleNext}
-        primaryButtonDisabled={!isValid}
+        primaryButtonDisabled={!isValid || isSubmitting}
       />
 
       {showToast && (
         <NotificationToast
           message={toastMessage}
-          type="error"
+          type={toastType}
           onClose={() => setShowToast(false)}
         />
       )}
