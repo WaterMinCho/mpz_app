@@ -186,9 +186,6 @@ export default function CenterAnimal() {
     // 화면 경계 정보
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
-    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-    const scrollLeft =
-      window.pageXOffset || document.documentElement.scrollLeft;
 
     // 기본 위치 계산 (카드 중앙 상단)
     let x = rect.left + rect.width / 2 - popupWidth / 2;
