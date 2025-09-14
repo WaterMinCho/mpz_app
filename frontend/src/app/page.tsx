@@ -41,21 +41,42 @@ export default function Home() {
 
   const { data: animalCountData } = useGetAnimalCount();
 
+  // TopPetSection용 쿼리 - admission_date 오래된 순
   const {
-    data: animalsData,
-    isLoading,
-    error,
+    data: topSectionData,
+    isLoading: isTopSectionLoading,
+    error: topSectionError,
   } = useGetAnimals({
     page_size: 100,
     sort_by: "admission_date",
+    sort_order: "asc",
+    region: selectedLocation || undefined,
+  });
+
+  // PetSection용 쿼리 - megaphone_count 순
+  const {
+    data: petSectionData,
+    isLoading: isPetSectionLoading,
+    error: petSectionError,
+  } = useGetAnimals({
+    page_size: 100,
+    sort_by: "megaphone_count",
     sort_order: "desc",
     region: selectedLocation || undefined,
   });
 
-  const animals: RawAnimalResponse[] =
-    animalsData?.pages?.flatMap((page) => {
+  const topSectionAnimals: RawAnimalResponse[] =
+    topSectionData?.pages?.flatMap((page) => {
       return (page as { data?: RawAnimalResponse[] }).data || [];
     }) || [];
+
+  const petSectionAnimals: RawAnimalResponse[] =
+    petSectionData?.pages?.flatMap((page) => {
+      return (page as { data?: RawAnimalResponse[] }).data || [];
+    }) || [];
+
+  // 기존 호환성을 위해 animals 변수 유지 (TopPetSection 데이터 사용)
+  const animals = topSectionAnimals;
 
   const totalPets = animalCountData?.total || animals.length;
 
@@ -240,7 +261,7 @@ export default function Home() {
       <TopPetSection
         title="따듯한 손길을 기다려요"
         rightSlot="모두 보기"
-        animals={animals}
+        animals={topSectionAnimals}
         variant="primary"
         showLocationFilter={true}
         locations={[
@@ -262,16 +283,18 @@ export default function Home() {
           "경남",
           "제주",
         ]}
-        isLoading={isLoading}
-        error={error}
+        isLoading={isTopSectionLoading}
+        error={topSectionError}
         selectedLocation={selectedLocation}
         onLocationSelect={handleLocationSelect}
+        sortBy="admission_date"
+        sortOrder="asc"
       />
 
       <MatchingSection
         variant="variant2"
-        isLoading={isLoading}
-        error={error}
+        isLoading={isTopSectionLoading}
+        error={topSectionError}
         isExpertAnalysis={true}
         aiMatchingResult={aiMatchingResult}
       />
@@ -280,9 +303,9 @@ export default function Home() {
 
       <PetSection
         title={`총 ${totalPets}명의 아이들이 \n도움을 요청하고 있어요`}
-        animals={animals}
-        isLoading={isLoading}
-        error={error}
+        animals={petSectionAnimals}
+        isLoading={isPetSectionLoading}
+        error={petSectionError}
       />
 
       <FooterSection />

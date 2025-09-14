@@ -350,7 +350,6 @@ export function PetCard({
           "flex flex-col items-start min-w-[146px] pb-3 cursor-pointer",
           className
         )}
-        onClick={handleCardClick}
       >
         <div className={cn("relative mb-2", getImageSize())}>
           <Image

@@ -209,7 +209,7 @@ export function MatchingSection({
 
               return (
                 <>
-                  <div className="flex flex-col gap-3">
+                  {/* <div className="flex flex-col gap-3">
                     {analysisAnimals.map((animal) => (
                       <PetCard
                         key={animal.id}
@@ -217,7 +217,7 @@ export function MatchingSection({
                         variant="variant2"
                       />
                     ))}
-                  </div>
+                  </div> */}
                   <MiniButton
                     text="전문가 분석 모아보기"
                     variant="filterOff"
