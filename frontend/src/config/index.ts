@@ -81,7 +81,7 @@ const localConfig: AppConfig = {
   },
   kakao: {
     ...baseConfig.kakao!,
-    redirectUri: "http://localhost:3000/api/auth/kakao/callback",
+    redirectUri: "http://localhost:3000/v1/kakao/login/callback",
   },
   cors: {
     origin: ["http://localhost:3000", "http://127.0.0.1:3000"],
@@ -118,7 +118,7 @@ const testConfig: AppConfig = {
   kakao: {
     clientId: "test-kakao-client-id",
     clientSecret: "test-kakao-client-secret",
-    redirectUri: "http://localhost:3001/api/auth/kakao/callback",
+    redirectUri: "http://localhost:3001/v1/kakao/login/callback",
   },
   cors: {
     origin: ["http://localhost:3001"],
@@ -185,9 +185,7 @@ const prodConfig: AppConfig = {
   },
   kakao: {
     ...baseConfig.kakao!,
-    redirectUri: process.env.NEXT_PUBLIC_API_URL
-      ? `${process.env.NEXT_PUBLIC_API_URL}/api/auth/kakao/callback`
-      : "https://mpzfullstack-production.up.railway.app/api/auth/kakao/callback",
+    redirectUri: process.env.KAKAO_SOCIAL_LOGIN_REDIRECT_URI || "",
   },
   cors: {
     origin: [
