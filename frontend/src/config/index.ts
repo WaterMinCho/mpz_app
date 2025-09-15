@@ -52,8 +52,8 @@ const baseConfig: Partial<AppConfig> = {
   },
   kakao: {
     clientId: process.env.KAKAO_CLIENT_ID || "",
-    clientSecret: process.env.KAKAO_CLIENT_SECRET || "",
-    redirectUri: process.env.KAKAO_REDIRECT_URI || "",
+    clientSecret: process.env.KAKAO_SOCIAL_LOGIN_CLIENT_SECRET || "",
+    redirectUri: process.env.KAKAO_SOCIAL_LOGIN_REDIRECT_URI || "",
   },
   rateLimit: {
     max: parseInt(process.env.RATE_LIMIT_MAX || "100"),
@@ -264,7 +264,9 @@ export function validateConfig(cfg: AppConfig): void {
   }
 
   if (cfg.env === "prod" && !cfg.kakao.clientSecret) {
-    throw new Error("KAKAO_CLIENT_SECRET must be set in production");
+    throw new Error(
+      "KAKAO_SOCIAL_LOGIN_CLIENT_SECRET must be set in production"
+    );
   }
 
   if (cfg.env !== "test") {

@@ -186,33 +186,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } else {
         console.error("로그아웃 실패:", response.statusText);
         // 에러가 발생해도 클라이언트 상태는 초기화
-        clearAuthState();
+        await clearAuthState();
         router.push("/");
       }
     } catch (error) {
       console.error("로그아웃 중 오류:", error);
       // 에러가 발생해도 클라이언트 상태는 초기화
-      clearAuthState();
+      await clearAuthState();
       router.push("/");
     }
   };
 
   // 인증 상태 초기화 함수
-  const clearAuthState = () => {
-    // 모든 토큰 관련 쿠키 삭제
+  const clearAuthState = async () => {
+    try {
+      // 서버에 로그아웃 요청을 보내서 HttpOnly 쿠키 삭제
+      await instance.post("/auth/logout");
+    } catch (error) {
+      console.error("로그아웃 요청 실패:", error);
+    }
+
+    // 클라이언트에서 접근 가능한 쿠키들만 삭제
     Cookies.remove("access");
     Cookies.remove("refresh");
-    Cookies.remove("access_token");
-    Cookies.remove("refresh_token");
 
-    // 로컬 스토리지 토큰 제거
+    // 로컬 스토리지 토큰 제거 (혹시 남아있을 수 있는 경우)
     if (typeof window !== "undefined") {
       localStorage.removeItem("access_token");
       localStorage.removeItem("refresh_token");
     }
-
-    // Axios 헤더에서 Authorization 제거
-    delete instance.defaults.headers.common["Authorization"];
 
     // 사용자 상태 초기화
     setUser(null);
