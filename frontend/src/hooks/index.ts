@@ -51,7 +51,6 @@ export { useGetCenterProcedureSettings } from "./query/useGetCenterProcedureSett
 export type {
   CenterProcedureSettings,
   ContractTemplate,
-  useGetCenterContractTemplates,
 } from "./query/useGetCenterProcedureSettings";
 export { useGetContractTemplate } from "./query/useGetContractTemplate";
 export { useGetCenterContractTemplates } from "./query/useGetCenterContractTemplates";
