@@ -894,7 +894,7 @@ async def get_related_animals_by_distance(
                 
                 # 같은 지역의 다른 동물들을 가져오기 (거리 기반 정렬)
                 # 실제 거리 계산이 어려우므로 같은 지역 내에서 최신순으로 정렬
-                related_animals = Animal.objects.filter(
+                related_animals = Animal.objects.select_related('center').prefetch_related('animalimage_set').filter(
                     center_id=animal.center_id,  # 같은 보호소
                     protection_status="보호중"  # 보호중인 동물만
                 ).exclude(id=animal_id).order_by('-created_at')[:query.limit]
