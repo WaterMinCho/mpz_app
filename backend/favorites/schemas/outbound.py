@@ -59,7 +59,7 @@ class AnimalFavoriteOut(Schema):
 
 
 class AnimalFavoriteListOut(Schema):
-    """찜한 동물 목록 출력 스키마""""
+    """찜한 동물 목록 출력 스키마"""
     animals: List[AnimalFavoriteOut] = Field(..., description="찜한 동물 목록")
     total: int = Field(..., description="전체 찜한 동물 수")
     page: int = Field(..., description="현재 페이지 번호")
