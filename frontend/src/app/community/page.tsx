@@ -124,20 +124,10 @@ export default function CommunityPage() {
 
   const [activeTab, setActiveTab] = useState("latest");
 
-  // systemTags가 로드된 후 activeTab 업데이트
-  useEffect(() => {
-    if (systemTags && systemTags.length > 0 && activeTab === "latest") {
-      // 기본값은 "latest"로 유지
-    }
-  }, [systemTags, activeTab]);
+  // URL 동기화 없이 프론트 상태로만 필터링
 
-  // API 요청 파라미터 디버깅
-  const apiParams = useMemo(() => {
-    const params = {
-      tags: activeTab !== "latest" ? [activeTab] : undefined,
-    };
-    return params;
-  }, [activeTab]);
+  // API에는 태그 파라미터를 넘기지 않음 (클라이언트 측 필터링)
+  const apiParams = useMemo(() => ({} as const), []);
 
   // 센터권한자용 게시글 조회
   const {
@@ -161,7 +151,7 @@ export default function CommunityPage() {
     const publicPosts = publicPostsData?.data || [];
     const combined = [...centerPosts, ...publicPosts];
     return combined;
-  }, [centerPostsData, publicPostsData, activeTab]);
+  }, [centerPostsData, publicPostsData]);
 
   const postsData = useMemo(() => ({ data: allPosts }), [allPosts]);
   const isLoading = centerPostsLoading || publicPostsLoading;
@@ -256,8 +246,12 @@ export default function CommunityPage() {
   };
 
   const filteredPosts: Post[] = useMemo(() => {
-    return posts;
-  }, [posts]);
+    if (activeTab === "latest") return posts;
+    const selected = activeTab.toLowerCase();
+    return posts.filter((p) =>
+      p.tags?.some((t) => (t.tag_name || "").toLowerCase() === selected)
+    );
+  }, [posts, activeTab]);
 
   const currentUserId = user?.id;
 
