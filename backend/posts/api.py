@@ -98,7 +98,6 @@ async def get_all_public_posts(request: HttpRequest, user_id: str = None, tags: 
             # 시스템 태그 필터링 적용 - PostTag 모델 기반
             if tags:
                 try:
-                    from posts.models import PostTag
                     
                     system_tag_names = [tag.strip() for tag in tags if tag.strip()]
                     print(f"🔍 Public Posts 태그 필터링 시도: {system_tag_names}")
@@ -216,7 +215,6 @@ async def get_mixed_access_posts(request: HttpRequest, user_id: str = None, tags
             # 시스템 태그 필터링 적용 (전체 공개) - PostTag 모델 기반
             if tags:
                 try:
-                    from posts.models import PostTag
                     
                     system_tag_names = [tag.strip() for tag in tags if tag.strip()]
                     print(f"Mixed Posts 태그 필터링 시도: {system_tag_names}")
@@ -396,7 +394,6 @@ async def get_center_posts(request: HttpRequest, user_id: str = None, tags: list
             # 시스템 태그 필터링 적용 - 정확한 태그명 매칭 (대소문자 무시)
             if tags:
                 try:
-                    from posts.models import PostTag
                     system_tag_names = [tag.strip() for tag in tags if tag and str(tag).strip()]
                     print(f"🔍 Center Posts 태그 필터링 시도: {system_tag_names}")
                     print(f"🔍 필터링 전 게시글 수: {posts_query.count()}")
