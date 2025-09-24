@@ -192,7 +192,6 @@ export default function CommunityPage() {
   // 댓글 수를 포함한 CommunityCard 컴포넌트
   const CommunityCardWithComments = ({
     post,
-    index,
   }: {
     post: Post;
     index: number;
@@ -220,7 +219,6 @@ export default function CommunityPage() {
 
     return (
       <div key={post.id}>
-        {(index === 0 || (index + 1) % 3 === 0) && <BannerSection />}
         <div className="pt-4">
           <a href={`/community/${post.id}`} className="block">
             <CommunityCard
@@ -341,7 +339,6 @@ export default function CommunityPage() {
           <div className="space-y-4">
             {[...Array(5)].map((_, index) => (
               <div key={index}>
-                {(index === 0 || (index + 1) % 4 === 0) && <BannerSection />}
                 <div className="pt-4">
                   <CommunityCardSkeleton />
                 </div>
@@ -437,11 +434,15 @@ export default function CommunityPage() {
           tabs={tabs}
           variant="primary"
         />
-        {(() => {
-          return null;
-        })()}
       </div>
-      <div className="flex-1 mx-4 overflow-y-auto scrollbar-hide">
+      {/* 상단 고정 배너 */}
+      <div className="mx-4">
+        <BannerSection />
+      </div>
+      <div
+        className="flex-1 mx-4 overflow-y-auto scrollbar-hide"
+        key={activeTab}
+      >
         {isLoading ? (
           // 로딩 중일 때 스켈레톤 표시
           <div className="space-y-4">
