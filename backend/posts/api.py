@@ -98,7 +98,8 @@ async def get_all_public_posts(request: HttpRequest, user_id: str = Query(None),
             if tags:
                 try:
                     system_tag_names = [tag.strip() for tag in tags if tag.strip()]
-                    print(f"Public Posts 태그 필터링 시도: {system_tag_names}")
+                    print(f"🔍 Public Posts 태그 필터링 시도: {system_tag_names}")
+                    print(f"🔍 필터링 전 게시글 수: {posts_query.count()}")
                     
                     if system_tag_names:
                         # 대소문자 무시 정확 일치 정규식으로 필터링
@@ -108,10 +109,14 @@ async def get_all_public_posts(request: HttpRequest, user_id: str = Query(None),
                         posts_query = posts_query.filter(
                             posttag__tag_name__iregex=pattern
                         ).distinct()
-                        print(f"필터링 후 게시글 수: {posts_query.count()}")
+                        print(f"🔍 필터링 후 게시글 수: {posts_query.count()}")
+                        
+                        # 실제로 매칭되는 태그들 확인
+                        matching_tags = PostTag.objects.filter(tag_name__in=system_tag_names).values_list('tag_name', flat=True).distinct()
+                        print(f"🔍 실제 매칭되는 태그들: {list(matching_tags)}")
                         
                 except Exception as e:
-                    print(f"시스템 태그 필터링 오류: {e}")
+                    print(f"❌ 시스템 태그 필터링 오류: {e}")
                     # 오류 발생 시 필터링 없이 진행
             
             # 정렬 적용
@@ -366,19 +371,18 @@ async def get_center_posts(request: HttpRequest, user_id: str = Query(None), tag
                 status='입양완료'
             ).exists()
             
-            # 센터 권한자, 본인 게시글, 입양 완료 이력이 있는 사용자 조회
-            posts_query = Post.objects.select_related('user').filter(
-                models.Q(is_all_access=True) |  # 전체 공개
-                models.Q(user=current_user)     # 본인 글
+            # 접근 가능한 범위를 하나의 Q 조건으로 구성 (UNION 대신)
+            access_condition = (
+                models.Q(is_all_access=True) |               # 전체 공개
+                models.Q(user=current_user)                  # 본인 글
             )
-            
-            # 센터 권한자이거나 입양 완료 이력이 있으면 센터 권한자 글도 볼 수 있음
-            if (current_user.user_type in ['센터관리자', '최고관리자'] or 
-                has_adoption_history):
-                posts_query = posts_query | Post.objects.select_related('user').filter(
+            if (current_user.user_type in ['센터관리자', '최고관리자'] or has_adoption_history):
+                access_condition = access_condition | (
                     models.Q(user__user_type__in=['센터관리자', '최고관리자']) |  # 센터 권한자 글
-                    models.Q(is_all_access=False)  # 제한 공개 글
+                    models.Q(is_all_access=False)                                  # 제한 공개 글
                 )
+
+            posts_query = Post.objects.select_related('user').filter(access_condition)
             
             # 필터링 적용
             if user_id:
@@ -388,7 +392,7 @@ async def get_center_posts(request: HttpRequest, user_id: str = Query(None), tag
             if is_all_access is not None:
                 posts_query = posts_query.filter(is_all_access=is_all_access)
             
-            # 시스템 태그 필터링 적용 - PostTag 모델 기반
+            # 시스템 태그 필터링 적용 - 정확한 태그명 매칭 (대소문자 무시)
             if tags:
                 try:
                     system_tag_names = [tag.strip() for tag in tags if tag.strip()]
@@ -404,8 +408,7 @@ async def get_center_posts(request: HttpRequest, user_id: str = Query(None), tag
                         print(f"필터링 후 게시글 수: {posts_query.count()}")
                         
                 except Exception as e:
-                    print(f"시스템 태그 필터링 오류: {e}")
-                    # 오류 발생 시 필터링 없이 진행
+                    print(f"❌ 시스템 태그 필터링 오류: {e}")
             
             posts = posts_query.order_by('-created_at')
             
