@@ -1410,3 +1410,5 @@ WARNING 2025-10-04 03:17:35,401 log 87726 6265597952 Not Found: /socket.io/
 WARNING 2025-10-04 03:17:35,401 basehttp 87726 6265597952 "GET /socket.io/?EIO=4&transport=websocket HTTP/1.1" 404 2654
 WARNING 2025-10-04 03:17:41,127 log 87726 6198292480 Not Found: /socket.io/
 WARNING 2025-10-04 03:17:41,127 basehttp 87726 6198292480 "GET /socket.io/?EIO=4&transport=websocket HTTP/1.1" 404 2654
+INFO 2025-10-04 03:20:56,398 autoreload 87726 8525258944 /Users/rutdev/mpz_fullstack/backend/animals/api.py changed, reloading.
+INFO 2025-10-04 03:20:57,448 autoreload 92518 8525258944 Watching for file changes with StatReloader
