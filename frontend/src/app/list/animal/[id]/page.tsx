@@ -480,6 +480,7 @@ export default function AnimalDetailPage({ params }: AnimalDetailPageProps) {
             specialNotes: animal.special_notes,
             healthNotes: animal.health_notes,
             basicTraining: animal.basic_training?.toString() || null,
+            trainerName: animal.trainer_name,
             trainerComment: animal.trainer_comment,
             centerId: animal.center_id,
             waitingDays: animal.waiting_days,
