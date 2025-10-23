@@ -151,26 +151,19 @@ export default function CenterProcess() {
             ) : questionFormsData?.questions &&
               questionFormsData.questions.length > 0 ? (
               <div className="w-full flex flex-col">
-                {questionFormsData.questions
-                  .sort((a, b) => (a.sequence || 0) - (b.sequence || 0))
-                  .map((question, index) => (
-                    <CustomInput
-                      key={question.id}
-                      variant="text"
-                      placeholder={`질문${index + 1}`}
-                      value={question.question}
-                      readOnly={true}
-                      className="cursor-pointer hover:bg-gray-50 rounded-md transition-colors"
-                      onClick={() =>
-                        router.push("/centerpage/process/customform")
-                      }
-                    />
-                  ))}
+                <CustomInput
+                  variant="text"
+                  placeholder="입양신청서"
+                  value={`입양신청서 (${questionFormsData.questions.length}개 질문)`}
+                  readOnly={true}
+                  className="cursor-pointer hover:bg-gray-50 rounded-md transition-colors"
+                  onClick={() => router.push("/centerpage/process/customform")}
+                />
               </div>
             ) : (
               <CustomInput
                 variant="text"
-                placeholder="등록된 질문이 없습니다"
+                placeholder="등록된 입양신청서가 없습니다"
                 readOnly={true}
                 className="text-gr"
               />
@@ -330,7 +323,7 @@ export default function CenterProcess() {
           </InfoCard>
         </div>
       </div>
-      <div className="sticky bottom-0 left-0 right-0 pb-6 pt-2 px-5">
+      <div className="sticky bottom-0 left-0 right-0 pb-6 pt-2 px-5 bg-white">
         <BigButton
           className="w-full"
           onClick={handleSave}

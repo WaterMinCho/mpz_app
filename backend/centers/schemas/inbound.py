@@ -79,6 +79,7 @@ class CenterUpdateIn(Schema):
     image_url: Optional[str] = Field(None, max_length=500, description="센터 이미지 URL")
     has_volunteer: Optional[bool] = Field(None, description="봉사활동 여부")
     has_foster_care: Optional[bool] = Field(None, description="임시보호 여부")
+    call_available_time: Optional[str] = Field(None, max_length=200, description="통화 가능 시간")
 
 
 class CenterAnimalsQueryIn(Schema):

@@ -26,13 +26,12 @@ export function ImageCarouselModal({
 
   useEffect(() => {
     if (open) {
+      const originalOverflow = document.body.style.overflow;
       document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "unset";
+      return () => {
+        document.body.style.overflow = originalOverflow;
+      };
     }
-    return () => {
-      document.body.style.overflow = "unset";
-    };
   }, [open]);
 
   if (!open) return null;
@@ -47,7 +46,7 @@ export function ImageCarouselModal({
 
   return (
     <div
-      className="fixed inset-0 z-[10001] bg-black/70 flex items-center justify-center"
+      className="fixed inset-0 z-[10001] bg-black/70 flex items-center justify-center animate-in fade-in-0 duration-200"
       onClick={onClose}
     >
       {/* 닫기 버튼 */}
@@ -95,7 +94,7 @@ export function ImageCarouselModal({
             alt={`이미지 ${currentIndex + 1}`}
             width={1200}
             height={1200}
-            className="object-contain max-w-full max-h-[90vh]"
+            className="object-contain max-w-full max-h-[90vh] transition-opacity duration-200"
             unoptimized
           />
         </div>

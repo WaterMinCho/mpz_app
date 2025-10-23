@@ -86,13 +86,23 @@ const transformApiResponseToAnimal = (apiAnimal: ApiAnimalResponse): Animal => {
       apiAnimal.protection_status as Animal["protection_status"],
     adoption_status: apiAnimal.adoption_status as Animal["adoption_status"],
     waitingDays: apiAnimal.waiting_days,
-    activityLevel: apiAnimal.activity_level.toString(), // 숫자를 문자열로 변환
-    sensitivity: apiAnimal.sensitivity.toString(), // 숫자를 문자열로 변환
-    sociability: apiAnimal.sociability.toString(), // 숫자를 문자열로 변환
-    separationAnxiety: apiAnimal.separation_anxiety.toString(), // 숫자를 문자열로 변환
+    activityLevel: apiAnimal.activity_level
+      ? apiAnimal.activity_level.toString()
+      : null,
+    sensitivity: apiAnimal.sensitivity
+      ? apiAnimal.sensitivity.toString()
+      : null,
+    sociability: apiAnimal.sociability
+      ? apiAnimal.sociability.toString()
+      : null,
+    separationAnxiety: apiAnimal.separation_anxiety
+      ? apiAnimal.separation_anxiety.toString()
+      : null,
     specialNotes: apiAnimal.special_notes,
     healthNotes: apiAnimal.health_notes,
-    basicTraining: apiAnimal.basic_training.toString(), // 숫자를 문자열로 변환
+    basicTraining: apiAnimal.basic_training
+      ? apiAnimal.basic_training.toString()
+      : null,
     trainerName: apiAnimal.trainer_name,
     trainerComment: apiAnimal.trainer_comment,
     announceNumber: apiAnimal.announce_number,

@@ -42,6 +42,7 @@ def _build_center_response(center):
         is_subscribed=center.is_subscribed,
         has_volunteer=center.has_volunteer,
         has_foster_care=center.has_foster_care,
+        call_available_time=center.call_available_time,
         created_at=center.created_at.isoformat(),
         updated_at=center.updated_at.isoformat(),
     )

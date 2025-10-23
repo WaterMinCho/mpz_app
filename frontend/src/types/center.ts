@@ -28,6 +28,7 @@ export interface Center extends CenterBasic {
   isPublic?: boolean;
   hasFosterCare?: boolean;
   hasVolunteer?: boolean;
+  callAvailableTime?: string | null;
   isFavorited?: boolean; // 찜하기 상태 추가
 }
 
@@ -100,6 +101,7 @@ export interface RawCenterResponse {
   is_subscribed: boolean;
   has_volunteer: boolean;
   has_foster_care: boolean;
+  call_available_time: string | null;
   created_at: string;
   updated_at: string;
   is_fav?: boolean; // 찜하기 상태 추가
@@ -139,6 +141,7 @@ export function transformRawCenterToCenter(raw: RawCenterResponse): Center {
     imageUrl: raw.image_url,
     hasFosterCare: raw.has_foster_care,
     hasVolunteer: raw.has_volunteer,
+    callAvailableTime: raw.call_available_time,
     isSubscriber: raw.is_subscribed,
     createdAt: raw.created_at,
     updatedAt: raw.updated_at,
@@ -204,6 +207,7 @@ export interface UpdateCenterSettingsRequest {
   image_url?: string;
   has_foster_care?: boolean;
   has_volunteer?: boolean;
+  call_available_time?: string;
 }
 
 export interface UpdateCenterSettingsResponse {

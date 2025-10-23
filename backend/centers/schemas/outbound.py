@@ -70,6 +70,7 @@ class CenterOut(Schema):
     is_subscribed: Optional[bool] = Field(None, description="구독 여부")
     has_volunteer: Optional[bool] = Field(None, description="봉사활동 여부")
     has_foster_care: Optional[bool] = Field(None, description="임시보호 여부")
+    call_available_time: Optional[str] = Field(None, description="통화 가능 시간")
     created_at: str = Field(..., description="생성일시 (ISO 형식)")
     updated_at: str = Field(..., description="수정일시 (ISO 형식)")
 
