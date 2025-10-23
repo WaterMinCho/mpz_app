@@ -58,6 +58,7 @@ class Center(BaseModel):
     has_foster_care = models.BooleanField(default=False, help_text="임시보호 여부")
     show_phone_number = models.BooleanField(default=True, help_text="전화번호 노출 여부")
     show_location = models.BooleanField(default=True, help_text="위치 노출 여부")
+    call_available_time = models.CharField(max_length=200, blank=True, null=True, help_text="통화 가능 시간")
     
     # 공공데이터 관련 필드 (최소한만 유지)
     public_reg_no = models.CharField(max_length=50, blank=True, null=True, help_text="공공데이터 보호소번호", unique=True)

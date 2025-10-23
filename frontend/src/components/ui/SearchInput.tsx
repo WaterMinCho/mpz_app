@@ -44,13 +44,12 @@ export function SearchInput({
   return (
     <div
       className={containerStyle}
-      onClick={readOnly ? onSearch : undefined}
-      style={{ cursor: readOnly ? "pointer" : "default" }}
+      onClick={onSearch}
+      style={{ cursor: "pointer" }}
     >
       <input
         className={cn(
-          "flex-1 outline-none bg-transparent text-body",
-          readOnly ? "cursor-pointer" : "cursor-text",
+          "flex-1 outline-none bg-transparent text-body cursor-pointer",
           `placeholder:${textColor}`
         )}
         placeholder={placeholder}
@@ -65,7 +64,10 @@ export function SearchInput({
           "ml-1 p-1 rounded-full flex items-center justify-center",
           textColor
         )}
-        onClick={onSearch}
+        onClick={(e) => {
+          e.stopPropagation();
+          onSearch?.();
+        }}
         tabIndex={-1}
       >
         <MagnifyingGlass size={16} weight="bold" />

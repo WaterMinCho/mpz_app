@@ -31,12 +31,16 @@ class R2Client:
       R2_ACCOUNT_ID, R2_ACCESS_KEY, R2_SECRET_KEY, R2_BUCKET, R2_ENDPOINT, R2_PUBLIC_BASE_URL
     """
     def __init__(self):
-        self.account_id = os.getenv("R2_ACCOUNT_ID")
-        self.access_key = os.getenv("R2_ACCESS_KEY")
-        self.secret_key = os.getenv("R2_SECRET_KEY")
-        self.bucket = os.getenv("R2_BUCKET")
-        self.endpoint = os.getenv("R2_ENDPOINT")
-        self.public_base_url = os.getenv("R2_PUBLIC_BASE_URL")
+        from django.conf import settings
+        from decouple import config
+        
+        # Django 설정에서 먼저 시도하고, 없으면 decouple로 직접 읽기
+        self.account_id = getattr(settings, 'R2_ACCOUNT_ID', None) or config('R2_ACCOUNT_ID', default='')
+        self.access_key = getattr(settings, 'R2_ACCESS_KEY', None) or config('R2_ACCESS_KEY', default='')
+        self.secret_key = getattr(settings, 'R2_SECRET_KEY', None) or config('R2_SECRET_KEY', default='')
+        self.bucket = getattr(settings, 'R2_BUCKET', None) or config('R2_BUCKET', default='')
+        self.endpoint = getattr(settings, 'R2_ENDPOINT', None) or config('R2_ENDPOINT', default='')
+        self.public_base_url = getattr(settings, 'R2_PUBLIC_BASE_URL', None) or config('R2_PUBLIC_BASE_URL', default='')
 
         if not all([self.account_id, self.access_key, self.secret_key, self.bucket, self.endpoint, self.public_base_url]):
             raise ValueError(
@@ -81,7 +85,17 @@ class R2Client:
             ContentType=content_type,
         )
         logger.info(f"[R2] 업로드 성공 key={key} len={len(blob)} ct={content_type}")
-        return resp
+        
+        # 공개 URL 생성
+        public_url = f"{self.public_base_url}/{key}"
+        
+        return {
+            'url': public_url,
+            'key': key,
+            'size': len(blob),
+            'content_type': content_type,
+            'response': resp
+        }
 
     def download_file(self, key: str) -> bytes:
         resp = self.client.get_object(Bucket=self.bucket, Key=key)

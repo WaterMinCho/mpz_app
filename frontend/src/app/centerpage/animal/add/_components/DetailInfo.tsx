@@ -46,28 +46,13 @@ export default function DetailInfo({ data, onChange }: DetailInfoProps) {
   const toggleExpanded = () => {
     setIsExpanded(!isExpanded);
   };
-  const handlePersonalitySelection = (category: keyof PersonalityData, value: number) => {
+  const handlePersonalitySelection = (
+    category: keyof PersonalityData,
+    value: number
+  ) => {
     onChange({
       personality: {
         ...data.personality,
-        [category]: value,
-      },
-    });
-  };
-
-  const handleSocialitySelection = (category: keyof SocialityData, value: number) => {
-    onChange({
-      sociality: {
-        ...data.sociality,
-        [category]: value,
-      },
-    });
-  };
-
-  const handleSeparationAnxietySelection = (category: keyof SeparationAnxietyDetailData, value: number) => {
-    onChange({
-      separationAnxietyDetail: {
-        ...data.separationAnxietyDetail,
         [category]: value,
       },
     });
@@ -86,50 +71,6 @@ export default function DetailInfo({ data, onChange }: DetailInfoProps) {
             variant="1"
             selected={data.personality[category] === value}
             onClick={() => handlePersonalitySelection(category, value)}
-            className="flex items-center justify-center w-full h-12 text-sm font-medium"
-          >
-            {value}
-          </SelectButton>
-        ))}
-      </div>
-    </div>
-  );
-
-  const renderSocialityButtons = (
-    category: keyof SocialityData,
-    label: string
-  ) => (
-    <div className="flex flex-col w-full gap-2">
-      <label className="h5 text-dg">{label}</label>
-      <div className="grid w-full grid-cols-5 gap-2">
-        {[1, 2, 3, 4, 5].map((value) => (
-          <SelectButton
-            key={value}
-            variant="1"
-            selected={data.sociality[category] === value}
-            onClick={() => handleSocialitySelection(category, value)}
-            className="flex items-center justify-center w-full h-12 text-sm font-medium"
-          >
-            {value}
-          </SelectButton>
-        ))}
-      </div>
-    </div>
-  );
-
-  const renderSeparationAnxietyButtons = (
-    category: keyof SeparationAnxietyDetailData,
-    label: string
-  ) => (
-    <div className="flex flex-col w-full gap-2">
-      <label className="h5 text-dg">{label}</label>
-      <div className="grid w-full grid-cols-5 gap-2">
-        {[1, 2, 3, 4, 5].map((value) => (
-          <SelectButton
-            key={value}
-            variant="1"
-            selected={data.separationAnxietyDetail[category] === value}
-            onClick={() => handleSeparationAnxietySelection(category, value)}
             className="flex items-center justify-center w-full h-12 text-sm font-medium"
           >
             {value}
@@ -170,28 +111,6 @@ export default function DetailInfo({ data, onChange }: DetailInfoProps) {
             {renderPersonalityButtons("sensitivity", "민감도")}
             {renderPersonalityButtons("sociability", "사회성")}
             {renderPersonalityButtons("separationAnxiety", "분리불안")}
-          </div>
-
-          {/* 사회성 세부 항목 */}
-          <div className="flex flex-col gap-6">
-            <h6 className="font-medium text-dg">사회성 세부 항목</h6>
-            {renderSocialityButtons("confidence", "새로운 자극/상황 적극성")}
-            {renderSocialityButtons("independence", "독립성 있는 행동")}
-            {renderSocialityButtons("physicalContact", "사람 터치 긍정적 수용")}
-            {renderSocialityButtons("handlingAcceptance", "몸 만지기 저항감")}
-            {renderSocialityButtons("strangersAttitude", "낯선 사람 반응")}
-            {renderSocialityButtons("objectsAttitude", "낯선 사물 반응")}
-            {renderSocialityButtons("environmentAttitude", "낯선 환경 반응")}
-            {renderSocialityButtons("dogsAttitude", "낯선 강아지 반응")}
-          </div>
-
-          {/* 분리불안 세부 항목 */}
-          <div className="flex flex-col gap-6">
-            <h6 className="font-medium text-dg">분리불안 세부 항목</h6>
-            {renderSeparationAnxietyButtons("copingAbility", "낯선 공간 혼자 남겨졌을 때 반응")}
-            {renderSeparationAnxietyButtons("playfulnessLevel", "장난감/바디시그널 놀이 유도 반응")}
-            {renderSeparationAnxietyButtons("walkabilityLevel", "산책 과정에서 모습")}
-            {renderSeparationAnxietyButtons("groomingAcceptanceLevel", "그루밍 진행 시 모습")}
           </div>
         </div>
       )}

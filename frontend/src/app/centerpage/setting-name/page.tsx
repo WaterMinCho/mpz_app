@@ -30,6 +30,7 @@ export default function CenterSettingName() {
   const [centerName, setCenterName] = useState("");
   const [centerNumber, setCenterNumber] = useState("");
   const [address, setAddress] = useState("");
+  const [callAvailableTime, setCallAvailableTime] = useState("");
   const [isPublicAddress, setIsPublicAddress] = useState("모두에게 공개");
   const [isTemporaryAdoption, setIsTemporaryAdoption] = useState("가능");
   const [isVolunteering, setIsVolunteering] = useState("가능");
@@ -56,6 +57,7 @@ export default function CenterSettingName() {
       setCenterName(myCenter.name || "");
       setCenterNumber(myCenter.centerNumber || "");
       setAddress(myCenter.location || "");
+      setCallAvailableTime(myCenter.callAvailableTime || "");
       setIsPublicAddress(
         myCenter.isPublic ? "모두에게 공개" : "입양자에게만 공개"
       );
@@ -103,6 +105,11 @@ export default function CenterSettingName() {
     // 필수 필드 검증
     if (!centerName.trim()) {
       showToastMessage("보호센터 이름을 입력해주세요.");
+      return;
+    }
+
+    if (!centerNumber.trim()) {
+      showToastMessage("보호센터 번호를 입력해주세요.");
       return;
     }
 
@@ -181,6 +188,7 @@ export default function CenterSettingName() {
         name: centerName.trim(),
         center_number: centerNumber.trim() || undefined,
         location: address.trim(),
+        call_available_time: callAvailableTime.trim() || undefined,
         is_public: isPublicAddress === "모두에게 공개",
         adoption_price: adoptionPriceNumber,
         has_foster_care: isTemporaryAdoption === "가능",
@@ -307,7 +315,7 @@ export default function CenterSettingName() {
           variant="primary"
           label="보호센터 번호"
           placeholder="000-0000-0000"
-          required={false}
+          required={true}
           value={centerNumber}
           onChange={(e) => setCenterNumber(e.target.value)}
         />
@@ -333,6 +341,13 @@ export default function CenterSettingName() {
           )}
           <CustomInput
             variant="primary"
+            label="통화 가능 시간"
+            placeholder="예) 평일 09:00-18:00, 주말 10:00-16:00"
+            value={callAvailableTime}
+            onChange={(e) => setCallAvailableTime(e.target.value)}
+          />
+          <CustomInput
+            variant="primary"
             label="책임비"
             placeholder="예)100,000"
             required={true}
@@ -343,27 +358,27 @@ export default function CenterSettingName() {
           <h5 className="text-dg">
             임시보호 가능 여부 <span className="text-brand">*</span>
           </h5>
-        {/*   {isSubscriber && ( */}
-            <CustomInput
-              variant="Variant7"
-              value={isTemporaryAdoption}
-              onChangeOption={setIsTemporaryAdoption}
-              twoOptions={["가능", "불가능"]}
-              required={true}
-            />
+          {/*   {isSubscriber && ( */}
+          <CustomInput
+            variant="Variant7"
+            value={isTemporaryAdoption}
+            onChangeOption={setIsTemporaryAdoption}
+            twoOptions={["가능", "불가능"]}
+            required={true}
+          />
           {/* )} */}
           <h5 className="text-dg">
             봉사활동 가능 여부 <span className="text-brand">*</span>
           </h5>
-        {/*   {isSubscriber && ( */}
-            <CustomInput
-              variant="Variant7"
-              value={isVolunteering}
-              onChangeOption={setIsVolunteering}
-              twoOptions={["가능", "불가능"]}
-              required={true}
-            />
-         {/*  )} */}
+          {/*   {isSubscriber && ( */}
+          <CustomInput
+            variant="Variant7"
+            value={isVolunteering}
+            onChangeOption={setIsVolunteering}
+            twoOptions={["가능", "불가능"]}
+            required={true}
+          />
+          {/*  )} */}
         </div>
       </div>
       <div className="sticky bottom-0 left-0 right-0 px-5 pt-2 pb-6">

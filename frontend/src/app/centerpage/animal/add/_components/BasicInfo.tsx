@@ -228,7 +228,6 @@ export default function BasicInfo({
     setBreedSearchTerm("");
   };
 
-
   const handleAddImage = () => {
     if (fileInputRef.current) {
       fileInputRef.current.click();
@@ -316,6 +315,16 @@ export default function BasicInfo({
     });
   };
 
+  const handleDetailAddressChange = (detailAddress: string) => {
+    // 기존 주소가 있으면 합치고, 없으면 상세주소만 저장
+    const currentLocation = data.foundLocation;
+    if (currentLocation && !currentLocation.includes(detailAddress)) {
+      onChange({ foundLocation: `${currentLocation} ${detailAddress}`.trim() });
+    } else {
+      onChange({ foundLocation: detailAddress });
+    }
+  };
+
   const showToastMessage = (
     message: string,
     type: "success" | "error" = "success"
@@ -385,7 +394,16 @@ export default function BasicInfo({
           variant="tagdropdown"
           label="보호 상태"
           placeholder="보호 상태를 선택해주세요"
-          options={["보호중", "임시보호", "안락사", "자연사", "반환", "기증", "방사", "입양완료"]}
+          options={[
+            "보호중",
+            "임시보호",
+            "안락사",
+            "자연사",
+            "반환",
+            "기증",
+            "방사",
+            "입양완료",
+          ]}
           value={data.protection_status}
           onChangeOption={(value) => onChange({ protection_status: value })}
           required={true}
@@ -466,34 +484,48 @@ export default function BasicInfo({
         />
         <div className="flex flex-col gap-2">
           <h5 className="text-dg">발견장소</h5>
-          <div onClick={handleFoundLocationSearch} className="cursor-pointer">
-            <SearchInput
-              variant="variant2"
-              placeholder="확실하지 않다면 추정으로 입력해주세요."
+          <div className="flex flex-col gap-2">
+            <div onClick={handleFoundLocationSearch} className="cursor-pointer">
+              <SearchInput
+                variant="variant2"
+                placeholder="주소를 검색해보세요"
+                value={data.foundLocation}
+                onChange={(e) => onChange({ foundLocation: e.target.value })}
+                onSearch={handleFoundLocationSearch}
+              />
+            </div>
+            <CustomInput
+              variant="primary"
+              placeholder="상세주소를 입력해주세요 (예: 101동 201호, 상가 1층)"
               value={data.foundLocation}
-              onChange={(e) => onChange({ foundLocation: e.target.value })}
-              onSearch={handleFoundLocationSearch}
+              onChange={(e) => handleDetailAddressChange(e.target.value)}
             />
           </div>
         </div>
+        <div className="flex flex-col gap-2">
+          <h5 className="text-dg">성격</h5>
+          <textarea
+            className="w-full px-4 py-3 border border-gray-200 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="예) 사람을 매우 잘따름"
+            value={data.personality}
+            onChange={(e) => onChange({ personality: e.target.value })}
+            rows={3}
+          />
+        </div>
+        <div className="flex flex-col gap-2">
+          <h5 className="text-dg">특이사항</h5>
+          <textarea
+            className="w-full px-4 py-3 border border-gray-200 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="예) 기다려, 앉아 가능"
+            value={data.specialNotes}
+            onChange={(e) => onChange({ specialNotes: e.target.value })}
+            rows={3}
+          />
+        </div>
         <CustomInput
           variant="primary"
-          label="성격"
-          placeholder="예) 사람을 매우 잘따름"
-          value={data.personality}
-          onChange={(e) => onChange({ personality: e.target.value })}
-        />
-        <CustomInput
-          variant="primary"
-          label="특이사항"
-          placeholder="예) 기다려, 앉아 가능"
-          value={data.specialNotes}
-          onChange={(e) => onChange({ specialNotes: e.target.value })}
-        />
-        <CustomInput
-          variant="primary"
-          label="건강 특징"
-          placeholder="예) 심상사상충 치료중"
+          label="건강 및 의료기록"
+          placeholder="예) 심장사상충 치료 시작 2025.05.24"
           value={data.healthNotes}
           onChange={(e) => onChange({ healthNotes: e.target.value })}
         />
@@ -501,7 +533,7 @@ export default function BasicInfo({
           <CustomInput
             key={index}
             variant="primary"
-            label={`추가 특징 ${index + 1}`}
+            label="건강데이터 추가"
             placeholder="예) 산책 시 줄당김 없음"
             value={feature}
             onChange={(e) => {
@@ -512,7 +544,7 @@ export default function BasicInfo({
           />
         ))}
         <AddButton onClick={() => setExtraFeatures((prev) => [...prev, ""])}>
-          특징 추가
+          건강데이터 추가
         </AddButton>
 
         {/* 센터 입소일 - CustomInput 사용 */}

@@ -138,7 +138,7 @@ export default function AnimalBasicInfo({
           src={currentImageUrl}
           alt={`${name} - 이미지 ${currentImageIndex}`}
           fill
-          className="object-cover cursor-pointer"
+          className="object-cover cursor-pointer transition-opacity duration-200"
           unoptimized={currentImageUrl.includes("openapi.animal.go.kr")}
           onClick={() => onImageClick?.(validImageUrls, currentImageIndex)}
           onError={(e) => {
