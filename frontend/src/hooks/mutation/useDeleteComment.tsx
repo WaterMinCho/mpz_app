@@ -13,7 +13,6 @@ export const useDeleteComment = () => {
 
   return useMutation({
     mutationFn: async ({
-      postId,
       commentId,
     }: {
       postId: string;

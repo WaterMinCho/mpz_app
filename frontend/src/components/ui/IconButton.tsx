@@ -8,7 +8,7 @@ interface IconButtonProps {
   size?: "iconM" | "iconS" | "imgM";
   label?: string;
   className?: string;
-  onClick?: () => void;
+  onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
   disabled?: boolean;
 }
 
