@@ -5,7 +5,7 @@ from centers.models import Center, AdoptionContractTemplate, QuestionForm, Prese
 
 @admin.register(Center)
 class CenterAdmin(admin.ModelAdmin):
-    list_display = ['name', 'owner', 'region', 'verified', 'is_public', 'is_subscribed', 'has_volunteer', 'has_foster_care', 'show_phone_number', 'show_location', 'created_at']
+    list_display = ['name', 'owner', 'region', 'verified', 'is_public', 'is_subscribed', 'has_volunteer', 'has_foster_care', 'show_phone_number', 'show_location', 'call_available_time', 'created_at']
     list_filter = ['region', 'verified', 'is_public', 'is_subscribed', 'has_monitoring', 'has_volunteer', 'has_foster_care', 'show_phone_number', 'show_location']
     search_fields = ['name', 'owner__username', 'center_number', 'region']
     list_editable = ['verified', 'is_public', 'is_subscribed', 'has_volunteer', 'has_foster_care', 'show_phone_number', 'show_location']
@@ -16,7 +16,7 @@ class CenterAdmin(admin.ModelAdmin):
             'fields': ('owner', 'name', 'center_number', 'description', 'image_url')
         }),
         ('위치 정보', {
-            'fields': ('location', 'region', 'phone_number', 'show_location', 'show_phone_number')
+            'fields': ('location', 'region', 'phone_number', 'call_available_time', 'show_location', 'show_phone_number')
         }),
         ('입양 관련', {
             'fields': ('adoption_procedure', 'adoption_guidelines', 'adoption_price')

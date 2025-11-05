@@ -113,7 +113,11 @@ export function BottomSheet<T = string>({
           {(title || description) && (
             <div className="px-4 pt-3 pb-1">
               {title && <h2 className="text-bk mb-1">{title}</h2>}
-              {description && <p className="body text-dg">{description}</p>}
+              {description && (
+                <p className="body text-dg whitespace-pre-line">
+                  {description}
+                </p>
+              )}
             </div>
           )}
 
@@ -176,7 +180,7 @@ export function BottomSheet<T = string>({
           {/* 서브 텍스트 */}
           {description && (
             <div className="px-4 -mt-2 mb-3">
-              <p className="body text-dg">{description}</p>
+              <p className="body text-dg whitespace-pre-line">{description}</p>
             </div>
           )}
 
@@ -257,7 +261,11 @@ export function BottomSheet<T = string>({
               />
             </div>
           )}
-          {description && <p className="body text-dg mb-4">{description}</p>}
+          {description && (
+            <p className="body text-dg mb-4 whitespace-pre-line">
+              {description}
+            </p>
+          )}
           <div className="flex">
             <BigButton
               variant="primary"
@@ -285,7 +293,11 @@ export function BottomSheet<T = string>({
               />
             </div>
           )}
-          {description && <p className="body text-dg mb-4">{description}</p>}
+          {description && (
+            <p className="body text-dg mb-4 whitespace-pre-line">
+              {description}
+            </p>
+          )}
           <div className="flex gap-3">
             <BigButton
               variant="primary"

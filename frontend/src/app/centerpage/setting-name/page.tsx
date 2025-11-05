@@ -30,6 +30,7 @@ export default function CenterSettingName() {
   const [centerName, setCenterName] = useState("");
   const [centerNumber, setCenterNumber] = useState("");
   const [address, setAddress] = useState("");
+  const [addressDetail, setAddressDetail] = useState("");
   const [callAvailableTime, setCallAvailableTime] = useState("");
   const [isPublicAddress, setIsPublicAddress] = useState("모두에게 공개");
   const [isTemporaryAdoption, setIsTemporaryAdoption] = useState("가능");
@@ -41,8 +42,6 @@ export default function CenterSettingName() {
   // 토스트 상태
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
-
-  const isSubscriber = myCenter?.isSubscriber === true;
 
   // 토스트 표시 함수
   const showToastMessage = (message: string) => {
@@ -323,22 +322,21 @@ export default function CenterSettingName() {
           <h5 className="text-dg">
             보호센터 주소 <span className="text-brand">*</span>
           </h5>
-          <SearchInput
-            variant="variant2"
-            placeholder="보호센터 주소를 입력해주세요."
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
-            onSearch={handleAddressSearch}
-          />
-          {isSubscriber && (
-            <CustomInput
-              variant="Variant7"
-              value={isPublicAddress}
-              onChangeOption={setIsPublicAddress}
-              twoOptions={["모두에게 공개", "입양자에게만 공개"]}
-              required={true}
+          <div className="flex flex-col">
+            <SearchInput
+              variant="variant2"
+              placeholder="보호센터 주소를 입력해주세요."
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              onSearch={handleAddressSearch}
             />
-          )}
+            <CustomInput
+              variant="primary"
+              placeholder="상세주소를 입력해주세요."
+              value={addressDetail}
+              onChange={(e) => setAddressDetail(e.target.value)}
+            />
+          </div>
           <CustomInput
             variant="primary"
             label="통화 가능 시간"
