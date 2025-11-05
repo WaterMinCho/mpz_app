@@ -690,7 +690,7 @@ export default function AnimalDetailPage({ params }: AnimalDetailPageProps) {
         title="센터로 전화해주세요!"
         description={`센터 전화번호: ${
           center?.phoneNumber || "연락처 정보 없음"
-        }`}
+        } \n 전화 가능시간: ${center?.callAvailableTime || "정보 없음"}`}
         rightButtonText="전화 연결하기"
         onRightClick={() => {
           if (center?.phoneNumber) {
@@ -739,7 +739,7 @@ export default function AnimalDetailPage({ params }: AnimalDetailPageProps) {
         title="입양 절차 안내"
         description={center?.adoptionProcedure || "입양 절차 정보가 없습니다."}
         variant="variant1"
-        leftButtonText="나중에 하기"
+        leftButtonText="전화하기"
         onLeftClick={() => setShowAdoptionProcedureModal(false)}
         rightButtonText="입양 신청하기"
         onRightClick={handleAdoptionProcedureConfirm}
