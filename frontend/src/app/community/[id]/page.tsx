@@ -13,6 +13,7 @@ import { CustomModal } from "@/components/ui/CustomModal";
 import { Toast } from "@/components/ui/Toast";
 import { IconButton } from "@/components/ui/IconButton";
 import { ImageCarouselModal } from "@/components/ui/ImageCarouselModal";
+import { PetCard } from "@/components/ui/PetCard";
 import {
   CommunityDetailSkeleton,
   CommentSectionSkeleton,
@@ -22,9 +23,11 @@ import {
   useGetCenterPostDetail,
   useGetComments,
   useDeletePost,
+  useGetAnimalById,
 } from "@/hooks";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useKakaoSDK } from "@/hooks/useKakaoSDK";
+import { transformRawAnimalToPetCard } from "@/types/animal";
 
 export default function CommunityDetailPage() {
   const params = useParams();
@@ -88,6 +91,12 @@ export default function CommunityDetailPage() {
   // 게시글 데이터
   const post = postDetailData?.post;
   const comments = commentsData?.data || [];
+  const animalId = post?.animal_id ?? null;
+  const { data: animalData, isLoading: isAnimalLoading } =
+    useGetAnimalById(animalId);
+  const petCardData = animalData
+    ? transformRawAnimalToPetCard(animalData)
+    : null;
   // 로딩 상태 관리
   useEffect(() => {
     if (postDetailData && post) {
@@ -383,6 +392,16 @@ export default function CommunityDetailPage() {
           />
         </div>
 
+        {animalId && (
+          <div className="px-4 pb-4">
+            {isAnimalLoading ? (
+              <div className="h-[72px] rounded-lg bg-gray-100 animate-pulse" />
+            ) : (
+              petCardData && <PetCard pet={petCardData} variant="variant4" />
+            )}
+          </div>
+        )}
+
         {/* 댓글 섹션 */}
         <CommentSection
           comments={comments}
@@ -434,7 +453,9 @@ export default function CommunityDetailPage() {
         ctaText="로그인하기"
         onCtaClick={() => {
           const next = `${window.location.pathname}${window.location.search}`;
-          document.cookie = `redirect_after_login=${encodeURIComponent(next)}; path=/; max-age=600`;
+          document.cookie = `redirect_after_login=${encodeURIComponent(
+            next
+          )}; path=/; max-age=600`;
           window.location.href = `/login?next=${encodeURIComponent(next)}`;
         }}
       />

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, use, useEffect } from "react";
+import type { ReactElement } from "react";
 
 import {
   ArrowLeft,
@@ -20,6 +21,7 @@ import RelatedPosts from "./_components/RelatedPosts";
 import { RelatedAnimals } from "@/app/list/animal/[id]/_components/RelatedAnimals";
 import { PetCard } from "@/components/ui/PetCard";
 import SubscriberDetails from "./_components/SubscriberDetails";
+import { AnimalDetailSkeleton } from "./_components/AnimalDetailSkeleton";
 import {
   useGetAnimalById,
   useGetRelatedAnimalsByDistance,
@@ -47,7 +49,9 @@ interface AnimalDetailPageProps {
   }>;
 }
 
-export default function AnimalDetailPage({ params }: AnimalDetailPageProps) {
+export default function AnimalDetailPage({
+  params,
+}: AnimalDetailPageProps): ReactElement {
   const router = useRouter();
   const { id } = use(params);
   const { isAuthenticated, user } = useAuth();
@@ -63,9 +67,9 @@ export default function AnimalDetailPage({ params }: AnimalDetailPageProps) {
   };
 
   // 동물의 보호센터 정보 가져오기
-  const { data: center, isLoading: centerLoading } = useGetCenterById(
-    animal?.center_id
-  );
+  const centerQuery = useGetCenterById(animal?.center_id);
+  const center = centerQuery.data;
+  const centerLoading = centerQuery.isLoading;
 
   // 센터의 구독 상태 확인 (공고를 올린 센터가 구독자인지)
   const isCenterSubscriber = center?.isSubscriber === true;
@@ -215,7 +219,11 @@ export default function AnimalDetailPage({ params }: AnimalDetailPageProps) {
 
     // 구독 센터인 경우 입양 절차 모달을 먼저 보여줌
     if (isCenterSubscriber) {
-      setShowAdoptionProcedureModal(true);
+      if (center?.adoptionProcedure) {
+        setShowAdoptionProcedureModal(true);
+      } else {
+        handleAdoptionProcedureConfirm();
+      }
       return;
     }
 
@@ -250,8 +258,6 @@ export default function AnimalDetailPage({ params }: AnimalDetailPageProps) {
 
   // 입양 절차 모달에서 입양 신청하기 버튼 클릭 핸들러
   const handleAdoptionProcedureConfirm = () => {
-    setShowAdoptionProcedureModal(false);
-
     // 스토어에 동물 정보 설정
     const centerId = animal?.center_id || center?.id || "";
     adoptionStore.setAnimalInfo(id, centerId);
@@ -276,6 +282,15 @@ export default function AnimalDetailPage({ params }: AnimalDetailPageProps) {
       // 전화번호 인증이 안된 경우 step1부터 시작
       router.push(`/adoption/verification/1`);
     }
+
+    setShowAdoptionProcedureModal(false);
+  };
+
+  const handleCenterPhoneCall = () => {
+    if (center?.phoneNumber) {
+      window.location.href = `tel:${center.phoneNumber}`;
+    }
+    setShowAdoptionProcedureModal(false);
   };
 
   // 공유하기 버튼 클릭 핸들러
@@ -391,31 +406,7 @@ export default function AnimalDetailPage({ params }: AnimalDetailPageProps) {
     useGetRelatedAnimalsByDistance(animal?.id);
 
   if (isLoading || centerLoading || relatedAnimalsLoading) {
-    return (
-      <Container>
-        <div className="min-h-screen bg-gray-50">
-          {/* TopBar 스켈레톤 */}
-          <div className="bg-white border-b border-lg">
-            <div className="flex items-center justify-between px-4 py-3">
-              <div className="w-8 h-8 bg-gray-200 rounded animate-pulse" />
-              <div className="w-24 h-6 bg-gray-200 rounded animate-pulse" />
-              <div className="w-8 h-8 bg-gray-200 rounded animate-pulse" />
-            </div>
-          </div>
-
-          {/* 이미지 스켈레톤 */}
-          <div className="w-full bg-gray-200 h-80 animate-pulse" />
-
-          {/* 정보 스켈레톤 */}
-          <div className="px-4 py-6 space-y-4">
-            <div className="w-3/4 h-6 bg-gray-200 rounded animate-pulse" />
-            <div className="w-1/2 h-4 bg-gray-200 rounded animate-pulse" />
-            <div className="w-full h-4 bg-gray-200 rounded animate-pulse" />
-            <div className="w-2/3 h-4 bg-gray-200 rounded animate-pulse" />
-          </div>
-        </div>
-      </Container>
-    );
+    return <AnimalDetailSkeleton />;
   }
 
   if (error || !animal) {
@@ -768,10 +759,8 @@ export default function AnimalDetailPage({ params }: AnimalDetailPageProps) {
         open={showAdoptionBottomSheet}
         onClose={() => setShowAdoptionBottomSheet(false)}
         variant="variant6"
-        title="센터로 전화해주세요!"
-        description={`센터 전화번호: ${
-          center?.phoneNumber || "연락처 정보 없음"
-        } \n 전화 가능시간: ${center?.callAvailableTime || "정보 없음"}`}
+        title="전화 연결"
+        description={`보호센터로 전화를 연결합니다.\n운영 시간 외에는 연결이 어려울 수 있습니다.`}
         rightButtonText="전화 연결하기"
         onRightClick={() => {
           if (center?.phoneNumber) {
@@ -785,10 +774,8 @@ export default function AnimalDetailPage({ params }: AnimalDetailPageProps) {
         open={showFosterBottomSheet}
         onClose={() => setShowFosterBottomSheet(false)}
         variant="variant6"
-        title="센터로 전화해주세요!"
-        description={`센터 전화번호: ${
-          center?.phoneNumber || "연락처 정보 없음"
-        } \n 전화 가능시간: ${center?.callAvailableTime || "정보 없음"}`}
+        title="전화 연결"
+        description={`보호센터로 전화를 연결합니다.\n운영 시간 외에는 연결이 어려울 수 있습니다.`}
         rightButtonText="전화 연결하기"
         onRightClick={() => {
           if (center?.phoneNumber) {
@@ -820,9 +807,14 @@ export default function AnimalDetailPage({ params }: AnimalDetailPageProps) {
         title="입양 절차 안내"
         description={center?.adoptionProcedure || "입양 절차 정보가 없습니다."}
         variant="variant1"
-        leftButtonText="전화하기"
-        onLeftClick={() => setShowAdoptionProcedureModal(false)}
-        rightButtonText="입양문의하기"
+        subText={
+          center?.callAvailableTime
+            ? `전화 가능시간: ${center.callAvailableTime}`
+            : undefined
+        }
+        leftButtonText="전화 문의"
+        onLeftClick={handleCenterPhoneCall}
+        rightButtonText="입양 문의"
         onRightClick={handleAdoptionProcedureConfirm}
       />
     </>

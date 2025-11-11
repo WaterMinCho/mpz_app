@@ -6,12 +6,20 @@ import { CustomInput } from "@/components/ui/CustomInput";
 import { Container } from "@/components/common/Container";
 import { FixedBottomBar } from "@/components/ui/FixedBottomBar";
 import { NotificationToast } from "@/components/ui/NotificationToast";
+import { useAuth } from "@/components/providers/AuthProvider";
+import { useAdoptionVerificationStore } from "@/lib/stores";
 
 export interface StepProps {
   onNext: () => void;
 }
 
 export function Step3({ onNext }: StepProps) {
+  const { user } = useAuth();
+  const {
+    data: storeData,
+    updateField,
+  } = useAdoptionVerificationStore(user?.id);
+
   const [birthRaw, setBirthRaw] = React.useState("");
   const [gender, setGender] = React.useState("");
 
@@ -61,12 +69,37 @@ export function Step3({ onNext }: StepProps) {
     try {
       sessionStorage.setItem("verification.birth", birth);
       sessionStorage.setItem("verification.gender", gender);
+      updateField(
+        "birth",
+        `${birthDigits.slice(0, 4)}-${birthDigits.slice(4, 6)}-${birthDigits.slice(6, 8)}`
+      );
       onNext();
     } catch (error) {
       console.error("생년월일/성별 저장 실패:", error);
       showErrorToast("정보 저장에 실패했습니다. 다시 시도해주세요.");
     }
   };
+
+  React.useEffect(() => {
+    if (storeData?.birth) {
+      const digits = storeData.birth.replace(/\D/g, "");
+      if (digits.length === 8) {
+        setBirthRaw(digits);
+      }
+    } else if (typeof window !== "undefined") {
+      const storedBirth = sessionStorage.getItem("verification.birth");
+      if (storedBirth) {
+        setBirthRaw(storedBirth);
+      }
+    }
+
+    if (typeof window !== "undefined") {
+      const storedGender = sessionStorage.getItem("verification.gender");
+      if (storedGender) {
+        setGender(storedGender);
+      }
+    }
+  }, [storeData?.birth]);
 
   return (
     <>

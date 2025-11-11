@@ -9,12 +9,20 @@ import { Container } from "@/components/common/Container";
 import { FixedBottomBar } from "@/components/ui/FixedBottomBar";
 import { NotificationToast } from "@/components/ui/NotificationToast";
 import { openKakaoAddress } from "@/lib/openKakaoAddress";
+import { useAuth } from "@/components/providers/AuthProvider";
+import { useAdoptionVerificationStore } from "@/lib/stores";
 
 export interface StepProps {
   onNext: () => void;
 }
 
 export function Step4({ onNext }: StepProps) {
+  const { user } = useAuth();
+  const {
+    data: storeData,
+    updateField,
+  } = useAdoptionVerificationStore(user?.id);
+
   const [roadAddress, setRoadAddress] = React.useState("");
   const [detailAddress, setDetailAddress] = React.useState("");
   const [visibility, setVisibility] = React.useState("");
@@ -61,12 +69,37 @@ export function Step4({ onNext }: StepProps) {
     try {
       sessionStorage.setItem("verification.address", fullAddress);
       sessionStorage.setItem("verification.addressVisibility", visibility);
+      updateField("address", fullAddress);
+      updateField("addressIsPublic", visibility === "공개함");
       onNext();
     } catch (error) {
       console.error("주소 정보 저장 실패:", error);
       showErrorToast("정보 저장에 실패했습니다. 다시 시도해주세요.");
     }
   };
+
+  React.useEffect(() => {
+    if (storeData?.address) {
+      setRoadAddress(storeData.address);
+    } else if (typeof window !== "undefined") {
+      const savedAddress = sessionStorage.getItem("verification.address");
+      if (savedAddress) {
+        setRoadAddress(savedAddress);
+      }
+    }
+
+    const savedVisibility = storeData?.addressIsPublic;
+    if (savedVisibility !== undefined) {
+      setVisibility(savedVisibility ? "공개함" : "공개안함");
+    } else if (typeof window !== "undefined") {
+      const visibilityValue = sessionStorage.getItem(
+        "verification.addressVisibility"
+      );
+      if (visibilityValue) {
+        setVisibility(visibilityValue);
+      }
+    }
+  }, [storeData?.address, storeData?.addressIsPublic]);
 
   return (
     <>

@@ -6,12 +6,20 @@ import { CustomInput } from "@/components/ui/CustomInput";
 import { Container } from "@/components/common/Container";
 import { FixedBottomBar } from "@/components/ui/FixedBottomBar";
 import { NotificationToast } from "@/components/ui/NotificationToast";
+import { useAuth } from "@/components/providers/AuthProvider";
+import { useAdoptionVerificationStore } from "@/lib/stores";
 
 export interface StepProps {
   onNext: () => void;
 }
 
 export function Step2({ onNext }: StepProps) {
+  const { user } = useAuth();
+  const {
+    data: storeData,
+    updateField,
+  } = useAdoptionVerificationStore(user?.id);
+
   const [name, setName] = React.useState("");
   const isNameValid = name.trim().length >= 2;
 
@@ -31,12 +39,26 @@ export function Step2({ onNext }: StepProps) {
     }
     try {
       sessionStorage.setItem("verification.name", name.trim());
+      updateField("name", name.trim());
       onNext();
     } catch (error) {
       console.error("이름 저장 실패:", error);
       showErrorToast("정보 저장에 실패했습니다. 다시 시도해주세요.");
     }
   };
+
+  React.useEffect(() => {
+    if (storeData?.name) {
+      setName(storeData.name);
+      return;
+    }
+    if (typeof window !== "undefined") {
+      const storedName = sessionStorage.getItem("verification.name");
+      if (storedName) {
+        setName(storedName);
+      }
+    }
+  }, [storeData?.name]);
 
   return (
     <>

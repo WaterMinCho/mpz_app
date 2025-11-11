@@ -11,6 +11,7 @@ interface CustomModalProps {
   onClose: () => void;
   title?: string;
   description?: string;
+  subText?: string;
   variant?: "variant1" | "variant2" | "variant3" | "variant4";
   // variant1: 양쪽 버튼
   leftButtonText?: string;
@@ -42,6 +43,7 @@ export function CustomModal({
   onRightClick,
   ctaText,
   onCtaClick,
+  subText,
   subLinkText,
   onSubLinkClick,
   onKakaoShare,
@@ -202,7 +204,15 @@ export function CustomModal({
               />
             </div>
           )}
-          {description && <p className="body text-dg mb-4">{description}</p>}
+          {description && (
+            <p className="text-sm text-dg mb-2 whitespace-pre-line">
+              {description}
+            </p>
+          )}
+          {subText && (
+            <p className="text-sm text-gray-500 mt-1 mb-4">{subText}</p>
+          )}
+          {!subText && description && <div className="mb-2" />}
           {children && <div className="mb-4">{children}</div>}
 
           {renderContent()}

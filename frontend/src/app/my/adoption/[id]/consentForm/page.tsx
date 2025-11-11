@@ -9,6 +9,7 @@ import { useGetCenterConsents } from "@/hooks/query/useGetCenterConsents";
 import { Container } from "@/components/common/Container";
 import { TopBar } from "@/components/common/TopBar";
 import { IconButton } from "@/components/ui/IconButton";
+import { FormListItem } from "@/components/ui/FormListItem";
 
 interface ConsentFormPageProps {
   params: Promise<{ id: string }>;
@@ -20,7 +21,10 @@ export default function ConsentFormPage({ params }: ConsentFormPageProps) {
   const { id } = React.use(params);
 
   const [guidelinesContent, setGuidelinesContent] = useState<string>("");
-  const [selectedConsentId, setSelectedConsentId] = useState<string>("");
+
+  const handleBack = () => {
+    router.back();
+  };
 
   const {
     data: adoptionDetail,
@@ -37,6 +41,15 @@ export default function ConsentFormPage({ params }: ConsentFormPageProps) {
     error: consentsError,
   } = useGetCenterConsents(adoptionDetail?.adoption?.center_id || "");
 
+  const activeConsents = React.useMemo(
+    () => centerConsents?.filter((consent) => consent.is_active) ?? [],
+    [centerConsents]
+  );
+  const fallbackConsent = React.useMemo(
+    () => activeConsents[0] ?? centerConsents?.[0] ?? null,
+    [activeConsents, centerConsents]
+  );
+
   useEffect(() => {
     // URL 쿼리 파라미터에서 guidelines 내용 가져오기
     const guidelines = searchParams.get("guidelines");
@@ -48,21 +61,11 @@ export default function ConsentFormPage({ params }: ConsentFormPageProps) {
     }
   }, [searchParams, adoptionDetail]);
 
-  // 동의서 목록이 로드되면 첫 번째 활성 동의서 선택
   useEffect(() => {
-    if (centerConsents && centerConsents.length > 0 && !selectedConsentId) {
-      const activeConsent = centerConsents.find((consent) => consent.is_active);
-      if (activeConsent) {
-        setSelectedConsentId(activeConsent.id);
-      } else {
-        setSelectedConsentId(centerConsents[0].id);
-      }
+    if (!guidelinesContent && fallbackConsent?.content) {
+      setGuidelinesContent(fallbackConsent.content);
     }
-  }, [centerConsents, selectedConsentId]);
-
-  const selectedConsent = centerConsents?.find(
-    (consent) => consent.id === selectedConsentId
-  );
+  }, [fallbackConsent, guidelinesContent]);
 
   if (isLoading || isConsentsLoading) {
     return (
@@ -114,8 +117,7 @@ export default function ConsentFormPage({ params }: ConsentFormPageProps) {
 
   return (
     <div className="min-h-screen bg-bg">
-      <Container className="min-h-screen">
-        {/* TopBar */}
+      <Container className="min-h-screen pb-28">
         <TopBar
           variant="variant4"
           left={
@@ -123,34 +125,49 @@ export default function ConsentFormPage({ params }: ConsentFormPageProps) {
               <IconButton
                 icon={({ size }) => <ArrowLeft size={size} weight="bold" />}
                 size="iconM"
-                onClick={() => router.back()}
+                onClick={handleBack}
               />
-              <h4>동의서</h4>
+              <h4>동의서 보기</h4>
             </div>
           }
         />
-
-        {/* Main Content */}
-        <div className="flex-1 bg-white rounded-t-3xl -mt-4 relative z-10">
-          <div className="p-4">
-            {/* Main Title */}
-            <div className="flex flex-col gap-2 mb-6">
+        <div className="mx-4 mt-4.5 flex flex-col gap-8">
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-1">
               <h2 className="text-bk">
-                원활한 서비스 사용을 위한 동의문이에요.
+                {fallbackConsent?.title ?? "동의서 내용"}
               </h2>
               <p className="body2 text-gr">
-                모니터링 전송 요구 및 개인정보 수집/이용
+                {fallbackConsent?.description ??
+                  "입양 절차와 관련된 동의서 내용을 확인해주세요."}
               </p>
             </div>
-
-            {/* Guidelines Content */}
-            <div className="mb-6">
-              <h3 className="text-bk mb-3">동의서 내용</h3>
-              <div className="text-sm text-dg leading-relaxed whitespace-pre-wrap">
-                {selectedConsent?.content ||
-                  guidelinesContent ||
-                  "동의서 내용이 준비되지 않았습니다."}
+            {guidelinesContent || fallbackConsent?.content ? (
+              <div className="flex flex-col gap-6">
+                <div className="body text-dg whitespace-pre-wrap leading-relaxed">
+                  {guidelinesContent || fallbackConsent?.content}
+                </div>
               </div>
+            ) : (
+              <div className="rounded-2xl border border-lg bg-white px-4 py-6 text-center text-gr">
+                동의서 내용이 준비되지 않았습니다.
+              </div>
+            )}
+          </div>
+          <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-2">
+              <FormListItem
+                selected={
+                  !!(
+                    adoptionDetail?.adoption.guidelines_agreement &&
+                    adoptionDetail?.adoption.monitoring_agreement
+                  )
+                }
+                disabled
+                className="pointer-events-none justify-start text-left"
+              >
+                모든 동의 사항에 동의했어요.
+              </FormListItem>
             </div>
           </div>
         </div>
