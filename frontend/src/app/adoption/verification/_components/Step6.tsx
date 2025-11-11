@@ -72,6 +72,48 @@ export function Step6({ onNext }: StepProps) {
     const answersData = sessionStorage.getItem("verification.answers");
     const answers = answersData ? JSON.parse(answersData) : {};
 
+    const sessionPhone =
+      typeof window !== "undefined"
+        ? sessionStorage.getItem("verification.phone")
+        : null;
+    const sessionName =
+      typeof window !== "undefined"
+        ? sessionStorage.getItem("verification.name")
+        : null;
+    const sessionBirthRaw =
+      typeof window !== "undefined"
+        ? sessionStorage.getItem("verification.birth")
+        : null;
+    const sessionAddress =
+      typeof window !== "undefined"
+        ? sessionStorage.getItem("verification.address")
+        : null;
+    const sessionVisibility =
+      typeof window !== "undefined"
+        ? sessionStorage.getItem("verification.addressVisibility")
+        : null;
+
+    const formattedBirthFromSession =
+      sessionBirthRaw && sessionBirthRaw.length === 8
+        ? `${sessionBirthRaw.slice(0, 4)}-${sessionBirthRaw.slice(
+            4,
+            6
+          )}-${sessionBirthRaw.slice(6, 8)}`
+        : sessionBirthRaw || "";
+
+    const resolvedPhone = storeData.phone || sessionPhone || "";
+    const resolvedName = storeData.name || sessionName || "";
+    const resolvedBirth = storeData.birth || formattedBirthFromSession || "";
+    const resolvedAddress = storeData.address || sessionAddress || "";
+    const resolvedAddressIsPublic =
+      storeData.addressIsPublic !== undefined
+        ? storeData.addressIsPublic
+        : sessionVisibility === "공개함"
+        ? true
+        : sessionVisibility === "공개안함"
+        ? false
+        : false;
+
     // 질문 응답 배열 생성 (API 스펙에 맞게)
     const questionResponses = Object.entries(answers).map(
       ([questionId, answer]) => ({
@@ -82,12 +124,12 @@ export function Step6({ onNext }: StepProps) {
 
     return {
       // 기본 사용자 정보
-      phone: storeData.phone || "",
+      phone: resolvedPhone,
       phoneVerification: storeData.phoneVerification || false,
-      name: storeData.name || "",
-      birth: storeData.birth || "",
-      address: storeData.address || "",
-      addressIsPublic: false, // 기본값으로 설정
+      name: resolvedName,
+      birth: resolvedBirth,
+      address: resolvedAddress,
+      addressIsPublic: resolvedAddressIsPublic,
 
       // 질문 응답 (API 스펙에 맞게)
       questionResponses: questionResponses,

@@ -29,7 +29,7 @@ export function AdoptorListItem({
   return (
     <div
       className={cn(
-        "flex flex-col bg-white rounded-lg p-4 border border-gray-200",
+        "flex flex-col bg-white p-4 border border-gray-200",
         className
       )}
       onClick={onClick}
@@ -60,7 +60,7 @@ export function AdoptorListItem({
         </div>
 
         {/* Status Chip */}
-        <div className="flex-shrink-0">
+        <div className="flex-shrink-0 mr-2">
           <Chip>{chipText}</Chip>
         </div>
       </div>

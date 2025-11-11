@@ -9,6 +9,7 @@ export interface AdoptionVerificationData {
   name?: string;
   birth?: string; // YYYY-MM-DD 형식
   address?: string;
+  addressIsPublic?: boolean;
 
   // Step 5부터 추가로 수집되는 정보
   occupation?: string;

@@ -7,6 +7,8 @@ import { Input } from "@/components/ui/CustomInput";
 import { Container } from "@/components/common/Container";
 import { FixedBottomBar } from "@/components/ui/FixedBottomBar";
 import { NotificationToast } from "@/components/ui/NotificationToast";
+import { useAuth } from "@/components/providers/AuthProvider";
+import { useAdoptionVerificationStore } from "@/lib/stores";
 
 export interface StepProps {
   onNext: () => void;
@@ -43,6 +45,24 @@ export function Step1({ onNext }: StepProps) {
   const [toastType, setToastType] = React.useState<"success" | "error">(
     "error"
   );
+
+  const { user } = useAuth();
+  const {
+    data: storeData,
+    updateField,
+    setStepData,
+  } = useAdoptionVerificationStore(user?.id);
+
+  React.useEffect(() => {
+    if (storeData?.phone) {
+      setRaw(storeData.phone);
+    } else if (typeof window !== "undefined") {
+      const savedPhone = sessionStorage.getItem("verification.phone");
+      if (savedPhone) {
+        setRaw(savedPhone);
+      }
+    }
+  }, [storeData?.phone]);
 
   React.useEffect(() => {
     if (!expireAt) return;
@@ -98,6 +118,9 @@ export function Step1({ onNext }: StepProps) {
       setExpireAt(Date.now() + 3 * 60 * 1000);
       setOtp("");
       setStage("otp");
+      setStepData({
+        phone: phone,
+      });
     } catch (error: unknown) {
       console.error("OTP 발급 실패:", error);
       let errorMessage = "인증번호 발송에 실패했습니다. 다시 시도해주세요.";
@@ -127,7 +150,9 @@ export function Step1({ onNext }: StepProps) {
       if (otp.trim() === storedOtp) {
         // 인증 성공
         sessionStorage.removeItem("verification.otp"); // 사용한 인증번호 제거
-        sessionStorage.removeItem("verification.phone"); // 전화번호도 제거
+        sessionStorage.setItem("verification.phone", phone); // 포맷된 번호 유지
+        updateField("phone", phone);
+        updateField("phoneVerification", true);
         onNext();
       } else {
         showErrorToast("인증번호가 올바르지 않습니다. 다시 확인해주세요.");

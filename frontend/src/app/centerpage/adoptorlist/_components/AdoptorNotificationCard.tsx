@@ -98,7 +98,7 @@ function AdoptorNotificationCard({
   return (
     <div
       className={cn(
-        "flex items-center gap-3 cursor-pointer hover:bg-gray-50 transition-colors rounded-lg",
+        "flex items-center gap-3 cursor-pointer hover:bg-gray-50 transition-colors",
         className
       )}
       onClick={handleCardClick}
@@ -128,7 +128,10 @@ function AdoptorNotificationCard({
           </div>
 
           {/* 상태 태그들 */}
-          <Chip className={getStatusColorClass(apiStatus || status)}>
+          <Chip
+            variant="default"
+            className={cn(getStatusColorClass(apiStatus || status), "mr-2")}
+          >
             {apiStatus || status}
           </Chip>
         </div>
