@@ -103,7 +103,7 @@ export function CustomModal({
 
           window.location.href = `/login?redirect=${encodeURIComponent(next)}`;
         }}
-        className="relative w-full bg-[#FEE404] text-black py-3 px-4 rounded-lg flex items-center justify-center gap-2 cursor-pointer"
+        className="relative w-full bg-[#FEE404] text-black mt-2 py-3 px-4 rounded-lg flex items-center justify-center gap-2 cursor-pointer"
       >
         <span className="absolute left-0 top-0 bottom-0 w-12 rounded-l-lg flex items-center justify-center">
           <Image src="/img/kakaoLogo.svg" alt="Kakao" width={20} height={20} />

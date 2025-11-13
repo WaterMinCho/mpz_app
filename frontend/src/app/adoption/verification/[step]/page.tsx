@@ -15,12 +15,16 @@ import Step4 from "../_components/Step4";
 import Step5 from "../_components/Step5";
 import Step6 from "../_components/Step6";
 import LinearProgressBar from "@/components/ui/LinearProgressBar";
+import { useAdoptionVerificationStore } from "@/lib/stores";
+import { useAuth } from "@/components/providers/AuthProvider";
 
 export default function VeriticationPage() {
   const router = useRouter();
   const { step } = useParams();
   const searchParams = useSearchParams();
   const currentStep = Number(step);
+  const { user } = useAuth();
+  const adoptionStore = useAdoptionVerificationStore(user?.id);
 
   // 전화번호 인증 완료로 바로 step5에 접근했는지 확인
   const isDirectAccess =
@@ -114,7 +118,13 @@ export default function VeriticationPage() {
           <IconButton
             icon={({ size }) => <X size={size} weight="bold" />}
             size="iconM"
-            onClick={() => router.push("/list/animal")}
+            onClick={() => {
+              const animalId = adoptionStore.data?.animalId;
+              const redirectUrl = animalId
+                ? `/list/animal/${animalId}`
+                : "/list/animal";
+              router.push(redirectUrl);
+            }}
           />
         }
       />

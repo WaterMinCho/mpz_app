@@ -1,5 +1,3 @@
-// 필터 페이지용 옵션 데이터
-
 export const weightOptions = ["10kg 이하", "25kg 이하", "그 이상"];
 
 export const ageOptions = ["2살 이하", "7살 이하", "그 이상"];
@@ -10,7 +8,7 @@ export const genderOptions = ["남아", "여아"];
 export const protectionStatusOptions = [
   "입양가능",
   "무지개",
-  "반환", 
+  "반환",
   "방사",
   "입양완료",
 ];

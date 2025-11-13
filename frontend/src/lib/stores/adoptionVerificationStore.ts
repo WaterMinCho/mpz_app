@@ -6,6 +6,7 @@ export interface AdoptionVerificationData {
   // Step 1-4에서 수집되는 기본 정보 (서버에서 가져온 사용자 정보로 자동 채움)
   phone?: string;
   phoneVerification?: boolean;
+  isPhoneVerified?: boolean; // 새로 추가
   name?: string;
   birth?: string; // YYYY-MM-DD 형식
   address?: string;

@@ -39,7 +39,7 @@ function CenterCard({
       onClick={handleCardClick}
     >
       <div className="flex items-center gap-3">
-        <div className="relative w-[63px] h-[63px] rounded-md overflow-hidden flex-shrink-0 bg-gray-800">
+        <div className="relative w-[63px] h-[63px] rounded-md border border-lg overflow-hidden flex-shrink-0 bg-white">
           <Image
             src={imageUrl}
             alt={name}

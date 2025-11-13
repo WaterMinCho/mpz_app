@@ -17,8 +17,7 @@ import {
   weightOptions,
   ageOptions,
   genderOptions,
-  animalProtectionStatusOptions,
-  //expertOpinionOptions,
+  protectionStatusOptions,
   regionOptions,
 } from "@/data/filterOptions";
 
@@ -358,36 +357,28 @@ function AnimalFilterContent() {
         {/* 보호상태 (Protection Status) */}
         <MultiSelectFilter
           title="보호상태"
-          options={animalProtectionStatusOptions}
+          options={protectionStatusOptions}
           selectedValues={selectedProtectionStatus}
           onSelectionChange={handleProtectionStatusChange}
         />
 
-        {/* InfoCard - 마지막으로 선택된 보호상태만 표시 */}
-        {lastSelectedProtectionStatus === "보호중" && (
-          <InfoCard>보호소에서 보호 중인 아이에요.</InfoCard>
+        {/* InfoCard - protectionStatusOptions 값에 맞게 수정 */}
+        {lastSelectedProtectionStatus === "입양가능" && (
+          <InfoCard>입양을 기다리는 동물들입니다.</InfoCard>
         )}
-        {lastSelectedProtectionStatus === "임시보호" && (
-          <InfoCard>임시 보호자와 함께 지내는 아이에요.</InfoCard>
-        )}
-        {lastSelectedProtectionStatus === "안락사" && (
-          <InfoCard>안타깝게도 안락사 처리된 아이에요.</InfoCard>
-        )}
-        {lastSelectedProtectionStatus === "자연사" && (
-          <InfoCard>자연스럽게 무지개다리를 건넌 아이에요.</InfoCard>
+        {lastSelectedProtectionStatus === "무지개" && (
+          <InfoCard>무지개 다리를 건넌 동물들입니다.</InfoCard>
         )}
         {lastSelectedProtectionStatus === "반환" && (
-          <InfoCard>원래 가족에게 다시 돌아간 아이에요.</InfoCard>
-        )}
-        {lastSelectedProtectionStatus === "기증" && (
-          <InfoCard>보호소에 새롭게 들어온 아이에요.</InfoCard>
+          <InfoCard>입양 후 반환된 동물들입니다.</InfoCard>
         )}
         {lastSelectedProtectionStatus === "방사" && (
-          <InfoCard>특별한 사유로 자연으로 돌려보낸 아이에요.</InfoCard>
+          <InfoCard>자연으로 방사된 동물들입니다.</InfoCard>
         )}
         {lastSelectedProtectionStatus === "입양완료" && (
-          <InfoCard>새로운 가족을 만나 행복하게 지내는 아이에요.</InfoCard>
+          <InfoCard>새로운 가족을 만난 동물들입니다.</InfoCard>
         )}
+
         {/* 
         전문가 분석 의견 (Expert Analysis Opinion)
         <MultiSelectFilter

@@ -20,6 +20,15 @@ export function CenterSearchSection({
 }: CenterSearchSectionProps) {
   const searchParams = useSearchParams();
 
+  // 검색 쿼리 파라미터를 sessionStorage에 저장 (센터 상세페이지 뒤로가기 시 사용)
+  useEffect(() => {
+    const searchString = searchParams.toString();
+
+    // 모든 검색 파라미터를 저장 (빈 문자열도 포함하여 현재 상태 보존)
+    const paramsToStore = searchString ? `?${searchString}` : "";
+    sessionStorage.setItem("centerListSearchParams", paramsToStore);
+  }, [searchParams]);
+
   const [searchValue, setSearchValue] = useState("");
   const [localIsSearching, setLocalIsSearching] = useState(false);
   const [likedCenters, setLikedCenters] = useState<Set<string>>(new Set());

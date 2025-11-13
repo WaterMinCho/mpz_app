@@ -152,7 +152,7 @@ export function Step1({ onNext }: StepProps) {
         sessionStorage.removeItem("verification.otp"); // 사용한 인증번호 제거
         sessionStorage.setItem("verification.phone", phone); // 포맷된 번호 유지
         updateField("phone", phone);
-        updateField("phoneVerification", true);
+        updateField("isPhoneVerified", true);
         onNext();
       } else {
         showErrorToast("인증번호가 올바르지 않습니다. 다시 확인해주세요.");

@@ -9,6 +9,8 @@ import { useToggleCenterFavorite } from "@/hooks/mutation/useToggleCenterFavorit
 import { useAuth } from "@/components/providers/AuthProvider";
 import { Center, transformRawCenterToCenter } from "@/types/center";
 import { CenterCardSkeleton } from "@/components/ui/CenterCardSkeleton";
+import { CustomModal } from "@/components/ui/CustomModal";
+import { useRouter } from "next/navigation";
 
 function CenterTab() {
   const searchParams = useSearchParams();
@@ -16,11 +18,22 @@ function CenterTab() {
   const [localFavorites, setLocalFavorites] = useState<Record<string, boolean>>(
     {}
   );
+  const [showLoginModal, setShowLoginModal] = useState(false); // 로그인 모달 상태 추가
   const { isAuthenticated } = useAuth();
+  const router = useRouter();
   const toggleFavorite = useToggleCenterFavorite();
 
   // URL에서 region 파라미터 읽기
   const regionFromUrl = searchParams.get("region");
+
+  // 검색 쿼리 파라미터를 sessionStorage에 저장 (센터 상세페이지 뒤로가기 시 사용)
+  useEffect(() => {
+    const searchString = searchParams.toString();
+
+    // 모든 검색 파라미터를 저장 (빈 문자열도 포함하여 현재 상태 보존)
+    const paramsToStore = searchString ? `?${searchString}` : "";
+    sessionStorage.setItem("centerListSearchParams", paramsToStore);
+  }, [searchParams]);
 
   const {
     data,
@@ -84,6 +97,8 @@ function CenterTab() {
   // 좋아요 토글 핸들러
   const handleLikeToggle = (centerId: string) => {
     if (!isAuthenticated) {
+      // 미로그인 시 로그인 모달 표시
+      setShowLoginModal(true);
       return;
     }
 
@@ -174,6 +189,24 @@ function CenterTab() {
           ))}
         </div>
       )}
+
+      {/* 로그인 모달 */}
+      <CustomModal
+        open={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
+        title="로그인이 필요합니다"
+        description="찜하기 기능을 사용하려면 로그인이 필요합니다."
+        variant="variant2"
+        ctaText="카카오톡으로 로그인하기"
+        onCtaClick={() => {
+          setShowLoginModal(false);
+          // 현재 URL을 redirect 파라미터로 포함하여 로그인 페이지로 이동
+          const currentUrl = `${window.location.pathname}${window.location.search}`;
+          router.push(`/login?redirect=${encodeURIComponent(currentUrl)}`);
+        }}
+        subLinkText="나중에 하기"
+        onSubLinkClick={() => setShowLoginModal(false)}
+      />
     </div>
   );
 }
@@ -207,12 +240,12 @@ function CenterCardWithFavorite({
 
   return (
     <CenterCard
-      imageUrl="/img/dummyImg.png"
+      imageUrl={center.imageUrl || "/img/op-image.svg"}
       name={center.name}
       location={center.location || "주소 정보 없음"}
       isSubscribed={center.isSubscriber || false}
       isLiked={isLiked}
-      onLikeToggle={isAuthenticated ? () => onLikeToggle(center.id) : undefined}
+      onLikeToggle={() => onLikeToggle(center.id)}
       centerId={center.id}
     />
   );
