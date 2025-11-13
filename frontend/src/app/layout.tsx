@@ -51,7 +51,7 @@ export const metadata: Metadata = {
     siteName: "마펫쯔",
     images: [
       {
-        url: "/img/og-image.png",
+        url: "/img/og-image.svg",
         width: 1200,
         height: 630,
         alt: "마펫쯔",

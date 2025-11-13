@@ -4,7 +4,7 @@ import { MiniButton } from "@/components/ui/MiniButton";
 
 interface MultiSelectFilterProps {
   title: string;
-  options: string[];
+  options: (string | { label: string; value: string })[];
   selectedValues: string[];
   onSelectionChange: (values: string[]) => void;
   layout?: "flex" | "grid";
@@ -27,6 +27,19 @@ export default function MultiSelectFilter({
     } else {
       onSelectionChange([...selectedValues, value]);
     }
+  };
+
+  // 타입 가드 함수들
+  const getOptionValue = (
+    option: string | { label: string; value: string }
+  ): string => {
+    return typeof option === "object" ? option.value : option;
+  };
+
+  const getOptionLabel = (
+    option: string | { label: string; value: string }
+  ): string => {
+    return typeof option === "object" ? option.label : option;
   };
 
   const getGridClassName = (cols: number) => {
@@ -60,10 +73,14 @@ export default function MultiSelectFilter({
       <div className={containerClassName}>
         {options.map((option) => (
           <MiniButton
-            key={option}
-            text={option}
-            variant={selectedValues.includes(option) ? "filterOn" : "filterOff"}
-            onClick={() => handleMultiSelect(option)}
+            key={getOptionValue(option)}
+            text={getOptionLabel(option)}
+            variant={
+              selectedValues.includes(getOptionValue(option))
+                ? "filterOn"
+                : "filterOff"
+            }
+            onClick={() => handleMultiSelect(getOptionValue(option))}
             className={className}
           />
         ))}

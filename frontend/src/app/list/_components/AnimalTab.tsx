@@ -43,6 +43,7 @@ function AnimalTab() {
         searchParams.get("expertOpinion")?.split(",").filter(Boolean) || [],
     };
 
+    console.log("필터 상태:", result);
     return result;
   }, [searchParams]);
 
@@ -50,7 +51,7 @@ function AnimalTab() {
   const apiParams = useMemo(() => {
     const params: GetAnimalsParams = {
       page_size: ITEMS_PER_PAGE,
-      sort_by: "created_at", // 기본 정렬
+      sort_by: "created_at",
       sort_order: "desc",
     };
 
@@ -98,11 +99,12 @@ function AnimalTab() {
       }
     }
 
-    // 보호상태 필터 (protectionStatus 배열의 첫 번째 값 사용)
+    // 보호상태 필터 - 단순 첫 번째 값 사용
     if (filters.protectionStatus.length > 0) {
-      const statusValue = filters.protectionStatus[0];
-      // 백엔드 API는 status 하나의 필드로 처리
-      params.status = statusValue as GetAnimalsParams["status"];
+      const firstStatus = filters.protectionStatus[0];
+      if (firstStatus) {
+        params.status = firstStatus as GetAnimalsParams["status"];
+      }
     }
 
     // 전문가 의견 필터
@@ -295,7 +297,11 @@ function AnimalTab() {
       {hasActiveFilters && (
         <div className="mx-4 mb-4">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-gray-600">필터링된 결과</span>
+            <span className="text-sm text-gray-600">
+              {filters.protectionStatus.length > 0
+                ? "보호상태 필터링된 결과"
+                : "필터링된 결과"}
+            </span>
             <button onClick={handleClearFilters} className="text-sm text-gr">
               전체 해제
             </button>
