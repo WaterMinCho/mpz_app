@@ -13,6 +13,11 @@ export const protectionStatusOptions = [
   "입양완료",
 ];
 
+export const protectionStatusToRawMap: Record<string, string[]> = {
+  입양가능: ["임시보호", "보호중"],
+  무지개: ["안락사", "자연사"],
+};
+
 // 동물 업로드용 보호상태 (실제 DB 상태)
 export const animalProtectionStatusOptions = [
   "보호중",

@@ -10,6 +10,7 @@ import { useGetAnimals } from "@/hooks/query/useGetAnimals";
 import type { Animal } from "./types";
 import { transformRawAnimalToAnimal } from "@/types/animal";
 import { useCenterFiltersStore } from "@/stores/centerFilters";
+import { protectionStatusToRawMap } from "@/data/filterOptions";
 
 interface CenterAnimalsTabProps {
   showFilters?: boolean;
@@ -104,11 +105,22 @@ export function CenterAnimalsTab({
         }
       }
 
-      // 보호상태 필터
+      // 보호상태 필터 (표시값 → 실제 DB 상태 매핑 포함)
       if (activeFilters.protectionStatus.length > 0) {
         const status = animal.status;
-        if (status && !activeFilters.protectionStatus.includes(status)) {
-          return false;
+        if (status) {
+          const allowedStatuses = new Set<string>();
+          for (const sel of activeFilters.protectionStatus) {
+            const mapped = protectionStatusToRawMap[sel];
+            if (mapped && mapped.length > 0) {
+              mapped.forEach((s) => allowedStatuses.add(s));
+            } else {
+              allowedStatuses.add(sel);
+            }
+          }
+          if (!allowedStatuses.has(status)) {
+            return false;
+          }
         }
       }
 
