@@ -88,10 +88,10 @@ export default function CommunityPage() {
 
   const [activeTab, setActiveTab] = useState("latest");
 
-  // URL 동기화 없이 프론트 상태로만 필터링
-
-  // API에는 태그 파라미터를 넘기지 않음 (클라이언트 측 필터링)
-  const apiParams = useMemo(() => ({} as const), []);
+  const apiParams = useMemo(
+    () => ({ page: 1, page_size: 1000, sort_by: "latest" } as const),
+    []
+  );
 
   // 센터 권한 확인
   const isCenterUser =
@@ -435,6 +435,10 @@ export default function CommunityPage() {
         className="flex-1 mx-4 overflow-y-auto scrollbar-hide"
         key={activeTab}
       >
+        {/* 최상단 고정 배너 */}
+        <div className="mb-4">
+          <Banner variant="sub" />
+        </div>
         {isLoading ? (
           // 로딩 중일 때 스켈레톤 표시
           <div className="flex flex-col gap-4">
