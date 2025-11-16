@@ -388,7 +388,7 @@ function AnimalCardWithFavorite({
           variant="primary"
           imageSize="full"
           className="w-full"
-          imageOverlay={
+          headerAction={
             isAuthenticated ? (
               <div onClick={(e) => e.stopPropagation()}>
                 <IconButton

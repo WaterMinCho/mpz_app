@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
+import { useCenterFilterOverlayStore } from "@/stores/centerFilterOverlay";
 import { PetCard } from "@/components/ui/PetCard";
 import { MiniButton } from "@/components/ui/MiniButton";
 import { CaretDown } from "@phosphor-icons/react";
@@ -33,6 +34,7 @@ export function CenterAnimalsTab({
   const router = useRouter();
   const [filteredAnimals, setFilteredAnimals] = useState<Animal[]>([]);
   const { filters, reset } = useCenterFiltersStore();
+  const { open: openFilterOverlay } = useCenterFilterOverlayStore();
 
   // 센터 동물 데이터 가져오기
   const {
@@ -164,9 +166,9 @@ export function CenterAnimalsTab({
     ];
   }, [showFilters, activeFilters, centerId]);
 
-  const handleFilterClick = (path: string) => {
-    // 전역 상태를 사용하므로 쿼리 전달 불필요
-    router.push(path);
+  const handleFilterClick = () => {
+    // 라우트 이동 없이 오버레이만 열기
+    openFilterOverlay();
   };
 
   const renderLoadingState = () => (
@@ -214,7 +216,7 @@ export function CenterAnimalsTab({
               }`}
               rightIcon={<CaretDown size={12} />}
               variant={option.hasFilters ? "filterOn" : "filterOff"}
-              onClick={() => handleFilterClick(option.path)}
+              onClick={handleFilterClick}
               className="flex-shrink-0"
             />
           ))}

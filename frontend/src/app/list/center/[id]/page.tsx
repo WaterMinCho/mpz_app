@@ -9,6 +9,7 @@ import { useKakaoSDK } from "@/hooks/useKakaoSDK";
 import { Container } from "@/components/common/Container";
 import { CenterDetailHeader, CenterDetailTabs } from "./_components";
 import type { TabType } from "./_components/types";
+import { CenterFilterOverlay } from "./filter/CenterFilterOverlay";
 
 export default function CenterDetailPage() {
   const params = useParams();
@@ -79,6 +80,7 @@ export default function CenterDetailPage() {
         isFavorite={isFavorite}
         onFavoriteToggle={handleFavoriteToggle}
       />
+      <CenterFilterOverlay />
     </Container>
   );
 }

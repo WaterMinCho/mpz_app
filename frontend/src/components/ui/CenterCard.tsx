@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { IconButton } from "./IconButton";
 import { SealCheck, Heart } from "@phosphor-icons/react";
@@ -24,6 +25,9 @@ function CenterCard({
   centerId,
 }: CenterCardProps) {
   const router = useRouter();
+  const [imgSrc, setImgSrc] = useState<string>(
+    imageUrl && imageUrl.trim() !== "" ? imageUrl : "/img/dummyImg.png"
+  );
 
   const handleCardClick = () => {
     if (centerId) {
@@ -41,11 +45,16 @@ function CenterCard({
       <div className="flex items-center gap-3">
         <div className="relative w-[63px] h-[63px] rounded-md border border-lg overflow-hidden flex-shrink-0 bg-white">
           <Image
-            src={imageUrl}
+            src={imgSrc}
             alt={name}
             fill
             className="object-cover"
             priority
+            onError={() => {
+              if (imgSrc !== "/img/dummyImg.png") {
+                setImgSrc("/img/dummyImg.png");
+              }
+            }}
           />
         </div>
         <div className="flex flex-col justify-center min-w-0 gap-1">

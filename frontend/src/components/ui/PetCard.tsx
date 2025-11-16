@@ -28,6 +28,7 @@ interface PetCardProps {
   disableNavigation?: boolean;
   adoptionStatus?: AdoptionStatus | string;
   imageOverlay?: React.ReactNode;
+  headerAction?: React.ReactNode;
 }
 
 export function PetCard({
@@ -43,6 +44,7 @@ export function PetCard({
   disableNavigation = false,
   adoptionStatus,
   imageOverlay,
+  headerAction,
 }: PetCardProps) {
   const router = useRouter();
 
@@ -415,13 +417,17 @@ export function PetCard({
               <GenderMale className="text-brand" weight="bold" size={16} />
             )}
           </div>
-          {imageOverlay && (
-            <div className="absolute bottom-2 right-2 z-10">{imageOverlay}</div>
-          )}
-          {(currentWaitingDays || 0) > 7 && (
-            <div className="absolute bottom-0 left-0 w-full bg-bk/50 text-white text-2xl px-2 py-1 rounded-b-[10px]">
+          {(currentWaitingDays || 0) > 7 ? (
+            <div className="absolute bottom-0 left-0 w-full bg-bk/50 text-white text-2xl px-2 py-1 rounded-b-[10px] flex items-center justify-between">
               <h6>{currentWaitingDays || 0}일 째 기다리는 중</h6>
+              {imageOverlay && <div className="z-10">{imageOverlay}</div>}
             </div>
+          ) : (
+            imageOverlay && (
+              <div className="absolute bottom-2 right-2 z-10">
+                {imageOverlay}
+              </div>
+            )
           )}
         </div>
         <div className="flex items-center mb-[6px] gap-1 w-full">
@@ -481,27 +487,35 @@ export function PetCard({
             <GenderMale className="text-brand" weight="bold" size={16} />
           )}
         </div>
-        {imageOverlay && (
-          <div className="absolute bottom-2 right-2 z-10">{imageOverlay}</div>
-        )}
-        {(currentWaitingDays || 0) > 7 && (
+        {(currentWaitingDays || 0) > 7 ? (
           <div className="absolute bottom-0 left-0 w-full bg-bk/50 text-white text-2xl px-2 py-1 rounded-b-[10px]">
             <h6>{currentWaitingDays || 0}일 째 기다리는 중</h6>
+            {imageOverlay && (
+              <div className="absolute right-2 bottom-1 z-10">
+                {imageOverlay}
+              </div>
+            )}
           </div>
+        ) : (
+          imageOverlay && (
+            <div className="absolute bottom-2 right-2 z-10">{imageOverlay}</div>
+          )
         )}
       </div>
-      <div className="flex items-center mb-[6px] gap-1 w-full">
-        {(() => {
-          // adoptionStatus prop이 전달된 경우 우선 사용, 없으면 기본 adoption_status 사용
-          const statusToUse = adoptionStatus || adoption_status;
-          const statusInfo = getStatusInfo(protection_status, statusToUse);
-          return (
-            <Chip className={statusInfo.colorClass}>{statusInfo.text}</Chip>
-          );
-        })()}
-        {createHeadingElement(
-          breed || "종 미등록",
-          cn("text-bk truncate flex-1")
+      <div className="flex items-center mb-[6px] gap-1 w-full justify-between">
+        <div className="flex items-center gap-1 min-w-0 flex-1">
+          {(() => {
+            // adoptionStatus prop이 전달된 경우 우선 사용, 없으면 기본 adoption_status 사용
+            const statusToUse = adoptionStatus || adoption_status;
+            const statusInfo = getStatusInfo(protection_status, statusToUse);
+            return (
+              <Chip className={statusInfo.colorClass}>{statusInfo.text}</Chip>
+            );
+          })()}
+          {createHeadingElement(breed || "종 미등록", cn("text-bk truncate"))}
+        </div>
+        {headerAction && (
+          <div className="ml-2 flex-shrink-0">{headerAction}</div>
         )}
       </div>
       <h6 className="text-dg">{foundLocation || "위치 정보 없음"}</h6>

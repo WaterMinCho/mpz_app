@@ -18,6 +18,12 @@ const sizeMap = {
   imgM: 24,
 };
 
+const sizeClassMap = {
+  iconM: "h-5 w-5", // 20px
+  iconS: "h-4 w-4", // 16px
+  imgM: "h-6 w-6", // 24px
+};
+
 export function IconButton({
   icon: Icon,
   size = "iconM",
@@ -29,7 +35,8 @@ export function IconButton({
   return (
     <button
       className={cn(
-        "inline-flex items-center justify-center rounded-full focus:outline-none transition-all cursor-pointer text-gr",
+        "inline-flex items-center justify-center rounded-full focus:outline-none transition-all cursor-pointer text-gr p-0",
+        sizeClassMap[size],
         disabled && "opacity-50 cursor-not-allowed",
         className
       )}
