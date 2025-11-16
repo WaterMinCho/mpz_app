@@ -66,12 +66,6 @@ export function CenterDetailHeader({
 
   // 뒤로가기 핸들러
   const handleBackClick = () => {
-    if (typeof window !== "undefined" && window.history) {
-      if (window.history.length > 2) {
-        window.history.go(-2);
-        return;
-      }
-    }
     router.back();
   };
 

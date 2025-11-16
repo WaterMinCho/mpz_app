@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, Suspense, useMemo } from "react";
-import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { ArrowLeft, ArrowsClockwise } from "@phosphor-icons/react";
 
 import { Container } from "@/components/common/Container";
@@ -11,6 +10,7 @@ import { FixedBottomBar } from "@/components/ui/FixedBottomBar";
 import { InfoCard } from "@/components/ui/InfoCard";
 import { FilterState } from "@/lib/filter-utils";
 import { useCenterFiltersStore } from "@/stores/centerFilters";
+import { useCenterFilterOverlayStore } from "@/stores/centerFilterOverlay";
 
 import BreedFilter from "./_components/BreedFilter";
 import MultiSelectFilter from "./_components/MultiSelectFilter";
@@ -22,14 +22,9 @@ import {
   //expertOpinionOptions,
 } from "@/data/filterOptions";
 
-function CenterFilterContent() {
-  const router = useRouter();
+export function CenterFilterContent() {
   const { filters, setFilters, reset } = useCenterFiltersStore();
-
-  // 센터 ID 추출 (URL에서) - 컴포넌트 가장 시작에 선언
-  const centerId = useMemo(() => {
-    return window.location.pathname.split("/")[3];
-  }, []);
+  const { close: closeOverlay } = useCenterFilterOverlayStore();
 
   const [selectedBreed, setSelectedBreed] = useState(filters.breed || "");
   const [breedSearchTerm, setBreedSearchTerm] = useState("");
@@ -62,7 +57,8 @@ function CenterFilterContent() {
   // URL 동기화/디바운스 제거
 
   const handleBack = () => {
-    router.push(`/list/center/${centerId}?tab=centers`);
+    // 라우팅 대신 오버레이만 닫기
+    closeOverlay();
   };
 
   const handleApply = () => {
@@ -76,7 +72,8 @@ function CenterFilterContent() {
       expertOpinion: selectedExpertOpinion,
     };
     setFilters(next);
-    router.push(`/list/center/${centerId}?tab=centers`);
+    // 오버레이 닫기
+    closeOverlay();
   };
 
   const handleReset = () => {
@@ -188,10 +185,4 @@ function CenterFilterContent() {
   );
 }
 
-export default function CenterFilter() {
-  return (
-    <Suspense fallback={<div>로딩 중...</div>}>
-      <CenterFilterContent />
-    </Suspense>
-  );
-}
+export default CenterFilterContent;

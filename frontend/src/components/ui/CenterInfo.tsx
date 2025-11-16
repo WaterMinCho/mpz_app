@@ -43,6 +43,9 @@ export function CenterInfo({
   const [toastType, setToastType] = React.useState<"success" | "error">(
     "success"
   );
+  const [imgSrc, setImgSrc] = React.useState<string>(
+    imageUrl && imageUrl.trim() !== "" ? imageUrl : "/img/dummyImg.png"
+  );
 
   const trimmedLocation = location?.trim() ?? "";
   const displayLocation = trimmedLocation.length > 0 ? trimmedLocation : "-";
@@ -103,17 +106,18 @@ export function CenterInfo({
           className="flex items-center gap-3 cursor-pointer hover:opacity-70 transition-opacity"
           onClick={handleCenterProfileClick}
         >
-          <div className="w-12 h-12 bg-gray-200 rounded-full flex-shrink-0 relative overflow-hidden">
-            {imageUrl ? (
-              <Image
-                src={imageUrl}
-                alt={`${name} 센터 이미지`}
-                fill
-                className="object-cover"
-              />
-            ) : (
-              <div className="w-full h-full bg-gray-200 rounded-full" />
-            )}
+          <div className="w-12 h-12 bg-white border border-lg rounded-full flex-shrink-0 relative overflow-hidden">
+            <Image
+              src={imgSrc}
+              alt={`${name} 센터 이미지`}
+              fill
+              className="object-cover"
+              onError={() => {
+                if (imgSrc !== "/img/dummyImg.png") {
+                  setImgSrc("/img/dummyImg.png");
+                }
+              }}
+            />
           </div>
           <div className="flex items-center gap-2">
             <span className="font-semibold text-gray-900">{name}</span>
