@@ -57,6 +57,8 @@ class ProcedureSettingsUpdateIn(Schema):
 
 class CenterListQueryIn(BaseModel):
     """센터 목록 조회 쿼리 스키마"""
+    name: Optional[str] = None  # 센터명 필터
+    location: Optional[str] = None  # 위치 필터
     region: Optional[str] = None  # 지역 필터 (서울, 부산 등)
     verified: Optional[bool] = None  # 인증 여부
     has_volunteer: Optional[bool] = None  # 봉사활동 여부
