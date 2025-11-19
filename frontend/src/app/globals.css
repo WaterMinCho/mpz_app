@@ -120,8 +120,8 @@ body {
   font-family: "Pretendard", "Inter", "system-ui", "sans-serif";
   color: #1c1c1c;
   /* 안드로이드 시스템 글자 크기 조정 방지 */
-  -webkit-text-size-adjust: none;
-  text-size-adjust: none;
+  /* -webkit-text-size-adjust: none;
+  text-size-adjust: none; */
 }
 
 h2 {
