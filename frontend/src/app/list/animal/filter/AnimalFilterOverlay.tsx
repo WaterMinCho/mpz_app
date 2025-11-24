@@ -2,7 +2,7 @@
 
 import { Suspense } from "react";
 import { useAnimalFilterOverlayStore } from "@/stores/animalFilterOverlay";
-import { AnimalFilterContent } from "./page";
+import { AnimalFilterContent } from "./AnimalFilterContent";
 
 export function AnimalFilterOverlay() {
   const { isOpen, close } = useAnimalFilterOverlayStore();
