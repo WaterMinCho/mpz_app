@@ -19,6 +19,10 @@ const config: CapacitorConfig = {
       iosSpinnerStyle: "small",
       webSpinnerStyle: "horizontal",
     },
+    // KakaoLogin 네이티브 플러그인 등록
+    KakaoLogin: {
+      appKey: "30c65f4b266ed8e462b30c91518d174b",
+    },
   },
 };
 

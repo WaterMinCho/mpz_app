@@ -35,8 +35,8 @@ export interface FixedBottomBarProps {
   onApplyButtonClick?: () => void;
   applyButtonDisabled?: boolean;
   // 공통 props
-  showSafeArea?: boolean;
   padding?: "sm" | "md" | "lg";
+  showSafeArea?: boolean; // 추가: SafeArea 뷰 지원
 }
 
 export function FixedBottomBar({
@@ -68,23 +68,23 @@ export function FixedBottomBar({
   onApplyButtonClick,
   applyButtonDisabled = false,
   // 공통 props
-  showSafeArea = true,
   padding = "md",
+  showSafeArea = true, // 기본값 추가
   ...props
 }: FixedBottomBarProps) {
   const paddingClasses = {
-    sm: { x: "px-4", y: "pt-3", bottom: "pb-3" },
-    md: { x: "px-6", y: "pt-4", bottom: "pb-4" },
-    lg: { x: "px-8", y: "pt-6", bottom: "pb-6" },
+    sm: { x: "px-4", y: "pt-3", bottom: "pb-6" }, // 고정 pb-6
+    md: { x: "px-6", y: "pt-4", bottom: "pb-8" }, // 고정 pb-8
+    lg: { x: "px-8", y: "pt-6", bottom: "pb-10" }, // 고정 pb-10
   };
 
   return (
     <Container
       className={cn(
-        "fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 pb-16",
+        "fixed bottom-0 left-0 right-0 z-30 bg-white border-t border-gray-200 pb-6", // showSafeArea 제거하고 고정 pb-6 추가
         paddingClasses[padding].x,
         paddingClasses[padding].y,
-        showSafeArea && paddingClasses[padding].bottom,
+        paddingClasses[padding].bottom, // showSafeArea 조건 제거
         className
       )}
       {...props}
@@ -197,6 +197,11 @@ export function FixedBottomBar({
             {applyButtonText}
           </BigButton>
         </div>
+      )}
+
+      {/* SafeArea 뷰 (iOS에서만 적용) */}
+      {showSafeArea && (
+        <div className="h-4 bg-background" /> // 간단한 SafeAreaView 구현
       )}
     </Container>
   );
