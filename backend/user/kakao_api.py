@@ -1,4 +1,4 @@
-from ninja import Router
+from ninja import Router, Schema
 from django.shortcuts import redirect
 from django.conf import settings
 import httpx
@@ -7,7 +7,8 @@ from asgiref.sync import sync_to_async
 from ninja.errors import HttpError
 from user.models import Jwt, User
 from user import utils
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, JsonResponse
+from typing import Dict, Tuple
 
 router = Router(tags=["Kakao_API"])
 
@@ -22,6 +23,108 @@ KAKAO_CONFIG = {
     "user_info_endpoint": "https://kapi.kakao.com/v2/user/me",
     "scope": "",  # 기본 동의 항목만 사용 (필수 항목만)
 }
+
+
+class KakaoNativeLoginIn(Schema):
+    access_token: str
+
+
+@sync_to_async
+def set_unusable_password(user):
+    user.set_unusable_password()
+    user.save()
+
+
+@sync_to_async
+def update_jwt_entry(user_id: int, access: str, refresh: str):
+    return Jwt.objects.update_or_create(
+        user_id=user_id,
+        defaults={"access": access, "refresh": refresh},
+    )
+
+
+async def fetch_kakao_profile(access_token: str) -> Dict:
+    if not access_token:
+        raise HttpError(400, "카카오 액세스 토큰이 필요합니다.")
+
+    headers = {"Authorization": f"Bearer {access_token}"}
+    try:
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            profile_request = await client.get(
+                KAKAO_CONFIG["user_info_endpoint"], headers=headers
+            )
+    except httpx.ConnectError as e:
+        print(f"카카오 서버 연결 오류: {e}")
+        raise HttpError(503, "카카오 서버 연결에 실패했습니다. 잠시 후 다시 시도해주세요.")
+    except httpx.TimeoutException as e:
+        print(f"카카오 서버 타임아웃 오류: {e}")
+        raise HttpError(
+            503, "카카오 서버 응답 시간이 초과되었습니다. 잠시 후 다시 시도해주세요."
+        )
+
+    if profile_request.status_code != 200:
+        raise HttpError(
+            503, f"카카오 사용자 정보 조회 실패: {profile_request.status_code}"
+        )
+
+    return profile_request.json()
+
+
+def parse_kakao_profile(profile_data: Dict) -> Dict[str, str]:
+    if not profile_data or "id" not in profile_data:
+        raise HttpError(
+            503,
+            "카카오 서버에서 유효한 응답을 받지 못했습니다. 잠시 후 다시 시도해주세요.",
+        )
+
+    kakao_user_id = str(profile_data.get("id", ""))
+    kakao_account = profile_data.get("kakao_account", {})
+    kakao_user_email = kakao_account.get("email", "")
+    kakao_user_name = kakao_account.get("profile", {}).get("nickname", "카카오 사용자")
+    kakao_user_image = kakao_account.get("profile", {}).get("profile_image_url", "")
+
+    if not kakao_user_email:
+        kakao_user_email = f"kakao_{kakao_user_id}@kakao.com"
+
+    if not kakao_user_id:
+        raise HttpError(
+            503,
+            "카카오 사용자 정보를 가져오는데 실패했습니다. 잠시 후 다시 시도해주세요.",
+        )
+
+    return {
+        "id": kakao_user_id,
+        "email": kakao_user_email,
+        "name": kakao_user_name,
+        "image": kakao_user_image if kakao_user_image else "",
+    }
+
+
+async def get_or_create_kakao_user(profile: Dict[str, str]) -> Tuple[User, bool]:
+    try:
+        user = await User.objects.aget(kakao_id=profile["id"])
+        created = False
+    except User.DoesNotExist:
+        unique_username = f"kakao_{profile['id']}"
+        user = await User.objects.acreate(
+            username=unique_username,
+            kakao_id=profile["id"],
+            email=profile["email"],
+            nickname=profile["name"],
+            image=profile["image"],
+            is_phone_verified=False,
+        )
+        await set_unusable_password(user)
+        created = True
+
+    return user, created
+
+
+async def issue_tokens_for_user(user: User):
+    access, access_exp = utils.get_access_token({"user_id": user.id})
+    refresh, refresh_exp = utils.get_refresh_token()
+    await update_jwt_entry(user.id, access, refresh)
+    return access, refresh, access_exp, refresh_exp
 
 
 def generate_state() -> str:
@@ -79,11 +182,6 @@ async def kakao_login_callback(request, code: str, state: str, redirect_uri: str
     """카카오 로그인 콜백 처리"""
     print(f"카카오 로그인 콜백 시작 - code: {code[:10]}..., state: {state}, redirect_uri: {redirect_uri}")
 
-    @sync_to_async
-    def set_unusable_password(user):
-        user.set_unusable_password()
-        user.save()
-
     # 액세스 토큰 받기 (프론트엔드와 동일한 로직)
     try:
         # redirect_uri를 동적으로 결정 (프론트엔드에서 전달받거나 기본값 사용)
@@ -139,17 +237,8 @@ async def kakao_login_callback(request, code: str, state: str, redirect_uri: str
                     f"카카오 인증 오류: {token_json.get('error_description', '알 수 없는 오류')}",
                 )
 
-        # 사용자 정보 가져오기 (프론트엔드와 동일한 엔드포인트)
-        headers = {"Authorization": f"Bearer {token_json.get('access_token')}"}
-        async with httpx.AsyncClient(timeout=30.0) as client:
-            profile_request = await client.get(
-                KAKAO_CONFIG["user_info_endpoint"], headers=headers
-            )
-            if profile_request.status_code != 200:
-                raise HttpError(
-                    503, f"카카오 사용자 정보 조회 실패: {profile_request.status_code}"
-                )
-            profile_data = profile_request.json()
+        profile_data = await fetch_kakao_profile(token_json.get("access_token"))
+        profile_info = parse_kakao_profile(profile_data)
     except httpx.ConnectError as e:
         print(f"카카오 서버 연결 오류: {e}")
         raise HttpError(503, "카카오 서버 연결에 실패했습니다. 잠시 후 다시 시도해주세요.")
@@ -164,68 +253,14 @@ async def kakao_login_callback(request, code: str, state: str, redirect_uri: str
         traceback.print_exc()
         raise HttpError(503, f"카카오 로그인 처리 중 오류가 발생했습니다: {str(e)}")
 
-    # 응답 데이터 검증 (프론트엔드와 동일한 구조)
-    if not profile_data or "id" not in profile_data:
-        raise HttpError(
-            503,
-            "카카오 서버에서 유효한 응답을 받지 못했습니다. 잠시 후 다시 시도해주세요.",
-        )
-
-    # 프론트엔드와 동일한 사용자 정보 구조
-    kakao_user_id = str(profile_data.get("id", ""))
-    kakao_account = profile_data.get("kakao_account", {})
-    kakao_user_email = kakao_account.get("email", "")
-    kakao_user_name = kakao_account.get("profile", {}).get("nickname", "카카오 사용자")
-    kakao_user_image = kakao_account.get("profile", {}).get("profile_image_url", "")
-    
-    # 카카오 계정 정보가 없는 경우 기본값 설정
-    if not kakao_user_email:
-        kakao_user_email = f"kakao_{kakao_user_id}@kakao.com"
-
-    if not kakao_user_id:
-        raise HttpError(
-            503,
-            "카카오 사용자 정보를 가져오는데 실패했습니다. 잠시 후 다시 시도해주세요.",
-        )
-
-    # 카카오 ID로 사용자 찾기 또는 생성
     try:
-        user = await User.objects.aget(kakao_id=kakao_user_id)
-        # 기존 사용자인 경우
-        created = False
-    except User.DoesNotExist:
-        # 새 사용자인 경우 (프론트엔드와 동일한 필드명 사용)
-        unique_username = f"kakao_{kakao_user_id}"
-        user = await User.objects.acreate(
-            username=unique_username,
-            kakao_id=kakao_user_id,
-            email=kakao_user_email,
-            nickname=kakao_user_name,
-            image=kakao_user_image if kakao_user_image else "",
-            is_phone_verified=False,  # 카카오 로그인은 전화번호 인증이 필요할 수 있음
-        )
-        await set_unusable_password(user)
-        created = True
-
-    # 실제 JWT 토큰 생성
-    try:
-        access, access_exp = utils.get_access_token({"user_id": user.id})
-        refresh, refresh_exp = utils.get_refresh_token()
+        user, created = await get_or_create_kakao_user(profile_info)
+        access, refresh, access_exp, refresh_exp = await issue_tokens_for_user(user)
     except Exception as e:
-        print(f"JWT 토큰 생성 오류: {e}")
+        print(f"JWT 토큰 생성 또는 사용자 처리 중 오류: {e}")
         import traceback
         traceback.print_exc()
-        raise HttpError(503, f"JWT 토큰 생성 중 오류가 발생했습니다: {str(e)}")
-
-    @sync_to_async
-    def update_jwt(user_id, access, refresh):
-        jwt_update = Jwt.objects.update_or_create(
-            user_id=user_id,
-            defaults={"access": access, "refresh": refresh},
-        )
-        return jwt_update
-
-    await update_jwt(user.id, access, refresh)
+        raise HttpError(503, f"카카오 로그인 처리 중 오류가 발생했습니다: {str(e)}")
 
     # 상태에 따른 리다이렉트 URL 설정
     from urllib.parse import unquote
@@ -259,3 +294,31 @@ async def kakao_login_callback(request, code: str, state: str, redirect_uri: str
         import traceback
         traceback.print_exc()
         raise HttpError(503, f"쿠키 설정 중 오류가 발생했습니다: {str(e)}")
+
+
+@router.post(
+    "/native/login",
+    summary="카카오 네이티브 로그인",
+    description="네이티브 SDK에서 받은 액세스 토큰으로 로그인합니다.",
+)
+async def kakao_native_login(request, data: KakaoNativeLoginIn):
+    profile_data = await fetch_kakao_profile(data.access_token)
+    profile_info = parse_kakao_profile(profile_data)
+    user, created = await get_or_create_kakao_user(profile_info)
+    access, refresh, access_exp, refresh_exp = await issue_tokens_for_user(user)
+
+    response = JsonResponse(
+        {
+            "success": True,
+            "user": {
+                "id": user.id,
+                "email": user.email,
+                "nickname": user.nickname,
+                "image": user.image,
+                "is_new_user": created,
+            },
+        }
+    )
+    return utils.set_cookie_jwt(
+        response, access, refresh, access_exp, refresh_exp, request=request
+    )

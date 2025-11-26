@@ -28,6 +28,7 @@ repositories {
     flatDir{
         dirs '../capacitor-cordova-android-plugins/src/main/libs', 'libs'
     }
+    maven { url 'https://devrepo.kakao.com/nexus/content/groups/public/' }
 }
 
 dependencies {
@@ -41,7 +42,7 @@ dependencies {
     androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"
     implementation project(':capacitor-cordova-android-plugins')
     // 카카오 SDK
-    implementation "com.kakao.sdk:v2-all:2.20.1"
+    implementation "com.kakao.sdk:v2-all:2.18.0"
 }
 
 apply from: 'capacitor.build.gradle'

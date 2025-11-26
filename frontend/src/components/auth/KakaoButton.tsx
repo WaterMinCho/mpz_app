@@ -3,7 +3,11 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Capacitor } from "@capacitor/core";
+import instance from "@/lib/axios-instance";
+import { useAuth } from "@/components/providers/AuthProvider";
+import { KakaoNativeLogin } from "@/lib/capacitor/kakao-login";
 
 interface KakaoButtonProps {
   onClick?: () => void;
@@ -19,29 +23,42 @@ export function KakaoButton({
   children = "카카오로 시작하기",
 }: KakaoButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
+  const { setUserFromToken } = useAuth();
 
-  const handleKakaoLogin = () => {
+  const handleKakaoLogin = async () => {
+    setIsLoading(true);
+    const clientId = "e87b92ff4188fc038238a9a22eb0bf35";
+    const isNative = Capacitor.isNativePlatform();
+
     try {
-      setIsLoading(true);
+      if (isNative) {
+        try {
+          const { accessToken } = await KakaoNativeLogin.login();
+          if (!accessToken) {
+            throw new Error("네이티브 카카오 액세스 토큰을 가져오지 못했습니다.");
+          }
 
-      // 클라이언트 사이드에서 카카오 인증 URL 구성
-      const clientId = "e87b92ff4188fc038238a9a22eb0bf35";
+          await instance.post("kakao/native/login", {
+            access_token: accessToken,
+          });
+          await setUserFromToken();
+          router.replace("/");
+          return;
+        } catch (nativeError) {
+          console.error("네이티브 카카오 로그인 실패, 웹 플로우로 폴백:", nativeError);
+        }
+      }
 
-      // 앱 환경인지 확인
-      const isNative = Capacitor.isNativePlatform();
+      if (!clientId) {
+        console.error("카카오 클라이언트 ID가 설정되지 않았습니다.");
+        return;
+      }
 
-      // 앱 환경이면 커스텀 URL 스킴 사용, 웹이면 기존 URL 사용
       const redirectUri = isNative
         ? "mpz://oauth/kakao/callback"
         : "https://api.mpz.kr/v1/kakao/login/callback";
 
-      if (!clientId) {
-        console.error("카카오 클라이언트 ID가 설정되지 않았습니다.");
-        setIsLoading(false);
-        return;
-      }
-
-      // state 파라미터 추가 (CSRF 보호)
       const state = crypto.randomUUID().replace(/-/g, "");
       const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(
         redirectUri
@@ -50,10 +67,10 @@ export function KakaoButton({
       console.log("카카오 인증 URL:", kakaoAuthUrl);
       console.log("플랫폼:", isNative ? "네이티브 앱" : "웹");
 
-      // 카카오 인증 페이지로 리다이렉트
       window.location.href = kakaoAuthUrl;
     } catch (error) {
       console.error("카카오 로그인 시작 중 오류:", error);
+    } finally {
       setIsLoading(false);
     }
   };
