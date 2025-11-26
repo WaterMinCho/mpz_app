@@ -239,7 +239,9 @@ export default function AdoptionMonitoringPage({
                           전화번호
                         </td>
                         <td className="text-sm py-1">
-                          {user?.phoneNumber || "전화번호 정보 없음"}
+                          <div className="py-1 px-3">
+                            {user?.phoneNumber || "전화번호 정보 없음"}
+                          </div>
                         </td>
                       </tr>
                     </tbody>

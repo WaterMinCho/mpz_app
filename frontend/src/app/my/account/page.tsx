@@ -94,10 +94,7 @@ export default function MyAccountPage() {
           <div className="flex flex-col gap-2">
             <h5 className="text-gr">계정 정보</h5>
             <div className="flex flex-col gap-1">
-              <p className="font-medium">
-                계정 유형: {user.accounts?.providerId || user.userType}
-              </p>
-              <p className="text-sm text-gray-600">{user.email}</p>
+              <p className="text-sm text-gray-600">가입 계정 : {user.email}</p>
             </div>
           </div>
 
@@ -106,7 +103,9 @@ export default function MyAccountPage() {
             onClick={() => setIsWithdrawalOpen(true)}
             className="text-left"
           >
-            <h5 className="text-gr hover:text-red cursor-pointer">계정 탈퇴</h5>
+            <h5 className="text-red/60 hover:text-red cursor-pointer">
+              계정 탈퇴
+            </h5>
           </button>
         </div>
       </div>

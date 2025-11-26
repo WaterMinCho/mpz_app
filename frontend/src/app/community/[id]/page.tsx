@@ -203,7 +203,7 @@ export default function CommunityDetailPage() {
               <IconButton
                 icon={({ size }) => <ArrowLeft size={size} weight="bold" />}
                 size="iconM"
-                onClick={() => window.history.back()}
+                onClick={() => router.back()}
               />
             </div>
           }
@@ -219,7 +219,7 @@ export default function CommunityDetailPage() {
 
         <div className="flex-1 overflow-y-auto scrollbar-hide">
           {/* 게시글 내용 스켈레톤 */}
-          <div className="py-3">
+          <div className="my-3">
             <CommunityDetailSkeleton />
           </div>
 
@@ -241,7 +241,7 @@ export default function CommunityDetailPage() {
               <IconButton
                 icon={({ size }) => <ArrowLeft size={size} weight="bold" />}
                 size="iconM"
-                onClick={() => window.history.back()}
+                onClick={() => router.back()}
               />
               <h2>게시글</h2>
             </div>
@@ -357,7 +357,7 @@ export default function CommunityDetailPage() {
             <IconButton
               icon={({ size }) => <ArrowLeft size={size} weight="bold" />}
               size="iconM"
-              onClick={() => window.history.back()}
+              onClick={() => router.back()}
             />
           </div>
         }
@@ -373,7 +373,7 @@ export default function CommunityDetailPage() {
 
       <div className="flex-1 overflow-y-auto scrollbar-hide">
         {/* 게시글 내용 */}
-        <div className="py-3">
+        <div className="my-3">
           <CommunityDetail
             post={post}
             users={[

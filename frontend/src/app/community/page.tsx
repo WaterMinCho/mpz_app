@@ -38,6 +38,7 @@ export default function CommunityPage() {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   // 알림 관련 hooks (로그인한 사용자만)
   const { data: notificationsData } = useGetNotifications({
@@ -161,6 +162,62 @@ export default function CommunityPage() {
     isAuthenticated,
     isCenterUser,
   ]); // 페이지 마운트 시 및 권한 변경 시 실행
+
+  // 스크롤 위치 저장 및 복원
+  useEffect(() => {
+    const scrollKey = "community-list-scroll";
+    const scrollContainer = scrollContainerRef.current;
+
+    // 스크롤 위치 복원
+    const restoreScrollPosition = () => {
+      const savedScrollPosition = sessionStorage.getItem(scrollKey);
+      if (savedScrollPosition && scrollContainer) {
+        const scrollY = parseInt(savedScrollPosition, 10);
+        setTimeout(() => {
+          scrollContainer.scrollTop = scrollY;
+        }, 100);
+      }
+    };
+
+    // 스크롤 위치 저장
+    const saveScrollPosition = () => {
+      if (scrollContainer) {
+        const scrollY = scrollContainer.scrollTop;
+        sessionStorage.setItem(scrollKey, scrollY.toString());
+      }
+    };
+
+    // 브라우저 뒤로가기/앞으로가기 이벤트 감지
+    const handlePopState = () => {
+      setTimeout(restoreScrollPosition, 50);
+    };
+
+    // 스크롤 이벤트 리스너 (디바운싱 적용)
+    let scrollTimeout: NodeJS.Timeout;
+    const handleScroll = () => {
+      clearTimeout(scrollTimeout);
+      scrollTimeout = setTimeout(saveScrollPosition, 150);
+    };
+
+    // 이벤트 리스너 등록
+    window.addEventListener("popstate", handlePopState);
+    if (scrollContainer) {
+      scrollContainer.addEventListener("scroll", handleScroll, {
+        passive: true,
+      });
+    }
+
+    // 초기 스크롤 위치 복원
+    restoreScrollPosition();
+
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+      if (scrollContainer) {
+        scrollContainer.removeEventListener("scroll", handleScroll);
+      }
+      clearTimeout(scrollTimeout);
+    };
+  }, []);
 
   // 게시글 삭제 훅
   const deletePostMutation = useDeletePost();
@@ -489,6 +546,7 @@ export default function CommunityPage() {
         />
       </div>
       <div
+        ref={scrollContainerRef}
         className="flex-1 mx-4 overflow-y-auto scrollbar-hide"
         key={activeTab}
       >

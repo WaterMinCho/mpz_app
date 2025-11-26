@@ -156,7 +156,12 @@ export default function AnimalBasicInfo({
           className="object-cover cursor-pointer transition-opacity duration-200"
           unoptimized={currentImageUrl.includes("openapi.animal.go.kr")}
           priority={currentImageIndex === 0}
-          onClick={() => onImageClick?.(validImageUrls, currentImageIndex)}
+          onClick={(e) => {
+            e.stopPropagation();
+            if (onImageClick && validImageUrls.length > 0) {
+              onImageClick(validImageUrls, currentImageIndex);
+            }
+          }}
           onError={(e) => {
             console.warn("이미지 로딩 실패:", currentImageUrl);
             // 에러 시 기본 이미지로 대체
@@ -175,14 +180,20 @@ export default function AnimalBasicInfo({
         {validImageUrls.length > 1 && (
           <>
             <button
-              onClick={prevImage}
-              className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white p-2 rounded-full transition-colors"
+              onClick={(e) => {
+                e.stopPropagation();
+                prevImage();
+              }}
+              className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white p-2 rounded-full transition-colors z-10"
             >
               <ArrowLeft size={20} />
             </button>
             <button
-              onClick={nextImage}
-              className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white p-2 rounded-full transition-colors"
+              onClick={(e) => {
+                e.stopPropagation();
+                nextImage();
+              }}
+              className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white p-2 rounded-full transition-colors z-10"
             >
               <ArrowRight size={20} />
             </button>

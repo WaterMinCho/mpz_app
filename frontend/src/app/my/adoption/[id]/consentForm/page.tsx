@@ -67,6 +67,11 @@ export default function ConsentFormPage({ params }: ConsentFormPageProps) {
     }
   }, [fallbackConsent, guidelinesContent]);
 
+  // 페이지 접근 시 스크롤 최상단으로 이동
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [id]);
+
   if (isLoading || isConsentsLoading) {
     return (
       <Container className="min-h-screen">
