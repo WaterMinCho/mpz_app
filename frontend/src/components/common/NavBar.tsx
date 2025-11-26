@@ -24,7 +24,7 @@ export function NavbarBtn({
   return (
     <div
       className={cn(
-        "flex flex-col gap-0.5 items-center justify-center w-full h-20 cursor-pointer pb-4",
+        "flex flex-col gap-0.5 items-center justify-center w-full h-20 cursor-pointer pb-16",
         active ? "text-dg" : "text-lg"
       )}
       onClick={onClick}

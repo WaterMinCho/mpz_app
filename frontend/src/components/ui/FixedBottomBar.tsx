@@ -81,7 +81,7 @@ export function FixedBottomBar({
   return (
     <Container
       className={cn(
-        "fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200",
+        "fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 pb-16",
         paddingClasses[padding].x,
         paddingClasses[padding].y,
         showSafeArea && paddingClasses[padding].bottom,
