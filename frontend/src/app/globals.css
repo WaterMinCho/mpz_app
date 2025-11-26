@@ -112,7 +112,7 @@ body {
 
   min-height: 100vh;
   box-sizing: border-box;
-  margin-top: 20px;
+  margin: 0;
 }
 
 /* 안드로이드 WebView 호환성: env() 미지원 시 직접 값 사용 */
@@ -279,13 +279,13 @@ body {
 }
 
 /* Safe area 유틸리티 클래스 */
-.pt-safe {
+/* .pt-safe {
   padding-top: var(--safe-area-inset-top);
 }
 
 .pb-safe {
   padding-bottom: var(--safe-area-inset-bottom);
-}
+} */
 /* 
 .mt-safe {
   margin-top: var(--safe-area-inset-top);

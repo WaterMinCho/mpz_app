@@ -18,6 +18,7 @@ const config: CapacitorConfig = {
       androidSpinnerStyle: "large",
       iosSpinnerStyle: "small",
       webSpinnerStyle: "horizontal",
+      fullscreen: false,
     },
   },
 };

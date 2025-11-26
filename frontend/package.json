@@ -20,6 +20,7 @@
     "@capacitor/core": "^7.4.4",
     "@capacitor/geolocation": "^7.1.5",
     "@capacitor/ios": "^7.4.4",
+    "@capgo/capacitor-navigation-bar": "^7.3.14",
     "@cloudflare/workers-types": "^4.20250823.0",
     "@hono/zod-openapi": "^1.1.0",
     "@phosphor-icons/react": "^2.1.10",
