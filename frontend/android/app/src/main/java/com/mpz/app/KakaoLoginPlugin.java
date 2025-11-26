@@ -8,8 +8,8 @@ import androidx.annotation.Nullable;
 import com.getcapacitor.JSObject;
 import com.getcapacitor.Plugin;
 import com.getcapacitor.PluginCall;
+import com.getcapacitor.PluginMethod;
 import com.getcapacitor.annotation.CapacitorPlugin;
-import com.getcapacitor.annotation.PluginMethod;
 import com.kakao.sdk.auth.model.OAuthToken;
 import com.kakao.sdk.common.model.ClientError;
 import com.kakao.sdk.common.model.ClientErrorCause;
@@ -66,7 +66,11 @@ public class KakaoLoginPlugin extends Plugin {
                     @Override
                     public Unit invoke(@Nullable OAuthToken oAuthToken, @Nullable Throwable throwable) {
                         if (throwable != null) {
-                            call.reject("카카오 계정 로그인을 완료할 수 없습니다.", throwable);
+                            Exception exception =
+                                    throwable instanceof Exception
+                                            ? (Exception) throwable
+                                            : new Exception(throwable);
+                            call.reject("카카오 계정 로그인을 완료할 수 없습니다.", exception);
                             return Unit.INSTANCE;
                         }
                         if (oAuthToken == null) {
