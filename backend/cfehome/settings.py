@@ -35,6 +35,8 @@ DEBUG = config("DJANGO_DEBUG", default=False, cast=bool)
 ALLOWED_HOSTS = [
     ".railway.app",
     ".mpz.kr",
+    "127.0.0.1",
+    "localhost",
 ]
 
 if DEBUG:
@@ -212,6 +214,7 @@ STATICFILES_VENDOR_DIR = STATICFILES_BASE_DIR / "vendors"
 STATICFILES_DIRS = [STATICFILES_BASE_DIR]
 
 STATIC_ROOT = BASE_DIR / "local-cdn"
+STATIC_ROOT.mkdir(exist_ok=True, parents=True)
 
 # Media files (user uploads)
 MEDIA_URL = '/media/'
@@ -229,6 +232,9 @@ STORAGES = {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
     },
 }
+
+if DEBUG:
+    STORAGES["staticfiles"]["BACKEND"] = "django.contrib.staticfiles.storage.StaticFilesStorage"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
