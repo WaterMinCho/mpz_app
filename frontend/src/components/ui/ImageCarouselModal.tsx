@@ -100,7 +100,7 @@ export function ImageCarouselModal({
           icon={({ size }) => <X size={size} weight="bold" />}
           size="iconM"
           onClick={onClose}
-          className="bg-white/10 hover:bg-white/20 text-white p-2"
+          className="bg-white/10 hover:bg-white/20 text-white p-1"
         />
       </div>
 
@@ -125,7 +125,7 @@ export function ImageCarouselModal({
               e.stopPropagation();
               handlePrevious();
             }}
-            className="bg-white/10 hover:bg-white/20 text-white p-2"
+            className="bg-white/10 hover:bg-white/20 text-white p-1"
           />
         </div>
       )}
@@ -199,7 +199,7 @@ export function ImageCarouselModal({
               e.stopPropagation();
               handleNext();
             }}
-            className="bg-white/10 hover:bg-white/20 text-white p-2"
+            className="bg-white/10 hover:bg-white/20 text-white p-1"
           />
         </div>
       )}
