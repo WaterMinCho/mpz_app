@@ -517,7 +517,6 @@ export default function CenterProcessCustomForm() {
           updateQuestionSequence.isPending ||
           deleteQuestionForm.isPending
         }
-        showSafeArea={true}
         padding="md"
       />
 

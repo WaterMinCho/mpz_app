@@ -365,7 +365,6 @@ export default function CenterProcess() {
         primaryButtonText={isLoading ? "저장 중..." : "저장하기"}
         onPrimaryButtonClick={handleSave}
         primaryButtonDisabled={isLoading || isLoadingSettings}
-        showSafeArea={true}
         padding="md"
       />
 

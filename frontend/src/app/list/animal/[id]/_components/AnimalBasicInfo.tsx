@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useMemo, useState, useEffect } from "react";
-import Image from "next/image";
 import { Chip } from "@/components/ui/Chip";
+import AnimalImage from "@/components/ui/AnimalImage";
 import {
   ArrowLeft,
   ArrowRight,
@@ -147,25 +147,20 @@ export default function AnimalBasicInfo({
     <div className="bg-white rounded-lg">
       {/* 이미지 섹션 */}
       <div className="relative w-full aspect-square bg-white overflow-hidden">
-        <Image
+        <AnimalImage
           key={currentImageUrl}
-          src={currentImageUrl}
+          imageUrl={currentImageUrl}
           alt={`${name} - 이미지 ${currentImageIndex}`}
           fill
           sizes="100vw"
-          className="object-cover cursor-pointer transition-opacity duration-200"
-          unoptimized={currentImageUrl.includes("openapi.animal.go.kr")}
+          containerClassName="w-full h-full"
+          imageClassName="cursor-pointer transition-opacity duration-200"
           priority={currentImageIndex === 0}
           onClick={(e) => {
             e.stopPropagation();
             if (onImageClick && validImageUrls.length > 0) {
               onImageClick(validImageUrls, currentImageIndex);
             }
-          }}
-          onError={(e) => {
-            console.warn("이미지 로딩 실패:", currentImageUrl);
-            // 에러 시 기본 이미지로 대체
-            e.currentTarget.src = "/img/dummyImg.png";
           }}
         />
 

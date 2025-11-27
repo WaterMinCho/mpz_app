@@ -24,7 +24,7 @@ export function NavbarBtn({
   return (
     <div
       className={cn(
-        "flex flex-col gap-1 items-center justify-center w-full h-20 cursor-pointer p-2 pb-6",
+        "flex flex-col gap-1 items-center justify-center w-full h-16 bg-wh cursor-pointer",
         active ? "text-dg" : "text-lg"
       )}
       onClick={onClick}
@@ -93,7 +93,7 @@ function NavBar() {
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-50 w-full bg-transparent pb-6" // env(safe-area-inset-bottom) 제거하고 pb-6 추가
+      className="fixed bottom-0 left-0 right-0 z-50 w-full bg-wh pb-safe-bottom"
       style={{
         pointerEvents: "auto",
       }}

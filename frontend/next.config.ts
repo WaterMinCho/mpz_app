@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
+    domains: ["localhost", "mpz.kr"],
     remotePatterns: [
       { protocol: "https", hostname: "pub-*.*.r2.dev" },
       { protocol: "https", hostname: "pub-*.r2.dev" },
