@@ -64,7 +64,7 @@ export function TopBar({
       {/* top-5로 내려간 만큼 상단 영역을 흰색으로 덮어 자연스럽게 보이도록 처리 */}
       <div
         aria-hidden
-        className="fixed left-1/2 -translate-x-1/2 top-0 z-[45] w-full max-w-[420px] h-5 bg-white"
+        className={`${className} left-1/2 -translate-x-1/2 top-0 z-[45] w-full max-w-[420px] h-5 bg-white`}
       />
       {/* TopBar 자체 */}
       <Comp className={outerClassName} {...props}>

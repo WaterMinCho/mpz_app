@@ -220,7 +220,7 @@ export default function AnimalDetailPage({
 
     // 구독 센터인 경우 입양 절차 모달을 먼저 보여줌
     if (isCenterSubscriber) {
-      if (center?.adoptionProcedure) {
+      if (center?.adoptionProcedure || center?.callAvailableTime) {
         setShowAdoptionProcedureModal(true);
       } else {
         handleAdoptionProcedureConfirm();
@@ -815,23 +815,23 @@ export default function AnimalDetailPage({
         initialIndex={imageModalData.initialIndex}
       />
 
-      {/* 입양 절차 모달 */}
-      <CustomModal
-        open={showAdoptionProcedureModal}
-        onClose={() => setShowAdoptionProcedureModal(false)}
-        title="입양 절차 안내"
-        description={center?.adoptionProcedure || "입양 절차 정보가 없습니다."}
-        variant="variant1"
-        subText={
-          center?.callAvailableTime
-            ? `전화 가능시간: ${center.callAvailableTime}`
-            : undefined
-        }
-        leftButtonText="전화 문의"
-        onLeftClick={handleCenterPhoneCall}
-        rightButtonText="입양 문의"
-        onRightClick={handleAdoptionProcedureConfirm}
-      />
+      {/* 입양 절차 모달: 전화 가능 시간이 등록된 센터만 노출 */}
+      {center?.callAvailableTime && (
+        <CustomModal
+          open={showAdoptionProcedureModal}
+          onClose={() => setShowAdoptionProcedureModal(false)}
+          title="입양 절차 안내"
+          description={
+            center?.adoptionProcedure || "입양 절차 정보가 없습니다."
+          }
+          variant="variant1"
+          subText={`전화 가능시간: ${center.callAvailableTime}`}
+          leftButtonText="전화 문의"
+          onLeftClick={handleCenterPhoneCall}
+          rightButtonText="입양 문의"
+          onRightClick={handleAdoptionProcedureConfirm}
+        />
+      )}
     </>
   );
 }

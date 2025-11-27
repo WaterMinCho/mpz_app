@@ -1,4 +1,3 @@
-import { Container } from "../common/Container";
 import { useState } from "react";
 import Link from "next/link";
 
@@ -46,13 +45,13 @@ export function TextMenu({ title, onClick, href }: TextMenuProps) {
 
   if (href) {
     return (
-      <Container>
+      <div className="max-w-[420px] mx-auto w-full">
         <Link href={href} className="block">
           {buttonContent}
         </Link>
-      </Container>
+      </div>
     );
   }
 
-  return <Container>{buttonContent}</Container>;
+  return <div className="max-w-[420px] mx-auto w-full">{buttonContent}</div>;
 }

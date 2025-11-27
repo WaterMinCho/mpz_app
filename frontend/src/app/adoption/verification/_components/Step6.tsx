@@ -4,7 +4,6 @@ import React from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 
-import { Container } from "@/components/common/Container";
 import { FixedBottomBar } from "@/components/ui/FixedBottomBar";
 import { FormListItem } from "@/components/ui/FormListItem";
 import { NotificationToast } from "@/components/ui/NotificationToast";
@@ -255,19 +254,19 @@ export function Step6({ onNext }: StepProps) {
   // 로딩 상태 처리
   if (isLoading) {
     return (
-      <Container className="min-h-screen pb-28">
+      <div className="min-h-screen max-w-[420px] mx-auto w-full pb-28">
         <h2 className="text-bk mb-6">동의서를 불러오는 중...</h2>
         <div className="flex justify-center items-center py-10">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
         </div>
-      </Container>
+      </div>
     );
   }
 
   // 에러 상태 처리
   if (error) {
     return (
-      <Container className="min-h-screen pb-28">
+      <div className="min-h-screen max-w-[420px] mx-auto w-full pb-28">
         <h2 className="text-bk mb-6">오류가 발생했습니다 !</h2>
         <p className="text-gray-600">
           동의서를 불러올 수 없습니다. 다시 시도해주세요.
@@ -277,25 +276,25 @@ export function Step6({ onNext }: StepProps) {
           type="error"
           onClose={() => {}}
         />
-      </Container>
+      </div>
     );
   }
 
   // centerId가 없는 경우
   if (!centerId) {
     return (
-      <Container className="min-h-screen pb-28">
+      <div className="min-h-screen max-w-[420px] mx-auto w-full pb-28">
         <h2 className="text-bk mb-6">센터 정보가 필요합니다</h2>
         <p className="text-gray-600">
           입양 신청을 진행하려면 센터 정보가 필요합니다.
         </p>
-      </Container>
+      </div>
     );
   }
 
   return (
     <>
-      <Container className="min-h-screen pb-28">
+      <div className="min-h-screen max-w-[420px] mx-auto w-full pb-28">
         <div className="flex flex-col gap-2 mb-6">
           <h2 className="text-bk">
             {"원활한 서비스 사용을 위한 동의문이에요."}
@@ -318,7 +317,7 @@ export function Step6({ onNext }: StepProps) {
             네, 동의해요.
           </FormListItem>
         </div>
-      </Container>
+      </div>
 
       <FixedBottomBar
         variant="variant1"

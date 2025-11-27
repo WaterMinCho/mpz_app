@@ -31,7 +31,7 @@ export function LinearProgressBar({
     <div className={cn("w-full", className)}>
       <div
         className={cn(
-          "relative w-full overflow-hidden bg-lg h-2",
+          "flex-1 w-full overflow-hidden bg-lg h-2",
           trackClassName
         )}
         role="progressbar"
@@ -41,7 +41,7 @@ export function LinearProgressBar({
       >
         <div
           className={cn(
-            "h-full transition-all duration-300 ease-out",
+            "flex-1 h-full transition-all duration-300 ease-out",
             "bg-brand",
             indicatorClassName
           )}

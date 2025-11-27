@@ -5,7 +5,6 @@ import React from "react";
 import { CustomInput } from "@/components/ui/CustomInput";
 import { SearchInput } from "@/components/ui/SearchInput";
 import { InfoCard } from "@/components/ui/InfoCard";
-import { Container } from "@/components/common/Container";
 import { FixedBottomBar } from "@/components/ui/FixedBottomBar";
 import { NotificationToast } from "@/components/ui/NotificationToast";
 import { openKakaoAddress } from "@/lib/openKakaoAddress";
@@ -18,10 +17,9 @@ export interface StepProps {
 
 export function Step4({ onNext }: StepProps) {
   const { user } = useAuth();
-  const {
-    data: storeData,
-    updateField,
-  } = useAdoptionVerificationStore(user?.id);
+  const { data: storeData, updateField } = useAdoptionVerificationStore(
+    user?.id
+  );
 
   const [roadAddress, setRoadAddress] = React.useState("");
   const [detailAddress, setDetailAddress] = React.useState("");
@@ -103,7 +101,7 @@ export function Step4({ onNext }: StepProps) {
 
   return (
     <>
-      <Container className="min-h-screen pb-28">
+      <div className="min-h-screen max-w-[420px] mx-auto w-full pb-28">
         <h2 className="text-bk mb-6">주소를 입력해주세요.</h2>
         <div className="flex flex-col w-full">
           <h5 className="text-dg">주소</h5>
@@ -141,7 +139,7 @@ export function Step4({ onNext }: StepProps) {
             )}
           </div>
         </div>
-      </Container>
+      </div>
 
       <FixedBottomBar
         variant="variant1"

@@ -1,7 +1,6 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
 
-import { Container } from "../common/Container";
 import { BigButton } from "./BigButton";
 import { IconButton } from "./IconButton";
 import { MiniButton } from "./MiniButton";
@@ -78,9 +77,9 @@ export function FixedBottomBar({
   };
 
   return (
-    <Container
+    <div
       className={cn(
-        "fixed bottom-0 left-0 right-0 z-30 bg-white border-t border-gray-200 pb-safe-bottom",
+        "fixed bottom-0 left-0 right-0 z-30 max-w-[420px] mx-auto w-full bg-white border-t border-gray-200 pb-safe-bottom",
         paddingClasses[padding].x,
         paddingClasses[padding].y,
         className
@@ -198,6 +197,6 @@ export function FixedBottomBar({
           </div>
         )}
       </div>
-    </Container>
+    </div>
   );
 }

@@ -3,7 +3,6 @@
 import React from "react";
 
 import { CustomInput } from "@/components/ui/CustomInput";
-import { Container } from "@/components/common/Container";
 import { FixedBottomBar } from "@/components/ui/FixedBottomBar";
 import { NotificationToast } from "@/components/ui/NotificationToast";
 import { useAuth } from "@/components/providers/AuthProvider";
@@ -15,10 +14,9 @@ export interface StepProps {
 
 export function Step3({ onNext }: StepProps) {
   const { user } = useAuth();
-  const {
-    data: storeData,
-    updateField,
-  } = useAdoptionVerificationStore(user?.id);
+  const { data: storeData, updateField } = useAdoptionVerificationStore(
+    user?.id
+  );
 
   const [birthRaw, setBirthRaw] = React.useState("");
   const [gender, setGender] = React.useState("");
@@ -71,7 +69,10 @@ export function Step3({ onNext }: StepProps) {
       sessionStorage.setItem("verification.gender", gender);
       updateField(
         "birth",
-        `${birthDigits.slice(0, 4)}-${birthDigits.slice(4, 6)}-${birthDigits.slice(6, 8)}`
+        `${birthDigits.slice(0, 4)}-${birthDigits.slice(
+          4,
+          6
+        )}-${birthDigits.slice(6, 8)}`
       );
       onNext();
     } catch (error) {
@@ -103,7 +104,7 @@ export function Step3({ onNext }: StepProps) {
 
   return (
     <>
-      <Container className="min-h-screen pb-28">
+      <div className="min-h-screen max-w-[420px] mx-auto w-full pb-28">
         <h2 className="text-bk mb-6">생년월일과 성별을 알려주세요.</h2>
         <div className="flex flex-col gap-3">
           <CustomInput
@@ -125,7 +126,7 @@ export function Step3({ onNext }: StepProps) {
             twoOptions={["남", "여"]}
           />
         </div>
-      </Container>
+      </div>
 
       <FixedBottomBar
         variant="variant1"
