@@ -5,7 +5,7 @@ interface IconButtonProps {
     size?: number | string;
     className?: string;
   }>;
-  size?: "iconM" | "iconS" | "imgM";
+  size?: "iconM" | "iconS" | "iconL";
   label?: string;
   className?: string;
   onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
@@ -15,13 +15,13 @@ interface IconButtonProps {
 const sizeMap = {
   iconM: 20,
   iconS: 16,
-  imgM: 24,
+  iconL: 24,
 };
 
 const sizeClassMap = {
   iconM: "h-5 w-5", // 20px
   iconS: "h-4 w-4", // 16px
-  imgM: "h-6 w-6", // 24px
+  iconL: "h-7 w-7", // 28px
 };
 
 export function IconButton({

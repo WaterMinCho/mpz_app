@@ -1,10 +1,11 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { X, CaretLeft, CaretRight } from "@phosphor-icons/react";
 import useEmblaCarousel from "embla-carousel-react";
 import { IconButton } from "./IconButton";
+import { getProxyImageUrl } from "@/lib/getProxyImageUrl";
 
 interface ImageCarouselModalProps {
   images: string[];
@@ -24,6 +25,9 @@ export function ImageCarouselModal({
   const [dragStart, setDragStart] = useState<{ x: number; y: number } | null>(
     null
   );
+  const [imageLoaded, setImageLoaded] = useState<boolean[]>(() =>
+    images.map(() => false)
+  );
   const [emblaRef, emblaApi] = useEmblaCarousel({
     loop: hasMultipleImages,
     align: "center",
@@ -31,6 +35,15 @@ export function ImageCarouselModal({
     dragFree: false,
     containScroll: "trimSnaps",
   });
+
+  const proxiedImages = useMemo(
+    () => images.map((image) => getProxyImageUrl(image) ?? "/img/dummyImg.png"),
+    [images]
+  );
+
+  useEffect(() => {
+    setImageLoaded(images.map(() => false));
+  }, [images]);
 
   useEffect(() => {
     setCurrentIndex(initialIndex);
@@ -98,9 +111,9 @@ export function ImageCarouselModal({
       <div className="absolute top-4 right-4 z-[10002] ">
         <IconButton
           icon={({ size }) => <X size={size} weight="bold" />}
-          size="iconM"
+          size="iconL"
           onClick={onClose}
-          className="bg-white/10 hover:bg-white/20 text-white p-2"
+          className="bg-white/10 hover:bg-white/20 text-white p-1"
         />
       </div>
 
@@ -120,12 +133,12 @@ export function ImageCarouselModal({
         <div className="absolute left-4 z-[10002]">
           <IconButton
             icon={({ size }) => <CaretLeft size={size} weight="bold" />}
-            size="iconM"
+            size="iconL"
             onClick={(e) => {
               e.stopPropagation();
               handlePrevious();
             }}
-            className="bg-white/10 hover:bg-white/20 text-white p-2"
+            className="bg-white/10 hover:bg-white/20 text-white p-1"
           />
         </div>
       )}
@@ -133,7 +146,7 @@ export function ImageCarouselModal({
       {/* 이미지 */}
       <div className="relative w-full h-full grid place-items-center px-6 sm:px-16 py-20">
         <div
-          className="pointer-events-auto relative max-h-[70vh] max-w-[85vw] w-full touch-pan-x"
+          className="pointer-events-auto relative max-h-[85vh] max-w-[95vw] w-full touch-pan-x"
           ref={emblaRef}
           style={{ touchAction: "pan-x pinch-zoom" }}
           onMouseDown={(e) => {
@@ -167,21 +180,32 @@ export function ImageCarouselModal({
             }
           }}
         >
-          <div className="flex h-full w-full">
-            {images.map((image, index) => (
+          <div className="flex h-full w-full gap-6 px-6">
+            {proxiedImages.map((image, index) => (
               <div
                 key={image + index}
                 className="relative flex-[0_0_100%] w-full aspect-auto touch-pan-x"
-                style={{ touchAction: "pan-x pinch-zoom", minHeight: "200px" }}
+                style={{ touchAction: "pan-x pinch-zoom", minHeight: "280px" }}
               >
+                {!imageLoaded[index] && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-white/5">
+                    <div className="h-10 w-10 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+                  </div>
+                )}
                 <Image
                   src={image}
                   alt={`이미지 ${index + 1}`}
                   fill
                   className="object-contain object-center select-none"
-                  sizes="(min-width: 1024px) 70vw, 85vw"
-                  unoptimized
+                  sizes="(min-width: 1024px) 70vw, 70vw"
                   draggable={false}
+                  onLoadingComplete={() => {
+                    setImageLoaded((prev) => {
+                      const next = [...prev];
+                      next[index] = true;
+                      return next;
+                    });
+                  }}
                 />
               </div>
             ))}
@@ -194,12 +218,12 @@ export function ImageCarouselModal({
         <div className="absolute right-4 z-[10002]">
           <IconButton
             icon={({ size }) => <CaretRight size={size} weight="bold" />}
-            size="iconM"
+            size="iconL"
             onClick={(e) => {
               e.stopPropagation();
               handleNext();
             }}
-            className="bg-white/10 hover:bg-white/20 text-white p-2"
+            className="bg-white/10 hover:bg-white/20 text-white p-1"
           />
         </div>
       )}
@@ -208,7 +232,7 @@ export function ImageCarouselModal({
       {hasMultipleImages && (
         <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-[10002] max-w-[90vw]">
           <div className="flex gap-2 overflow-x-auto scrollbar-hide px-4">
-            {images.map((img, index) => (
+            {proxiedImages.map((img, index) => (
               <button
                 key={index}
                 onClick={(e) => {
@@ -226,7 +250,6 @@ export function ImageCarouselModal({
                   alt={`썸네일 ${index + 1}`}
                   fill
                   className="object-cover"
-                  unoptimized
                 />
               </button>
             ))}

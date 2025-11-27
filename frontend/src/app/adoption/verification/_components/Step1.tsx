@@ -4,7 +4,6 @@ import React from "react";
 import axios from "axios";
 
 import { Input } from "@/components/ui/CustomInput";
-import { Container } from "@/components/common/Container";
 import { FixedBottomBar } from "@/components/ui/FixedBottomBar";
 import { NotificationToast } from "@/components/ui/NotificationToast";
 import { useAuth } from "@/components/providers/AuthProvider";
@@ -220,7 +219,7 @@ export function Step1({ onNext }: StepProps) {
 
   return (
     <>
-      <Container className="min-h-screen pb-28">
+      <div className="min-h-screen max-w-[420px] mx-auto w-full pb-28">
         <h2 className="mb-6 text-bk">휴대폰 번호를 인증해주세요.</h2>
 
         <div className="flex flex-col gap-3">
@@ -257,7 +256,7 @@ export function Step1({ onNext }: StepProps) {
             />
           )}
         </div>
-      </Container>
+      </div>
 
       <FixedBottomBar
         variant="variant1"

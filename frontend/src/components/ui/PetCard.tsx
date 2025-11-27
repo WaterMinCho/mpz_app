@@ -6,6 +6,7 @@ import { GenderMale, GenderFemale, Link } from "@phosphor-icons/react";
 import { DotsIndicator } from "@/components/ui/DotsIndicator";
 import { MiniButton } from "./MiniButton";
 import { Chip } from "./Chip";
+import AnimalImage from "./AnimalImage";
 import { cn, getRelativeTime } from "@/lib/utils";
 // 기존 호환성을 위한 타입 사용
 import { PetCardAnimal } from "@/types/animal";
@@ -114,6 +115,8 @@ export function PetCard({
     const HeadingTag = headingLevel;
     return React.createElement(HeadingTag, { className }, content);
   };
+
+  const mainImageUrl = getImageUrl();
 
   const getStatusInfo = (
     protectionStatus?: string,
@@ -251,17 +254,12 @@ export function PetCard({
                 <GenderMale className="text-brand" weight="bold" size={14} />
               )}
             </div>
-            <Image
-              src={getImageUrl()}
+            <AnimalImage
+              imageUrl={mainImageUrl}
               alt={breed || "동물"}
               fill
-              className="object-cover"
-              unoptimized={getImageUrl().includes("openapi.animal.go.kr")}
-              onError={(e) => {
-                console.warn("이미지 로딩 실패:", getImageUrl());
-                // 에러 시 기본 이미지로 대체
-                e.currentTarget.src = "/img/dummyImg.png";
-              }}
+              containerClassName="w-full h-full"
+              imageClassName="object-cover"
             />
           </div>
         </div>
@@ -318,11 +316,12 @@ export function PetCard({
         onClick={handleCardClick}
       >
         <div className={cn("relative mb-2", getImageSize())}>
-          <Image
-            src={getImageUrl()}
+          <AnimalImage
+            imageUrl={mainImageUrl}
             alt={breed || "동물"}
             fill
-            className="object-cover rounded-[10px]"
+            containerClassName="w-full h-full"
+            imageClassName="object-cover rounded-[10px]"
           />
           {imageOverlay && (
             <div className="absolute bottom-2 right-2 z-10">{imageOverlay}</div>
@@ -361,11 +360,12 @@ export function PetCard({
               <GenderMale className="text-brand" weight="bold" size={12} />
             )}
           </div>
-          <Image
-            src={getImageUrl()}
+          <AnimalImage
+            imageUrl={mainImageUrl}
             alt={breed || "동물"}
             fill
-            className="object-cover"
+            containerClassName="w-full h-full"
+            imageClassName="object-cover"
           />
         </div>
         <div className="flex-1 min-w-0">
@@ -403,11 +403,12 @@ export function PetCard({
         )}
       >
         <div className={cn("relative mb-2", getImageSize())}>
-          <Image
-            src={getImageUrl()}
+          <AnimalImage
+            imageUrl={mainImageUrl}
             alt={breed || "동물"}
             fill
-            className="object-cover rounded-[10px]"
+            containerClassName="w-full h-full"
+            imageClassName="object-cover rounded-[10px]"
           />
           {/* 성별 아이콘 - 우측 상단 */}
           <div className="absolute flex items-center justify-center w-6 h-6 rounded-full shadow-sm top-2 right-2 bg-white/90">
@@ -473,11 +474,12 @@ export function PetCard({
       onClick={handleCardClick}
     >
       <div className={cn("relative mb-2", getImageSize())}>
-        <Image
-          src={getImageUrl()}
+        <AnimalImage
+          imageUrl={mainImageUrl}
           alt={breed || "동물"}
           fill
-          className="object-cover rounded-[10px]"
+          containerClassName="w-full h-full"
+          imageClassName="object-cover rounded-[10px]"
         />
         {/* 성별 아이콘 - 우측 상단 */}
         <div className="absolute flex items-center justify-center w-6 h-6 rounded-full shadow-sm top-2 right-2 bg-white/90">

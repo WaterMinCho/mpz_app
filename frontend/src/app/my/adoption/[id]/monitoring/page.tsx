@@ -279,7 +279,7 @@ export default function AdoptionMonitoringPage({
               <BigButton
                 variant="variant5"
                 onClick={() => {
-                  router.push(`/adoption/contract?adoptionId=${id}`);
+                  router.push(`/my/adoption/${id}/contract`);
                 }}
                 className="w-full py-4 my-3"
               >

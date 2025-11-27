@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import type { ReactNode } from "react";
 // import { Inter } from "next/font/google";
 import { QueryProvider } from "@/components/providers/QueryProvider";
 import { AuthProvider } from "@/components/providers/AuthProvider";
@@ -8,6 +9,7 @@ import KakaoMapScript from "@/components/common/KakaoMapScript";
 import DaumPostcodeScript from "@/components/common/DaumPostcodeScript";
 import { AppUrlHandler } from "@/components/common/AppUrlHandler";
 import "./globals.css";
+import { SafeAreaLayout } from "@/components/layouts/SafeAreaLayout";
 
 // 시스템 폰트 사용
 const inter = { className: "font-sans" };
@@ -98,11 +100,7 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="ko">
       <body className={inter.className}>
@@ -113,7 +111,7 @@ export default function RootLayout({
                 <AppUrlHandler />
                 <KakaoMapScript />
                 <DaumPostcodeScript />
-                <div className="pt-6">{children}</div>
+                <SafeAreaLayout>{children}</SafeAreaLayout>
               </SocketProvider>
             </KakaoProvider>
           </AuthProvider>

@@ -3,7 +3,6 @@
 import React from "react";
 
 import { CustomInput } from "@/components/ui/CustomInput";
-import { Container } from "@/components/common/Container";
 import { FixedBottomBar } from "@/components/ui/FixedBottomBar";
 import { NotificationToast } from "@/components/ui/NotificationToast";
 import { useAuth } from "@/components/providers/AuthProvider";
@@ -15,10 +14,9 @@ export interface StepProps {
 
 export function Step2({ onNext }: StepProps) {
   const { user } = useAuth();
-  const {
-    data: storeData,
-    updateField,
-  } = useAdoptionVerificationStore(user?.id);
+  const { data: storeData, updateField } = useAdoptionVerificationStore(
+    user?.id
+  );
 
   const [name, setName] = React.useState("");
   const isNameValid = name.trim().length >= 2;
@@ -62,7 +60,7 @@ export function Step2({ onNext }: StepProps) {
 
   return (
     <>
-      <Container className="min-h-screen pb-28">
+      <div className="min-h-screen max-w-[420px] mx-auto w-full pb-28">
         <h2 className="text-bk mb-6">이름을 입력해주세요.</h2>
         <CustomInput
           variant="primary"
@@ -73,7 +71,7 @@ export function Step2({ onNext }: StepProps) {
           inputMode="text"
           maxLength={15}
         />
-      </Container>
+      </div>
 
       <FixedBottomBar
         variant="variant1"

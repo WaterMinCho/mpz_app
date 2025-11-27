@@ -18,13 +18,13 @@ export function NavbarBtn({
   onClick,
 }: NavbarBtnProps) {
   const iconWithColor = React.cloneElement(icon, {
-    className: cn("w-4 h-4 transition-colors", active ? "text-dg" : "text-lg"),
+    className: cn("w-5 h-5 transition-colors", active ? "text-dg" : "text-lg"),
   });
 
   return (
     <div
       className={cn(
-        "flex flex-col gap-0.5 items-center justify-center w-full h-20 cursor-pointer pb-4",
+        "flex flex-col gap-1 items-center justify-center w-full h-16 bg-wh cursor-pointer",
         active ? "text-dg" : "text-lg"
       )}
       onClick={onClick}
@@ -32,7 +32,7 @@ export function NavbarBtn({
       {iconWithColor}
       <h6
         className={cn(
-          "text-sm font-medium cursor-pointer",
+          "text-xs font-medium cursor-pointer leading-tight",
           active && "text-dg"
         )}
       >
@@ -93,13 +93,13 @@ function NavBar() {
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-50 w-full bg-transparent"
+      className="fixed bottom-0 left-0 right-0 z-50 w-full bg-wh pb-safe-bottom"
       style={{
         pointerEvents: "auto",
       }}
     >
       <div className="max-w-[420px] mx-auto w-full bg-wh border-t border-lg rounded-t-xl">
-        <div className="flex justify-between px-2">
+        <div className="flex justify-between px-4">
           <NavbarBtn
             icon={<HouseSimple weight="bold" />}
             label="홈"

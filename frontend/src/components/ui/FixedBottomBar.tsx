@@ -1,12 +1,12 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
 
-import { Container } from "../common/Container";
 import { BigButton } from "./BigButton";
 import { IconButton } from "./IconButton";
 import { MiniButton } from "./MiniButton";
 
-export interface FixedBottomBarProps {
+export interface FixedBottomBarProps
+  extends React.HTMLAttributes<HTMLDivElement> {
   children?: React.ReactNode;
   className?: string;
   variant?: "variant1" | "variant2" | "variant3" | "variant4";
@@ -35,7 +35,6 @@ export interface FixedBottomBarProps {
   onApplyButtonClick?: () => void;
   applyButtonDisabled?: boolean;
   // 공통 props
-  showSafeArea?: boolean;
   padding?: "sm" | "md" | "lg";
 }
 
@@ -68,136 +67,136 @@ export function FixedBottomBar({
   onApplyButtonClick,
   applyButtonDisabled = false,
   // 공통 props
-  showSafeArea = true,
   padding = "md",
   ...props
 }: FixedBottomBarProps) {
   const paddingClasses = {
-    sm: { x: "px-4", y: "pt-3", bottom: "pb-3" },
-    md: { x: "px-6", y: "pt-4", bottom: "pb-4" },
-    lg: { x: "px-8", y: "pt-6", bottom: "pb-6" },
+    sm: { x: "px-4", y: "pt-3" },
+    md: { x: "px-6", y: "pt-4" },
+    lg: { x: "px-8", y: "pt-6" },
   };
 
   return (
-    <Container
+    <div
       className={cn(
-        "fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200",
+        "fixed bottom-0 left-0 right-0 z-30 max-w-[420px] mx-auto w-full bg-white border-t border-gray-200 pb-safe-bottom",
         paddingClasses[padding].x,
         paddingClasses[padding].y,
-        showSafeArea && paddingClasses[padding].bottom,
         className
       )}
       {...props}
     >
-      {children && <div className="my-4">{children}</div>}
+      <div className="pb-2">
+        {children && <div className="my-4">{children}</div>}
 
-      {variant === "variant1" ? (
-        <div className="flex items-center gap-3">
-          <BigButton
-            variant="primary"
-            left={primaryButtonLeft}
-            right={primaryButtonRight}
-            onClick={onPrimaryButtonClick}
-            disabled={primaryButtonDisabled}
-            className="flex-1 h-12"
-          >
-            {primaryButtonText}
-          </BigButton>
-          {rightIcon1 && (
-            <IconButton
-              icon={() => rightIcon1}
-              size="iconM"
-              onClick={onRightIcon1Click}
-              className="text-gr"
-            />
-          )}
-          {rightIcon2 && (
-            <IconButton
-              icon={() => rightIcon2}
-              size="iconM"
-              onClick={onRightIcon2Click}
-              className="text-gr"
-            />
-          )}
-        </div>
-      ) : variant === "variant3" ? (
-        <div className="flex items-center gap-3">
-          {leftButtonText && (
+        {variant === "variant1" ? (
+          <div className="flex items-center gap-3">
             <BigButton
-              variant="variant3"
-              onClick={onLeftButtonClick}
-              disabled={leftButtonDisabled}
-              className="flex-1 h-12 bg-bg text-gr"
-            >
-              {leftButtonText}
-            </BigButton>
-          )}
-          <BigButton
-            variant="primary"
-            left={primaryButtonLeft}
-            right={primaryButtonRight}
-            onClick={onPrimaryButtonClick}
-            disabled={primaryButtonDisabled}
-            className="flex-1 h-12"
-          >
-            {primaryButtonText}
-          </BigButton>
-          {showDivider && <div className="mx-1 h-6 w-px bg-gray-200" />}
-          {rightIcon1 && (
-            <IconButton
-              icon={({ className }) => (
-                <div className={cn(className, "text-gr")}>{rightIcon1}</div>
-              )}
-              size="iconM"
-              onClick={onRightIcon1Click}
-              className="text-gr"
-            />
-          )}
-          {rightIcon2 && (
-            <IconButton
-              icon={({ className }) => (
-                <div className={cn(className, "text-gr")}>{rightIcon2}</div>
-              )}
-              size="iconM"
-              onClick={onRightIcon2Click}
-              className="text-gr"
-            />
-          )}
-        </div>
-      ) : variant === "variant4" ? (
-        <div className="flex items-center">
-          <BigButton
-            variant="primary"
-            onClick={onPrimaryButtonClick}
-            disabled={primaryButtonDisabled}
-            className="w-full h-12"
-          >
-            {primaryButtonText}
-          </BigButton>
-        </div>
-      ) : (
-        <div className="flex items-center gap-3">
-          {showResetButton && (
-            <MiniButton
-              text={resetButtonText}
               variant="primary"
-              leftIcon={resetButtonLeft}
-              onClick={onResetButtonClick}
-            />
-          )}
+              left={primaryButtonLeft}
+              right={primaryButtonRight}
+              onClick={onPrimaryButtonClick}
+              disabled={primaryButtonDisabled}
+              className="flex-1 h-12"
+            >
+              {primaryButtonText}
+            </BigButton>
+            {rightIcon1 && (
+              <IconButton
+                icon={() => rightIcon1}
+                size="iconM"
+                onClick={onRightIcon1Click}
+                className="text-gr"
+              />
+            )}
+            {rightIcon2 && (
+              <IconButton
+                icon={() => rightIcon2}
+                size="iconM"
+                onClick={onRightIcon2Click}
+                className="text-gr"
+              />
+            )}
+          </div>
+        ) : variant === "variant3" ? (
+          <div className="flex items-center gap-3">
+            {leftButtonText && (
+              <BigButton
+                variant="variant3"
+                onClick={onLeftButtonClick}
+                disabled={leftButtonDisabled}
+                className="flex-1 h-12 bg-bg text-gr"
+              >
+                {leftButtonText}
+              </BigButton>
+            )}
+            <BigButton
+              variant="primary"
+              left={primaryButtonLeft}
+              right={primaryButtonRight}
+              onClick={onPrimaryButtonClick}
+              disabled={primaryButtonDisabled}
+              className="flex-1 h-12"
+            >
+              {primaryButtonText}
+            </BigButton>
+            {showDivider && <div className="mx-1 h-6 w-px bg-gray-200" />}
+            {rightIcon1 && (
+              <IconButton
+                icon={({ className }) => (
+                  <div className={cn(className, "text-gr")}>{rightIcon1}</div>
+                )}
+                size="iconM"
+                onClick={onRightIcon1Click}
+                className="text-gr"
+              />
+            )}
+            {rightIcon2 && (
+              <IconButton
+                icon={({ className }) => (
+                  <div className={cn(className, "text-gr")}>{rightIcon2}</div>
+                )}
+                size="iconM"
+                onClick={onRightIcon2Click}
+                className="text-gr"
+              />
+            )}
+          </div>
+        ) : variant === "variant4" ? (
+          <div className="flex items-center">
+            <BigButton
+              variant="primary"
+              onClick={onPrimaryButtonClick}
+              disabled={primaryButtonDisabled}
+              className="w-full h-12"
+            >
+              {primaryButtonText}
+            </BigButton>
+          </div>
+        ) : (
+          <div className="flex items-center gap-3">
+            {showResetButton && (
+              <MiniButton
+                text={resetButtonText}
+                variant="primary"
+                leftIcon={resetButtonLeft}
+                onClick={onResetButtonClick}
+              />
+            )}
 
-          <BigButton
-            variant="primary"
-            left={applyButtonLeft}
-            right={applyButtonRight}
-            onClick={onApplyButtonClick}
-            disabled={applyButtonDisabled}
-            className="flex-1 h-12"
-          >
-            {applyButtonText}
-          </BigButton>
-        </div>
-      )}
-    </Container>
+            <BigButton
+              variant="primary"
+              left={applyButtonLeft}
+              right={applyButtonRight}
+              onClick={onApplyButtonClick}
+              disabled={applyButtonDisabled}
+              className="flex-1 h-12"
+            >
+              {applyButtonText}
+            </BigButton>
+          </div>
+        )}
+      </div>
+    </div>
   );
 }

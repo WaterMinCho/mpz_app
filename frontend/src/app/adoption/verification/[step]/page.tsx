@@ -81,28 +81,27 @@ export default function VeriticationPage() {
   }, [currentStep]);
 
   const stepsMap: Record<number, React.ReactNode> = {
-    1: <Step1 onNext={() => router.push("/adoption/verification/2")} />,
-    2: <Step2 onNext={() => router.push("/adoption/verification/3")} />,
-    3: <Step3 onNext={() => router.push("/adoption/verification/4")} />,
-    4: <Step4 onNext={() => router.push("/adoption/verification/5")} />,
-    5: <Step5 onNext={() => router.push("/adoption/verification/6")} />,
-    6: <Step6 onNext={() => router.push("/my/adoption")} />,
+    0: <Step1 onNext={() => router.push("/adoption/verification/2")} />,
+    1: <Step2 onNext={() => router.push("/adoption/verification/3")} />,
+    2: <Step3 onNext={() => router.push("/adoption/verification/4")} />,
+    3: <Step4 onNext={() => router.push("/adoption/verification/5")} />,
+    4: <Step5 onNext={() => router.push("/adoption/verification/6")} />,
+    5: <Step6 onNext={() => router.push("/my/adoption")} />,
   };
 
   if (!stepsMap[currentStep]) {
     return <div>잘못된 단계입니다.</div>;
   }
 
+  const progressMax = Math.max(1, stepConfig.totalSteps - 1);
+  const progressValue = Math.min(currentStep, progressMax);
+
   return (
     <Container className="min-h-screen">
-      <LinearProgressBar
-        value={currentStep}
-        max={stepConfig.totalSteps}
-        className="mt-2"
-      />
+      <LinearProgressBar value={progressValue} max={progressMax} />
       <TopBar
         variant="variant6"
-        className="mt-4"
+        className="mt-8"
         left={
           currentStep > 1 && !isDirectAccess ? (
             <IconButton
@@ -129,6 +128,7 @@ export default function VeriticationPage() {
           />
         }
       />
+
       <div className="px-4">{stepsMap[currentStep]}</div>
     </Container>
   );

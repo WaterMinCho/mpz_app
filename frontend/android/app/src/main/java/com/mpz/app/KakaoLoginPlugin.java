@@ -1,97 +1,115 @@
 package com.mpz.app;
 
-import android.app.Activity;
-import android.content.Context;
-
-import androidx.annotation.Nullable;
-
-import com.getcapacitor.JSObject;
 import com.getcapacitor.Plugin;
 import com.getcapacitor.PluginCall;
 import com.getcapacitor.PluginMethod;
 import com.getcapacitor.annotation.CapacitorPlugin;
-import com.kakao.sdk.auth.model.OAuthToken;
-import com.kakao.sdk.common.model.ClientError;
-import com.kakao.sdk.common.model.ClientErrorCause;
+import com.getcapacitor.JSObject;
 import com.kakao.sdk.user.UserApiClient;
-
-import kotlin.Unit;
-import kotlin.jvm.functions.Function2;
+import com.kakao.sdk.auth.model.OAuthToken;
+import com.kakao.sdk.user.model.User;
+import android.content.Context;
+import android.util.Log;
 
 @CapacitorPlugin(name = "KakaoLogin")
 public class KakaoLoginPlugin extends Plugin {
 
+    private static final String TAG = "KakaoLoginPlugin";
+
     @PluginMethod
-    public void login(final PluginCall call) {
-        Activity activity = getActivity();
-        if (activity == null) {
-            call.reject("활성 Activity를 가져올 수 없습니다.");
-            return;
+    public void initialize(PluginCall call) {
+        String appKey = call.getString("appKey");
+        if (appKey != null) {
+            Log.d(TAG, "Kakao SDK 초기화: " + appKey);
+            call.resolve();
+        } else {
+            call.reject("appKey가 필요합니다.");
         }
-
-        UserApiClient.getInstance()
-                .loginWithKakaoTalk(activity, new Function2<OAuthToken, Throwable, Unit>() {
-                    @Override
-                    public Unit invoke(@Nullable OAuthToken oAuthToken, @Nullable Throwable throwable) {
-                        if (throwable != null) {
-                            return fallbackToAccountLogin(call, throwable);
-                        }
-                        if (oAuthToken == null) {
-                            call.reject("카카오 로그인에 실패했습니다.");
-                            return Unit.INSTANCE;
-                        }
-                        resolveWithToken(call, oAuthToken);
-                        return Unit.INSTANCE;
-                    }
-                });
     }
 
-    private Unit fallbackToAccountLogin(final PluginCall call, Throwable originalError) {
-        if (originalError instanceof ClientError) {
-            ClientError clientError = (ClientError) originalError;
-            if (clientError.getReason() == ClientErrorCause.Cancelled) {
-                call.reject("사용자가 카카오 로그인을 취소했습니다.");
-                return Unit.INSTANCE;
+    @PluginMethod
+    public void login(PluginCall call) {
+        Log.d(TAG, "카카오 로그인 시작");
+        
+        UserApiClient.getInstance().loginWithKakaoAccount(getContext(), (OAuthToken token, Throwable error) -> {
+            if (error != null) {
+                Log.e(TAG, "카카오 로그인 실패", error);
+                call.reject("카카오 계정 로그인을 완료할 수 없습니다: " + error.getMessage());
+            } else if (token != null) {
+                Log.d(TAG, "카카오 로그인 성공");
+                JSObject ret = new JSObject();
+                
+                ret.put("accessToken", token.getAccessToken());
+                if (token.getRefreshToken() != null) {
+                    ret.put("refreshToken", token.getRefreshToken());
+                }
+                if (token.getIdToken() != null) {
+                    ret.put("idToken", token.getIdToken());
+                }
+                
+                call.resolve(ret);
             }
-        }
-
-        Context context = getContext();
-        if (context == null) {
-            call.reject("앱 컨텍스트를 가져올 수 없습니다.");
-            return Unit.INSTANCE;
-        }
-
-        UserApiClient.getInstance()
-                .loginWithKakaoAccount(context, new Function2<OAuthToken, Throwable, Unit>() {
-                    @Override
-                    public Unit invoke(@Nullable OAuthToken oAuthToken, @Nullable Throwable throwable) {
-                        if (throwable != null) {
-                            Exception exception =
-                                    throwable instanceof Exception
-                                            ? (Exception) throwable
-                                            : new Exception(throwable);
-                            call.reject("카카오 계정 로그인을 완료할 수 없습니다.", exception);
-                            return Unit.INSTANCE;
-                        }
-                        if (oAuthToken == null) {
-                            call.reject("카카오 계정 로그인에 실패했습니다.");
-                            return Unit.INSTANCE;
-                        }
-                        resolveWithToken(call, oAuthToken);
-                        return Unit.INSTANCE;
-                    }
-                });
-
-        return Unit.INSTANCE;
+            return null;
+        });
     }
 
-    private void resolveWithToken(PluginCall call, OAuthToken token) {
-        JSObject result = new JSObject();
-        result.put("accessToken", token.getAccessToken());
-        if (token.getRefreshToken() != null) {
-            result.put("refreshToken", token.getRefreshToken());
-        }
-        call.resolve(result);
+    @PluginMethod
+    public void logout(PluginCall call) {
+        UserApiClient.getInstance().logout((Throwable error) -> {
+            if (error != null) {
+                Log.e(TAG, "카카오 로그아웃 실패", error);
+                call.reject("로그아웃에 실패했습니다: " + error.getMessage());
+            } else {
+                Log.d(TAG, "카카오 로그아웃 성공");
+                call.resolve();
+            }
+            return null;
+        });
+    }
+
+    @PluginMethod
+    public void unlink(PluginCall call) {
+        UserApiClient.getInstance().unlink((Throwable error) -> {
+            if (error != null) {
+                Log.e(TAG, "카카오 회원탈퇴 실패", error);
+                call.reject("회원탈퇴에 실패했습니다: " + error.getMessage());
+            } else {
+                Log.d(TAG, "카카오 회원탈퇴 성공");
+                call.resolve();
+            }
+            return null;
+        });
+    }
+
+    @PluginMethod
+    public void getUserInfo(PluginCall call) {
+        UserApiClient.getInstance().me((User user, Throwable error) -> {
+            if (error != null) {
+                Log.e(TAG, "사용자 정보 조회 실패", error);
+                call.reject("사용자 정보를 가져올 수 없습니다: " + error.getMessage());
+            } else if (user != null) {
+                Log.d(TAG, "사용자 정보 조회 성공: " + user.getId());
+                JSObject ret = new JSObject();
+                ret.put("id", user.getId());
+                
+                if (user.getKakaoAccount() != null) {
+                    ret.put("email", user.getKakaoAccount().getEmail());
+                    
+                    if (user.getKakaoAccount().getProfile() != null) {
+                        ret.put("nickname", user.getKakaoAccount().getProfile().getNickname());
+                        ret.put("profileImageUrl", user.getKakaoAccount().getProfile().getProfileImageUrl());
+                    }
+                }
+                
+                call.resolve(ret);
+            }
+            return null;
+        });
+    }
+
+    @Override
+    public Context getContext() {
+        return bridge.getContext();
     }
 }
 

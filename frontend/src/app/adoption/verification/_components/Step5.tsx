@@ -3,7 +3,6 @@
 import React from "react";
 
 import { CustomInput } from "@/components/ui/CustomInput";
-import { Container } from "@/components/common/Container";
 import { FixedBottomBar } from "@/components/ui/FixedBottomBar";
 import { NotificationToast } from "@/components/ui/NotificationToast";
 import { useGetCenterProcedureQuestions } from "@/hooks/query/useGetCenterProcedureQuestions";
@@ -52,14 +51,16 @@ export function Step5({ onNext }: StepProps) {
     }));
   };
 
-  // 모든 질문이 답변되었는지 확인 (질문이 없으면 통과)
+  // 필수 질문이 모두 답변되었는지 확인 (질문이 없거나 모두 선택사항이면 통과)
   const isAllQuestionsAnswered = React.useMemo(() => {
     const questions = questionsData?.questions;
     if (!questions) return false; // 아직 로딩되지 않음
-    if (questions.length === 0) return true; // 질문이 없으면 바로 진행 가능
+    const requiredQuestions = questions.filter(
+      (q: CenterProcedureQuestion) => q.is_required
+    );
+    if (requiredQuestions.length === 0) return true;
 
-    // 모든 질문에 답변이 입력되었는지 확인
-    return questions.every(
+    return requiredQuestions.every(
       (q: CenterProcedureQuestion) => (answers[q.id] || "").trim().length > 0
     );
   }, [questionsData, answers]);
@@ -81,19 +82,19 @@ export function Step5({ onNext }: StepProps) {
   // 로딩 상태 처리
   if (isLoading) {
     return (
-      <Container className="min-h-screen pb-28">
+      <div className="min-h-screen max-w-[420px] mx-auto w-full pb-28">
         <h2 className="text-bk mb-6">질문을 불러오는 중...</h2>
         <div className="flex justify-center items-center py-10">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
         </div>
-      </Container>
+      </div>
     );
   }
 
   // 에러 상태 처리
   if (error) {
     return (
-      <Container className="min-h-screen pb-28">
+      <div className="min-h-screen max-w-[420px] mx-auto w-full pb-28">
         <h2 className="text-bk mb-6">오류가 발생했습니다</h2>
         <p className="text-gray-600">
           질문을 불러올 수 없습니다. 다시 시도해주세요.
@@ -103,25 +104,25 @@ export function Step5({ onNext }: StepProps) {
           type="error"
           onClose={() => {}}
         />
-      </Container>
+      </div>
     );
   }
 
   // centerId가 없는 경우
   if (!centerId) {
     return (
-      <Container className="min-h-screen pb-28">
+      <div className="min-h-screen max-w-[420px] mx-auto w-full pb-28">
         <h2 className="text-bk mb-6">센터 정보가 필요합니다</h2>
         <p className="text-gray-600">
           입양 신청을 진행하려면 센터 정보가 필요합니다.
         </p>
-      </Container>
+      </div>
     );
   }
 
   return (
     <>
-      <Container className="min-h-screen pb-28">
+      <div className="min-h-screen max-w-[420px] mx-auto w-full pb-28">
         <h2 className="text-bk mb-6">답변을 작성해주세요.</h2>
         {questionsData?.questions && questionsData.questions.length === 0 ? (
           <div className="text-center text-gray-600 py-10">
@@ -153,7 +154,7 @@ export function Step5({ onNext }: StepProps) {
               ))}
           </div>
         )}
-      </Container>
+      </div>
 
       <FixedBottomBar
         variant="variant1"

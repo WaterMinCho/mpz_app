@@ -1,7 +1,7 @@
 "use client";
 
 import { TabButton } from "@/components/ui/TabButton";
-import { Container } from "@/components/common/Container";
+// import { Container } from "@/components/common/Container";
 import { CenterAnimalsTab } from "./CenterAnimalsTab";
 import { CenterInfoTab } from "./CenterInfoTab";
 import type { TabType, CenterDetailProps } from "./types";
@@ -53,7 +53,7 @@ export function CenterDetailTabs({
 
   return (
     <>
-      <Container className="mb-4 cursor-pointer">
+      <div className="max-w-[420px] mx-auto w-full mb-4 cursor-pointer">
         <TabButton
           value={activeTab}
           tabs={tabs}
@@ -61,7 +61,7 @@ export function CenterDetailTabs({
           useLinks={false}
           onValueChange={(value) => onTabChange(value as TabType)}
         />
-      </Container>
+      </div>
 
       {renderTabContent()}
     </>
