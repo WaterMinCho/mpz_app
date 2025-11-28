@@ -14390,3 +14390,355 @@ INFO 2025-11-24 18:41:49,333 basehttp 29310 6205747200 "GET /socket.io/?EIO=4&tr
 INFO 2025-11-24 18:41:53,973 basehttp 29310 6222573568 "GET /socket.io/?EIO=4&transport=websocket HTTP/1.1" 302 0
 INFO 2025-11-24 18:41:58,983 basehttp 29310 6239399936 "GET /socket.io/?EIO=4&transport=websocket HTTP/1.1" 302 0
 INFO 2025-11-24 18:42:03,991 basehttp 29310 6256226304 "GET /socket.io/?EIO=4&transport=websocket HTTP/1.1" 302 0
+ERROR 2025-11-27 17:10:04,967 exception 64016 6173175808 Invalid HTTP_HOST header: '127.0.0.1:8000'. You may need to add '127.0.0.1' to ALLOWED_HOSTS.
+Traceback (most recent call last):
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/utils/deprecation.py", line 133, in __call__
+    response = self.process_request(request)
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/middleware/common.py", line 48, in process_request
+    host = request.get_host()
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/http/request.py", line 151, in get_host
+    raise DisallowedHost(msg)
+django.core.exceptions.DisallowedHost: Invalid HTTP_HOST header: '127.0.0.1:8000'. You may need to add '127.0.0.1' to ALLOWED_HOSTS.
+WARNING 2025-11-27 17:10:05,059 log 64016 6173175808 Bad Request: /
+WARNING 2025-11-27 17:10:05,067 basehttp 64016 6173175808 "GET / HTTP/1.1" 400 143
+ERROR 2025-11-27 17:10:05,446 exception 64016 6190002176 Invalid HTTP_HOST header: '127.0.0.1:8000'. You may need to add '127.0.0.1' to ALLOWED_HOSTS.
+Traceback (most recent call last):
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/utils/deprecation.py", line 133, in __call__
+    response = self.process_request(request)
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/middleware/common.py", line 48, in process_request
+    host = request.get_host()
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/http/request.py", line 151, in get_host
+    raise DisallowedHost(msg)
+django.core.exceptions.DisallowedHost: Invalid HTTP_HOST header: '127.0.0.1:8000'. You may need to add '127.0.0.1' to ALLOWED_HOSTS.
+WARNING 2025-11-27 17:10:05,447 log 64016 6190002176 Bad Request: /favicon.ico
+WARNING 2025-11-27 17:10:05,448 basehttp 64016 6190002176 "GET /favicon.ico HTTP/1.1" 400 143
+ERROR 2025-11-27 17:10:08,129 exception 64016 6206828544 Invalid HTTP_HOST header: '127.0.0.1:8000'. You may need to add '127.0.0.1' to ALLOWED_HOSTS.
+Traceback (most recent call last):
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/utils/deprecation.py", line 133, in __call__
+    response = self.process_request(request)
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/middleware/common.py", line 48, in process_request
+    host = request.get_host()
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/http/request.py", line 151, in get_host
+    raise DisallowedHost(msg)
+django.core.exceptions.DisallowedHost: Invalid HTTP_HOST header: '127.0.0.1:8000'. You may need to add '127.0.0.1' to ALLOWED_HOSTS.
+WARNING 2025-11-27 17:10:08,130 log 64016 6206828544 Bad Request: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-11-27 17:10:08,131 basehttp 64016 6206828544 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 400 143
+ERROR 2025-11-27 17:10:09,134 exception 64016 6223654912 Invalid HTTP_HOST header: '127.0.0.1:8000'. You may need to add '127.0.0.1' to ALLOWED_HOSTS.
+Traceback (most recent call last):
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/utils/deprecation.py", line 133, in __call__
+    response = self.process_request(request)
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/middleware/common.py", line 48, in process_request
+    host = request.get_host()
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/http/request.py", line 151, in get_host
+    raise DisallowedHost(msg)
+django.core.exceptions.DisallowedHost: Invalid HTTP_HOST header: '127.0.0.1:8000'. You may need to add '127.0.0.1' to ALLOWED_HOSTS.
+WARNING 2025-11-27 17:10:09,137 log 64016 6223654912 Bad Request: /
+WARNING 2025-11-27 17:10:09,137 basehttp 64016 6223654912 "GET / HTTP/1.1" 400 143
+ERROR 2025-11-27 17:10:09,166 exception 64016 6240481280 Invalid HTTP_HOST header: '127.0.0.1:8000'. You may need to add '127.0.0.1' to ALLOWED_HOSTS.
+Traceback (most recent call last):
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/utils/deprecation.py", line 133, in __call__
+    response = self.process_request(request)
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/middleware/common.py", line 48, in process_request
+    host = request.get_host()
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/http/request.py", line 151, in get_host
+    raise DisallowedHost(msg)
+django.core.exceptions.DisallowedHost: Invalid HTTP_HOST header: '127.0.0.1:8000'. You may need to add '127.0.0.1' to ALLOWED_HOSTS.
+WARNING 2025-11-27 17:10:09,167 log 64016 6240481280 Bad Request: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-11-27 17:10:09,167 basehttp 64016 6240481280 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 400 143
+ERROR 2025-11-27 17:10:09,206 exception 64016 6173175808 Invalid HTTP_HOST header: '127.0.0.1:8000'. You may need to add '127.0.0.1' to ALLOWED_HOSTS.
+Traceback (most recent call last):
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/utils/deprecation.py", line 133, in __call__
+    response = self.process_request(request)
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/middleware/common.py", line 48, in process_request
+    host = request.get_host()
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/http/request.py", line 151, in get_host
+    raise DisallowedHost(msg)
+django.core.exceptions.DisallowedHost: Invalid HTTP_HOST header: '127.0.0.1:8000'. You may need to add '127.0.0.1' to ALLOWED_HOSTS.
+WARNING 2025-11-27 17:10:09,209 log 64016 6173175808 Bad Request: /favicon.ico
+WARNING 2025-11-27 17:10:09,215 basehttp 64016 6173175808 "GET /favicon.ico HTTP/1.1" 400 143
+ERROR 2025-11-27 17:10:21,514 exception 64016 6190002176 Invalid HTTP_HOST header: '127.0.0.1:8000'. You may need to add '127.0.0.1' to ALLOWED_HOSTS.
+Traceback (most recent call last):
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/utils/deprecation.py", line 133, in __call__
+    response = self.process_request(request)
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/middleware/common.py", line 48, in process_request
+    host = request.get_host()
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/http/request.py", line 151, in get_host
+    raise DisallowedHost(msg)
+django.core.exceptions.DisallowedHost: Invalid HTTP_HOST header: '127.0.0.1:8000'. You may need to add '127.0.0.1' to ALLOWED_HOSTS.
+WARNING 2025-11-27 17:10:21,516 log 64016 6190002176 Bad Request: /
+WARNING 2025-11-27 17:10:21,517 basehttp 64016 6190002176 "GET / HTTP/1.1" 400 143
+ERROR 2025-11-27 17:10:21,541 exception 64016 6206828544 Invalid HTTP_HOST header: '127.0.0.1:8000'. You may need to add '127.0.0.1' to ALLOWED_HOSTS.
+Traceback (most recent call last):
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/utils/deprecation.py", line 133, in __call__
+    response = self.process_request(request)
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/middleware/common.py", line 48, in process_request
+    host = request.get_host()
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/http/request.py", line 151, in get_host
+    raise DisallowedHost(msg)
+django.core.exceptions.DisallowedHost: Invalid HTTP_HOST header: '127.0.0.1:8000'. You may need to add '127.0.0.1' to ALLOWED_HOSTS.
+WARNING 2025-11-27 17:10:21,578 log 64016 6206828544 Bad Request: /.well-known/appspecific/com.chrome.devtools.json
+ERROR 2025-11-27 17:10:21,580 exception 64016 6257307648 Invalid HTTP_HOST header: '127.0.0.1:8000'. You may need to add '127.0.0.1' to ALLOWED_HOSTS.
+Traceback (most recent call last):
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/utils/deprecation.py", line 133, in __call__
+    response = self.process_request(request)
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/middleware/common.py", line 48, in process_request
+    host = request.get_host()
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/http/request.py", line 151, in get_host
+    raise DisallowedHost(msg)
+django.core.exceptions.DisallowedHost: Invalid HTTP_HOST header: '127.0.0.1:8000'. You may need to add '127.0.0.1' to ALLOWED_HOSTS.
+WARNING 2025-11-27 17:10:21,588 log 64016 6257307648 Bad Request: /favicon.ico
+WARNING 2025-11-27 17:10:21,588 basehttp 64016 6257307648 "GET /favicon.ico HTTP/1.1" 400 143
+WARNING 2025-11-27 17:10:21,592 basehttp 64016 6206828544 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 400 143
+ERROR 2025-11-27 17:10:23,475 exception 64016 6274134016 Invalid HTTP_HOST header: '127.0.0.1:8000'. You may need to add '127.0.0.1' to ALLOWED_HOSTS.
+Traceback (most recent call last):
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/utils/deprecation.py", line 133, in __call__
+    response = self.process_request(request)
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/middleware/common.py", line 48, in process_request
+    host = request.get_host()
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/http/request.py", line 151, in get_host
+    raise DisallowedHost(msg)
+django.core.exceptions.DisallowedHost: Invalid HTTP_HOST header: '127.0.0.1:8000'. You may need to add '127.0.0.1' to ALLOWED_HOSTS.
+WARNING 2025-11-27 17:10:23,477 log 64016 6274134016 Bad Request: /admin
+WARNING 2025-11-27 17:10:23,479 basehttp 64016 6274134016 "GET /admin HTTP/1.1" 400 143
+ERROR 2025-11-27 17:10:23,520 exception 64016 6290960384 Invalid HTTP_HOST header: '127.0.0.1:8000'. You may need to add '127.0.0.1' to ALLOWED_HOSTS.
+Traceback (most recent call last):
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/utils/deprecation.py", line 133, in __call__
+    response = self.process_request(request)
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/middleware/common.py", line 48, in process_request
+    host = request.get_host()
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/http/request.py", line 151, in get_host
+    raise DisallowedHost(msg)
+django.core.exceptions.DisallowedHost: Invalid HTTP_HOST header: '127.0.0.1:8000'. You may need to add '127.0.0.1' to ALLOWED_HOSTS.
+WARNING 2025-11-27 17:10:23,524 log 64016 6290960384 Bad Request: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-11-27 17:10:23,525 basehttp 64016 6290960384 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 400 143
+ERROR 2025-11-27 17:10:23,586 exception 64016 6307786752 Invalid HTTP_HOST header: '127.0.0.1:8000'. You may need to add '127.0.0.1' to ALLOWED_HOSTS.
+Traceback (most recent call last):
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/utils/deprecation.py", line 133, in __call__
+    response = self.process_request(request)
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/middleware/common.py", line 48, in process_request
+    host = request.get_host()
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/http/request.py", line 151, in get_host
+    raise DisallowedHost(msg)
+django.core.exceptions.DisallowedHost: Invalid HTTP_HOST header: '127.0.0.1:8000'. You may need to add '127.0.0.1' to ALLOWED_HOSTS.
+WARNING 2025-11-27 17:10:23,588 log 64016 6307786752 Bad Request: /favicon.ico
+WARNING 2025-11-27 17:10:23,589 basehttp 64016 6307786752 "GET /favicon.ico HTTP/1.1" 400 143
+INFO 2025-11-27 17:12:10,607 basehttp 65625 6188576768 "GET /admin HTTP/1.1" 301 0
+ERROR 2025-11-27 17:12:11,619 log 65625 6205403136 Internal Server Error: /admin/
+Traceback (most recent call last):
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/core/handlers/base.py", line 220, in _get_response
+    response = response.render()
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/template/response.py", line 114, in render
+    self.content = self.rendered_content
+                   ^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/template/response.py", line 92, in rendered_content
+    return template.render(context, self._request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/template/backends/django.py", line 61, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/template/base.py", line 171, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/template/base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/template/base.py", line 1000, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/template/base.py", line 961, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/template/loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/template/base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/template/base.py", line 1000, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/template/base.py", line 961, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/template/loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/template/base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/template/base.py", line 1000, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/template/base.py", line 961, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/template/loader_tags.py", line 65, in render
+    result = block.nodelist.render(context)
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/template/base.py", line 1000, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/template/base.py", line 961, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/templatetags/static.py", line 116, in render
+    url = self.url(context)
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/templatetags/static.py", line 113, in url
+    return self.handle_simple(path)
+           ~~~~~~~~~~~~~~~~~~^^^^^^
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/templatetags/static.py", line 129, in handle_simple
+    return staticfiles_storage.url(path)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/contrib/staticfiles/storage.py", line 203, in url
+    return self._url(self.stored_name, name, force)
+           ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/contrib/staticfiles/storage.py", line 182, in _url
+    hashed_name = hashed_name_func(*args)
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/contrib/staticfiles/storage.py", line 516, in stored_name
+    raise ValueError(
+        "Missing staticfiles manifest entry for '%s'" % clean_name
+    )
+ValueError: Missing staticfiles manifest entry for 'admin/css/base.css'
+ERROR 2025-11-27 17:12:11,624 basehttp 65625 6205403136 "GET /admin/ HTTP/1.1" 500 145
+WARNING 2025-11-27 17:12:11,669 log 65625 6205403136 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-11-27 17:12:11,674 basehttp 65625 6205403136 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 179
+INFO 2025-11-27 17:12:11,715 basehttp 65625 6205403136 "GET /favicon.ico HTTP/1.1" 301 0
+WARNING 2025-11-27 17:12:12,683 log 65625 6188576768 Not Found: /favicon.ico/
+WARNING 2025-11-27 17:12:12,684 basehttp 65625 6188576768 "GET /favicon.ico/ HTTP/1.1" 404 179
+INFO 2025-11-27 17:12:56,217 basehttp 66145 6110801920 "GET / HTTP/1.1" 200 16
+ERROR 2025-11-27 17:13:00,311 log 66145 6110801920 Internal Server Error: /admin/
+Traceback (most recent call last):
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/core/handlers/base.py", line 220, in _get_response
+    response = response.render()
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/template/response.py", line 114, in render
+    self.content = self.rendered_content
+                   ^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/template/response.py", line 92, in rendered_content
+    return template.render(context, self._request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/template/backends/django.py", line 61, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/template/base.py", line 171, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/template/base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/template/base.py", line 1000, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/template/base.py", line 961, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/template/loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/template/base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/template/base.py", line 1000, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/template/base.py", line 961, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/template/loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/template/base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/template/base.py", line 1000, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/template/base.py", line 961, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/template/loader_tags.py", line 65, in render
+    result = block.nodelist.render(context)
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/template/base.py", line 1000, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/template/base.py", line 961, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/templatetags/static.py", line 116, in render
+    url = self.url(context)
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/templatetags/static.py", line 113, in url
+    return self.handle_simple(path)
+           ~~~~~~~~~~~~~~~~~~^^^^^^
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/templatetags/static.py", line 129, in handle_simple
+    return staticfiles_storage.url(path)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/contrib/staticfiles/storage.py", line 203, in url
+    return self._url(self.stored_name, name, force)
+           ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/contrib/staticfiles/storage.py", line 182, in _url
+    hashed_name = hashed_name_func(*args)
+  File "/Users/jhy20/mpz_fullstack/backend/venv/lib/python3.13/site-packages/django/contrib/staticfiles/storage.py", line 516, in stored_name
+    raise ValueError(
+        "Missing staticfiles manifest entry for '%s'" % clean_name
+    )
+ValueError: Missing staticfiles manifest entry for 'admin/css/base.css'
+ERROR 2025-11-27 17:13:00,317 basehttp 66145 6110801920 "GET /admin/ HTTP/1.1" 500 145
+WARNING 2025-11-27 17:13:02,192 log 66145 6110801920 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-11-27 17:13:02,193 basehttp 66145 6110801920 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 179
+INFO 2025-11-27 17:13:44,459 basehttp 66709 6189527040 "GET /admin/ HTTP/1.1" 200 29064
+INFO 2025-11-27 17:13:44,529 basehttp 66709 6256832512 "GET /static/admin/css/dashboard.css HTTP/1.1" 200 441
+INFO 2025-11-27 17:13:44,556 basehttp 66709 6189527040 "GET /static/admin/css/base.css HTTP/1.1" 200 21544
+INFO 2025-11-27 17:13:44,557 basehttp 66709 6206353408 "GET /static/admin/css/dark_mode.css HTTP/1.1" 200 2682
+INFO 2025-11-27 17:13:44,560 basehttp 66709 6223179776 "GET /static/admin/css/responsive.css HTTP/1.1" 200 17905
+INFO 2025-11-27 17:13:44,564 basehttp 66709 6240006144 "GET /static/admin/css/nav_sidebar.css HTTP/1.1" 200 2810
+INFO 2025-11-27 17:13:44,566 basehttp 66709 6256832512 "GET /static/admin/js/theme.js HTTP/1.1" 200 1943
+INFO 2025-11-27 17:13:44,572 basehttp 66709 6189527040 "GET /static/admin/js/nav_sidebar.js HTTP/1.1" 200 3063
+INFO 2025-11-27 17:13:44,581 basehttp 66709 6223179776 "GET /static/admin/img/icon-viewlink.svg HTTP/1.1" 200 581
+INFO 2025-11-27 17:13:44,584 basehttp 66709 6206353408 "GET /static/admin/img/icon-deletelink.svg HTTP/1.1" 200 392
+INFO 2025-11-27 17:13:44,585 basehttp 66709 6256832512 "GET /static/admin/img/icon-addlink.svg HTTP/1.1" 200 331
+INFO 2025-11-27 17:13:44,586 basehttp 66709 6240006144 "GET /static/admin/img/icon-changelink.svg HTTP/1.1" 200 380
+WARNING 2025-11-27 17:13:44,600 log 66709 6273658880 Not Found: /.well-known/appspecific/com.chrome.devtools.json
+WARNING 2025-11-27 17:13:44,601 basehttp 66709 6273658880 "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 31402
+INFO 2025-11-28 03:50:36,488 basehttp 94790 6173306880 "GET / HTTP/1.1" 200 16
+WARNING 2025-11-28 03:50:37,800 log 94790 6173306880 Not Found: /favicon.ico/
+WARNING 2025-11-28 03:50:37,800 basehttp 94790 6173306880 "GET /favicon.ico/ HTTP/1.1" 404 2632
+INFO 2025-11-28 03:50:39,796 basehttp 94790 6173306880 "GET /admin/ HTTP/1.1" 200 29132
+INFO 2025-11-28 03:50:39,836 basehttp 94790 6190133248 "GET /static/admin/css/dark_mode.css HTTP/1.1" 304 0
+INFO 2025-11-28 03:50:39,837 basehttp 94790 6173306880 "GET /static/admin/css/base.css HTTP/1.1" 304 0
+INFO 2025-11-28 03:50:39,841 basehttp 94790 6206959616 "GET /static/admin/css/nav_sidebar.css HTTP/1.1" 304 0
+INFO 2025-11-28 03:50:39,845 basehttp 94790 6223785984 "GET /static/admin/css/responsive.css HTTP/1.1" 304 0
+INFO 2025-11-28 03:50:39,852 basehttp 94790 6206959616 "GET /static/admin/js/nav_sidebar.js HTTP/1.1" 304 0
+INFO 2025-11-28 03:50:39,854 basehttp 94790 6240612352 "GET /static/admin/css/dashboard.css HTTP/1.1" 304 0
+INFO 2025-11-28 03:50:39,857 basehttp 94790 6257438720 "GET /static/admin/js/theme.js HTTP/1.1" 304 0
+INFO 2025-11-28 03:50:39,861 basehttp 94790 6257438720 "GET /static/admin/img/icon-addlink.svg HTTP/1.1" 304 0
+INFO 2025-11-28 03:50:39,861 basehttp 94790 6240612352 "GET /static/admin/img/icon-changelink.svg HTTP/1.1" 304 0
+INFO 2025-11-28 03:50:39,861 basehttp 94790 6206959616 "GET /static/admin/img/icon-viewlink.svg HTTP/1.1" 304 0
+INFO 2025-11-28 03:50:43,966 basehttp 94790 6206959616 "GET /docs HTTP/1.1" 301 0
+INFO 2025-11-28 03:50:44,948 basehttp 94790 6240612352 "GET /docs/ HTTP/1.1" 200 810
+INFO 2025-11-28 03:50:46,545 basehttp 94790 6240612352 "GET /openapi.json HTTP/1.1" 200 300461
