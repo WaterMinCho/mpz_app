@@ -1,7 +1,6 @@
 import { useRouter } from "next/navigation";
 import { CaretDown } from "@phosphor-icons/react";
-import { MiniButton } from "@/components/ui/MiniButton";
-import { CommunityCard } from "@/components/ui/CommunityCard";
+import { MiniButton, CommunityCard } from "@/components/ui";
 import { MainSection } from "@/components/common/MainSection";
 import { useGetPublicPosts } from "@/hooks/query/useGetPublicPosts";
 import type { ApiPostResponse, Post } from "@/types/posts";

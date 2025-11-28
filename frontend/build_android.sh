@@ -5,6 +5,7 @@ echo "🚀 Android 패키징 시작 (Capacitor + Next.js)..."
 
 FRONTEND_DIR="/Users/jhy20/mpz_fullstack/frontend"
 ANDROID_DIR="$FRONTEND_DIR/android"
+WEB_BUILD_DIR="$FRONTEND_DIR/.next"
 APK_DEBUG_PATH="$ANDROID_DIR/app/build/outputs/apk/debug/app-debug.apk"
 # AAB_RELEASE_PATH="$ANDROID_DIR/app/build/outputs/bundle/release/app-release.aab"
 
@@ -23,12 +24,21 @@ else
 	echo "⏭️  의존성 설치 스킵 (node_modules 존재)"
 fi
 
+export NEXT_TELEMETRY_DISABLED=1
+export NEXT_DISABLE_SOURCEMAP="${NEXT_DISABLE_SOURCEMAP:-1}"
+
 echo "🧱 Next.js 프로덕션 빌드 (next build)"
+rm -rf "$WEB_BUILD_DIR"
 if npm run -s build; then
 	echo "✅ Next.js 빌드 완료"
 else
 	echo "❌ Next.js 빌드 실패"
 	exit 1
+fi
+
+if [ "$NEXT_DISABLE_SOURCEMAP" = "1" ]; then
+	echo "🧹 소스맵 제거 (APK 용량 최적화)"
+	find "$WEB_BUILD_DIR" -name "*.map" -delete || true
 fi
 
 echo "🔗 Capacitor 동기화 (Android)"

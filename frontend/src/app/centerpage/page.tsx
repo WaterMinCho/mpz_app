@@ -151,14 +151,14 @@ export default function MyPage() {
               <div className="flex items-center gap-1">
                 {isAuthenticated && myCenter ? (
                   <div>
-                    <span className="font-medium text-black">
+                    <h4 className="text-black">
                       {myCenter.name || "보호센터 이름"}
-                    </span>
+                    </h4>
                   </div>
                 ) : (
-                  <span className="font-medium text-black">
+                  <h4 className=" text-black">
                     센터 정보를 불러오는 중입니다...
-                  </span>
+                  </h4>
                 )}
                 {isSubscriber && (
                   <SealCheck

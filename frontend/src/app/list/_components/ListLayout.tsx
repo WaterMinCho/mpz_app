@@ -62,7 +62,7 @@ export function ListLayout({ children }: ListLayoutProps) {
     <Container className="min-h-screen pb-20">
       <TopBar
         variant="variant4"
-        left={<h4>입양</h4>}
+        left="입양"
         right={
           isAuthenticated ? (
             <Link href="/notifications">
@@ -78,10 +78,9 @@ export function ListLayout({ children }: ListLayoutProps) {
             </Link>
           ) : (
             <Link href="/login">
-              <IconButton
-                icon={({ size }) => <Bell size={size} weight="bold" />}
-                size="iconM"
-              />
+              <div className="flex items-center gap-2 cursor-pointer">
+                <button>로그인</button>
+              </div>
             </Link>
           )
         }

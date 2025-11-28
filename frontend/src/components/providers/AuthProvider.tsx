@@ -203,7 +203,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // 로그아웃 - 쿼리 캐시 무효화 포함
   const logout = async () => {
+    const disconnectKakaoSession = async () => {
+      if (typeof window === "undefined") return;
+      const kakaoAuth = window.Kakao?.Auth;
+      if (!kakaoAuth || typeof kakaoAuth.logout !== "function") return;
+
+      await new Promise<void>((resolve) => {
+        try {
+          kakaoAuth.logout(() => {
+            kakaoAuth.setAccessToken?.(null);
+            resolve();
+          });
+        } catch (error) {
+          console.warn("카카오 SDK 로그아웃 실패:", error);
+          resolve();
+        }
+        setTimeout(resolve, 2000);
+      });
+    };
+
     try {
+      await disconnectKakaoSession();
       await instance.post("/auth/logout", {}, { withCredentials: true });
     } catch (error) {
       console.error("로그아웃 요청 실패:", error);

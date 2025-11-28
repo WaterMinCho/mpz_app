@@ -10,6 +10,7 @@ const serverUsesHttp = serverUrl.startsWith("http://");
 const config: CapacitorConfig = {
   appId: "com.mpz.app",
   appName: "MPZ App",
+  // SSR 빌드를 그대로 활용하므로 `.next` 산출물을 Capacitor에 전달
   webDir: ".next",
   server: {
     url: serverUrl,

@@ -21,7 +21,7 @@ export const FormListItem = React.forwardRef<
     const baseClass =
       "w-full flex items-center gap-2 rounded-[8px] border p-3 transition-colors cursor-pointer focus:outline-none min-h-12";
     const inactiveClass = "bg-white border-lg text-dg";
-    const activeClass = "bg-brand-op/4 border-brand text-dg";
+    const activeClass = "bg-brand-op border-brand text-dg";
     const iconColorClass = selected ? "text-brand" : "text-gr";
 
     return (

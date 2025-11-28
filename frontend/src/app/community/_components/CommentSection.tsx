@@ -142,7 +142,6 @@ export function CommentSection({
         postId,
         content: text,
       });
-      showToast("댓글이 작성되었습니다.", "success");
     } catch (error) {
       console.error("댓글 작성 실패:", error);
       showToast("댓글 작성에 실패했습니다.", "error");

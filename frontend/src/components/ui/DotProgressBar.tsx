@@ -4,81 +4,38 @@ import { cn } from "@/lib/utils";
 interface DotProgressBarProps {
   currentStep: number;
   totalSteps?: number;
-  variant?: "variant1" | "variant2" | "variant3" | "variant4" | "variant5";
   className?: string;
   size?: "sm" | "md" | "lg";
   labels?: string[];
 }
 
-const variantStyles = {
-  variant1: {
-    completed: "bg-brand border-brand",
-    active: "bg-brand border-brand",
-    inactive: "bg-lg",
-    line: "border-bg",
-    completedLine: "border-brand",
-    text: "text-gr",
-    activeText: "text-gr font-bold",
-    completedText: "text",
-  },
-  variant2: {
-    completed: "bg-brand/80 border-brand/80",
-    active: "bg-brand/80 border-brand/80",
-    inactive: "bg-lg",
-    line: "border-bg",
-    completedLine: "border-brand/80",
-    text: "text-gr",
-    activeText: "text-gr font-bold",
-    completedText: "text",
-  },
-  variant3: {
-    completed: "bg-brand/60 border-brand/60",
-    active: "bg-brand/60 border-brand/60",
-    inactive: "bg-lg",
-    line: "border-bg",
-    completedLine: "border-brand/60",
-    text: "text-gr",
-    activeText: "text-gr font-bold",
-    completedText: "text",
-  },
-  variant4: {
-    completed: "bg-brand/40 border-brand/40",
-    active: "bg-brand/40 border-brand/40",
-    inactive: "bg-lg",
-    line: "border-bg",
-    completedLine: "border-brand/40",
-    text: "text-gr",
-    activeText: "text-gr font-bold",
-    completedText: "text",
-  },
-  variant5: {
-    completed: "bg-brand/20 border-brand/20",
-    active: "bg-brand/20 border-brand/20",
-    inactive: "bg-lg",
-    line: "border-bg",
-    completedLine: "border-brand/20",
-    text: "text-gr",
-    activeText: "text-gr font-bold",
-    completedText: "text",
-  },
+const barStyles = {
+  completed: "bg-brand border-brand",
+  active: "bg-brand border-brand",
+  inactive: "bg-lg",
+  line: "border-bg",
+  completedLine: "border-brand",
+  text: "text-gr",
+  activeText: "text-brand font-bold",
+  completedText: "text",
 };
 
 const sizeStyles = {
   sm: {
     counter: "w-3 h-3",
-    line: "top-1.5",
+    lineTop: 4.5,
     gap: "gap-2",
     text: "text-xs",
   },
   md: {
     counter: "w-3 h-3",
-    line: "top-1.5",
+    lineTop: 4.5,
     gap: "gap-4",
     text: "text-xs",
   },
   lg: {
     counter: "w-3 h-3",
-    line: "top-1.5",
+    lineTop: 4.5,
     gap: "gap-6",
     text: "text-xs",
   },
@@ -95,16 +52,14 @@ const defaultLabels = [
 export function DotProgressBar({
   currentStep,
   totalSteps = 5,
-  variant = "variant1",
   className,
-  size = "md",
+  size = "sm",
   labels = defaultLabels,
 }: DotProgressBarProps) {
-  const styles = variantStyles[variant];
   const sizeStyle = sizeStyles[size];
 
   return (
-    <div className={cn("flex justify-between mb-5", className)}>
+    <div className={cn("flex justify-between mb-5 w-full", className)}>
       {Array.from({ length: totalSteps }, (_, index) => {
         const stepNumber = index + 1;
         const isCompleted = stepNumber < currentStep;
@@ -117,15 +72,15 @@ export function DotProgressBar({
 
         if (isCompleted) {
           stepClass = "completed";
-          counterClass = styles.completed;
-          textClass = styles.completedText;
+          counterClass = barStyles.completed;
+          textClass = barStyles.completedText;
         } else if (isActive) {
           stepClass = "active";
-          counterClass = styles.active;
-          textClass = styles.activeText;
+          counterClass = barStyles.active;
+          textClass = barStyles.activeText;
         } else {
-          counterClass = styles.inactive;
-          textClass = styles.text;
+          counterClass = barStyles.inactive;
+          textClass = barStyles.text;
         }
 
         return (
@@ -140,15 +95,13 @@ export function DotProgressBar({
             {index > 0 && (
               <div
                 className={cn(
-                  "absolute content-[''] border-b-2 w-full",
-                  sizeStyle.line,
-                  index < currentStep ? styles.completedLine : styles.line,
+                  "absolute content-[''] border-b-[3px] w-full",
+                  index < currentStep
+                    ? barStyles.completedLine
+                    : barStyles.line,
                   "z-[2]"
                 )}
-                style={{
-                  top: sizeStyle.line,
-                  left: "-50%",
-                }}
+                style={{ top: `${sizeStyle.lineTop}px`, left: "-50%" }}
               />
             )}
 
@@ -156,15 +109,13 @@ export function DotProgressBar({
             {index < totalSteps - 1 && (
               <div
                 className={cn(
-                  "absolute content-[''] border-b-2 w-full",
-                  sizeStyle.line,
-                  index < currentStep ? styles.completedLine : styles.line,
+                  "absolute content-[''] border-b-[3px] w-full",
+                  index < currentStep
+                    ? barStyles.completedLine
+                    : barStyles.line,
                   "z-[2]"
                 )}
-                style={{
-                  top: sizeStyle.line,
-                  left: "50%",
-                }}
+                style={{ top: `${sizeStyle.lineTop}px`, left: "50%" }}
               />
             )}
 

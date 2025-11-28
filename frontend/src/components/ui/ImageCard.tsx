@@ -66,7 +66,7 @@ export function ImageCard({
           src={src}
           alt={alt ?? ""}
           fill
-          className="object-cover rounded-[10px]"
+          className="object-cover rounded-lg"
           sizes="(max-width: 640px) 100vw, 125px"
           unoptimized={src.startsWith("blob:")}
         />

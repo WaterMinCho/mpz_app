@@ -11,9 +11,13 @@ import { Container } from "@/components/common/Container";
 import { TopBar } from "@/components/common/TopBar";
 import { NavBar } from "@/components/common/NavBar";
 import { CommunityCard, CommunityCardSkeleton } from "@/components/ui";
-import { TabButton } from "@/components/ui/TabButton";
-import { BigButton } from "@/components/ui/BigButton";
-import { IconButton } from "@/components/ui/IconButton";
+import {
+  TabButton,
+  BigButton,
+  IconButton,
+  CustomModal,
+  Toast,
+} from "@/components/ui";
 import {
   useGetPublicPosts,
   useGetCenterPosts,
@@ -26,8 +30,6 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useNotificationSocket } from "@/hooks/useNotificationSocket";
-import { CustomModal } from "@/components/ui/CustomModal";
-import { Toast } from "@/components/ui/Toast";
 import { Post } from "@/types/posts";
 
 export default function CommunityPage() {
