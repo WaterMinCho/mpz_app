@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import NextImage from "next/image";
 import { Container } from "@/components/common/Container";
@@ -21,13 +21,16 @@ import {
   //checkMatchingCompletion,
   clearMatchingData,
 } from "@/lib/storage-utils";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { Banner } from "@/components/ui/Banner";
 import { BottomSheet } from "@/components/ui/BottomSheet";
+import { App } from "@capacitor/app";
+import { Capacitor } from "@capacitor/core";
 
 export default function Home() {
   const { isAuthenticated } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
   const kakaoChannelUrl = "http://pf.kakao.com/_mbxbDn/chat";
   const [selectedLocation, setSelectedLocation] = useState<string>(() => {
     if (typeof window !== "undefined") {
@@ -127,7 +130,40 @@ export default function Home() {
     }
   };
 
-  // 캐러셀 로직 제거
+  // 앱 환경에서 홈 화면에서 뒤로가기 버튼 처리
+  useEffect(() => {
+    // 네이티브 앱에서만 실행
+    if (!Capacitor.isNativePlatform()) {
+      return;
+    }
+
+    // 홈 화면에서만 뒤로가기 버튼 처리
+    if (pathname !== "/") {
+      return;
+    }
+
+    const handleBackButton = async () => {
+      // 히스토리가 없으면 앱 종료
+      if (typeof window !== "undefined") {
+        // window.history.length가 1이면 히스토리가 없는 경우
+        // (앱이 처음 시작되었거나 히스토리가 비어있는 경우)
+        if (window.history.length <= 1) {
+          await App.exitApp();
+        } else {
+          // 히스토리가 있으면 기본 뒤로가기 동작 수행
+          router.back();
+        }
+      }
+    };
+
+    // 뒤로가기 버튼 이벤트 리스너 등록
+    const listener = App.addListener("backButton", handleBackButton);
+
+    // 클린업
+    return () => {
+      listener.then((l) => l.remove());
+    };
+  }, [pathname, router]);
 
   return (
     <Container>

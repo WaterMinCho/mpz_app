@@ -62,7 +62,7 @@ export const metadata: Metadata = {
       "전국 유기동물 보호센터 정보와 입양 절차를 한눈에 확인하기! 반려동물 입양 플랫폼",
     images: [
       {
-        url: "/op-image.svg",
+        url: "/op-image.png",
         width: 1200,
         height: 630,
         alt: "마펫쯔 - 반려동물 입양 플랫폼",
@@ -95,8 +95,8 @@ export const metadata: Metadata = {
     },
   },
   icons: {
-    icon: "/img/op-image.svg",
-    shortcut: "/img/op-image.svg",
+    icon: "/img/op-image.png",
+    shortcut: "/img/op-image.png",
   },
 };
 
