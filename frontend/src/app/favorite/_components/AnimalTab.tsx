@@ -135,7 +135,7 @@ function AnimalTab() {
 
   return (
     <div>
-      <div className="flex flex-wrap justify-start gap-2 px-4">
+      <div className="flex flex-wrap justify-start gap-2 p-4">
         {pets.map((pet: unknown) => {
           const petData = pet as Record<string, unknown>;
           const petCardData = {

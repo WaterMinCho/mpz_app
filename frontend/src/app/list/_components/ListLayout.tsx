@@ -87,7 +87,7 @@ export function ListLayout({ children }: ListLayoutProps) {
       />
 
       {/* 탭 버튼 */}
-      <div>
+      <div className="w-full px-3.5 z-5">
         <TabButton
           value={activeTab}
           tabs={tabs}
@@ -95,6 +95,7 @@ export function ListLayout({ children }: ListLayoutProps) {
           useLinks={true}
         />
       </div>
+      <div className="border-b-2 border-lg -mt-0.5 -px-4" />
 
       {/* 검색 섹션 - 탭에 따라 다른 컴포넌트 렌더링 */}
       {activeTab === "animal" ? (

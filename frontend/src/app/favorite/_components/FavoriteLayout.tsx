@@ -70,7 +70,7 @@ export function FavoriteLayout({ children }: FavoriteLayoutProps) {
       />
 
       {/* 탭 버튼 */}
-      <div className="mb-4">
+      <div className="w-full px-3.5 z-5">
         <TabButton
           value={activeTab}
           tabs={tabs}
@@ -78,6 +78,7 @@ export function FavoriteLayout({ children }: FavoriteLayoutProps) {
           useLinks={true}
         />
       </div>
+      <div className="border-b-2 border-lg -mt-0.5 -px-4" />
 
       {/* 메인 콘텐츠 */}
       {children}

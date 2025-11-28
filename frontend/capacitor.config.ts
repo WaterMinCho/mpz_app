@@ -22,6 +22,10 @@ const config: CapacitorConfig = {
   android: {
     allowMixedContent: true,
   },
+  ios: {
+    scheme: "mpz",
+    contentInset: "automatic",
+  },
   plugins: {
     SplashScreen: {
       launchShowDuration: 3000,

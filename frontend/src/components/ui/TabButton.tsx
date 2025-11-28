@@ -10,9 +10,9 @@ const variantStyles: Record<
   { base: string; active: string; size: string }
 > = {
   primary: {
-    base: "text-gr font-bold h6 border-b-2 border-b-lg flex-1",
-    active: "text-bk font-bold h6 border-b-2 border-b-black flex-1",
-    size: "min-w-[60px] px-3",
+    base: "text-gr font-bold h6",
+    active: "text-bk font-bold h6 border-b-2 border-b-black",
+    size: "px-3",
   },
   variant3: {
     base: "text-gr font-bold h4 border-b-2 border-b-lg flex-1",
@@ -59,7 +59,8 @@ export function TabButton({
             const content = (
               <div
                 className={cn(
-                  "bg-transparent rounded-none flex flex-col items-center justify-end flex-1 p-3 pb-[10px] cursor-pointer",
+                  "bg-transparent rounded-none flex flex-col items-center justify-end p-3 pb-[10px] cursor-pointer",
+                  variant === "primary" ? "" : "flex-1",
                   isActive ? v.active : v.base
                 )}
               >
@@ -68,11 +69,18 @@ export function TabButton({
             );
 
             return tab.href ? (
-              <Link key={tabKey} href={tab.href} className="flex-1">
+              <Link
+                key={tabKey}
+                href={tab.href}
+                className={variant === "primary" ? "" : "flex-1"}
+              >
                 {content}
               </Link>
             ) : (
-              <div key={tabKey} className="flex-1">
+              <div
+                key={tabKey}
+                className={variant === "primary" ? "" : "flex-1"}
+              >
                 {content}
               </div>
             );

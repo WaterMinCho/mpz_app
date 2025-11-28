@@ -539,7 +539,7 @@ export default function CommunityPage() {
           )
         }
       />
-      <div className="w-full overflow-x-auto scrollbar-hide">
+      <div className="w-full overflow-x-auto scrollbar-hide px-3 z-10">
         <TabButton
           value={activeTab}
           onValueChange={setActiveTab}
@@ -547,6 +547,8 @@ export default function CommunityPage() {
           variant="primary"
         />
       </div>
+      <div className="border-b-2 border-lg -mt-0.5 -px-4" />
+
       <div
         ref={scrollContainerRef}
         className="flex-1 mx-4 overflow-y-auto scrollbar-hide"
