@@ -59,7 +59,7 @@ export function CommentInput({
   const textColor = variant === "primary" ? "text-gray-500" : "text-black";
 
   return (
-    <div className={`relative bg-bg rounded-lg ${className}`}>
+    <div className={`relative bg-bg rounded-lg overflow-hidden ${className}`}>
       <input
         type="text"
         value={text}
@@ -72,7 +72,7 @@ export function CommentInput({
           disabled ? "opacity-50 cursor-not-allowed" : ""
         }`}
       />
-      <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
+      <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center justify-center">
         {disabled ? (
           <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
         ) : (

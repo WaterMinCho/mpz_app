@@ -76,7 +76,9 @@ export function CenterInfo({
       {
         onSuccess: () => {
           setToastType("success");
-          setToastMessage("센터를 찜했습니다 !");
+          setToastMessage(
+            isFavorite ? "센터 찜을 해제했습니다." : "센터를 찜했습니다 !"
+          );
           setShowToast(true);
         },
         onError: () => {

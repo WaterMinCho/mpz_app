@@ -557,6 +557,7 @@ export default function AnimalDetailPage({
           centerId={center?.id || ""}
           name={center?.name || "-"}
           phoneNumber={center?.phoneNumber || "-"}
+          location={center?.location || center?.region || undefined}
           adoptionProcedure={
             isCenterSubscriber && center?.adoptionProcedure
               ? center.adoptionProcedure

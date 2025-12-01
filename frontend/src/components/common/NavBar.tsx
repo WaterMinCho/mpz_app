@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "../providers/AuthProvider";
 import { HouseSimple, Dog, Chats, Heart, User } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
+import { CustomModal } from "../ui/CustomModal";
 
 interface NavbarBtnProps {
   icon: React.ReactElement<{ className?: string }>;
@@ -48,6 +49,7 @@ function NavBar() {
   const { user, isAuthenticated } = useAuth();
   const isCenter =
     user?.userType === "센터관리자" || user?.userType === "센터최고관리자";
+  const [showLoginModal, setShowLoginModal] = useState(false);
 
   // 현재 경로에 따라 active 탭 결정
   const getActiveTab = () => {
@@ -82,10 +84,20 @@ function NavBar() {
         url = "/community";
         break;
       case "like":
-        url = isAuthenticated ? "/favorite/animal" : "/login";
+        if (isAuthenticated) {
+          url = "/favorite/animal";
+        } else {
+          setShowLoginModal(true);
+          return;
+        }
         break;
       case "my":
-        url = isAuthenticated ? (isCenter ? "/centerpage" : "/my") : "/login";
+        if (isAuthenticated) {
+          url = isCenter ? "/centerpage" : "/my";
+        } else {
+          setShowLoginModal(true);
+          return;
+        }
         break;
     }
     router.push(url);
@@ -98,7 +110,7 @@ function NavBar() {
         pointerEvents: "auto",
       }}
     >
-      <div className="max-w-[420px] mx-auto w-full bg-wh border-t border-lg rounded-t-xl">
+      <div className="max-w-[420px] mx-auto w-full bg-wh border-t border-lg">
         <div className="flex justify-between px-4">
           <NavbarBtn
             icon={<HouseSimple weight="bold" />}
@@ -132,6 +144,25 @@ function NavBar() {
           />
         </div>
       </div>
+
+      <CustomModal
+        open={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
+        title="로그인이 필요합니다"
+        description="이 기능을 사용하려면 로그인이 필요합니다."
+        variant="variant2"
+        ctaText="카카오톡으로 로그인하기"
+        onCtaClick={() => {
+          setShowLoginModal(false);
+          const currentUrl =
+            typeof window !== "undefined"
+              ? window.location.pathname + (window.location.search || "")
+              : "/my";
+          router.push(`/login?redirect=${encodeURIComponent(currentUrl)}`);
+        }}
+        subLinkText="나중에 하기"
+        onSubLinkClick={() => setShowLoginModal(false)}
+      />
     </nav>
   );
 }

@@ -17,18 +17,24 @@ export function KakaoProvider({ children }: KakaoProviderProps) {
     }
     // SDK가 이미 로드되어 있는 경우를 대비한 초기화
     const initializeKakao = () => {
-      if (typeof window !== "undefined" && window.Kakao) {
-        try {
-          if (!window.Kakao.isInitialized || !window.Kakao.isInitialized()) {
-            console.log("카카오 JavaScript SDK 초기화 중...");
-            window.Kakao.init(kakaoKey);
-            console.log("카카오 JavaScript SDK 초기화 완료");
-          } else {
-            console.log("카카오 JavaScript SDK가 이미 초기화되어 있습니다.");
-          }
-        } catch (error) {
-          console.error("카카오 JavaScript SDK 초기화 실패:", error);
+      if (typeof window === "undefined") {
+        return;
+      }
+      const kakao = window.Kakao;
+      if (!kakao?.init) {
+        return;
+      }
+      try {
+        const alreadyInitialized = kakao.isInitialized?.() ?? false;
+        if (!alreadyInitialized) {
+          console.log("카카오 JavaScript SDK 초기화 중...");
+          kakao.init(kakaoKey);
+          console.log("카카오 JavaScript SDK 초기화 완료");
+        } else {
+          console.log("카카오 JavaScript SDK가 이미 초기화되어 있습니다.");
         }
+      } catch (error) {
+        console.error("카카오 JavaScript SDK 초기화 실패:", error);
       }
     };
 
@@ -37,7 +43,7 @@ export function KakaoProvider({ children }: KakaoProviderProps) {
 
     // 주기적으로 확인 (SDK 로드가 늦을 수 있음)
     const interval = setInterval(() => {
-      if (typeof window !== "undefined" && window.Kakao) {
+      if (typeof window !== "undefined" && window.Kakao?.init) {
         initializeKakao();
         clearInterval(interval);
       }

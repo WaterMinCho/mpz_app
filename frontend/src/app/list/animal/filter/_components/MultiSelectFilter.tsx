@@ -60,7 +60,7 @@ export default function MultiSelectFilter({
   };
 
   const containerClassName =
-    layout === "grid" ? getGridClassName(gridCols) : "flex flex-wrap gap-2";
+    layout === "grid" ? getGridClassName(gridCols) : "flex flex-wrap gap-1";
 
   return (
     <div className="flex flex-col gap-1">

@@ -244,30 +244,30 @@ export default function MyPage() {
                       }
                     }}
                   >
-                    <div className="flex items-center gap-3 mb-4">
+                    <div className="flex w-full items-center justify-between gap-3 mb-4">
                       {/* 동물 이미지 */}
-                      <div className="relative overflow-hidden w-16 h-16 rounded-lg bg-gray-100">
-                        <Image
-                          src={adoption.animal_image || "/img/dummyImg.png"}
-                          alt={adoption.animal_name || "동물"}
-                          fill
-                          className="object-cover"
-                          onError={(e) => {
-                            const target = e.target as HTMLImageElement;
-                            target.src = "/img/dummyImg.png";
-                          }}
-                        />
-                      </div>
-                      {/* 텍스트와 화살표 */}
-                      <div className="flex items-center gap-8">
+                      <div className="flex items-center gap-3">
+                        <div className="relative overflow-hidden w-16 h-16 rounded-lg bg-gray-100">
+                          <Image
+                            src={adoption.animal_image || "/img/dummyImg.png"}
+                            alt={adoption.animal_name || "동물"}
+                            fill
+                            className="object-cover"
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              target.src = "/img/dummyImg.png";
+                            }}
+                          />
+                        </div>
+                        {/* 텍스트와 화살표 */}
                         <p className="text-sm text-black">
                           {adoption.user_nickname ||
                             adoption.user_name ||
                             "사용자"}
                           님과의 만남을 기다리고 있어요!
                         </p>
-                        <CaretRight className="w-5 h-5 text-gray-400" />
                       </div>
+                      <CaretRight className="w-5 h-5 text-gray-400" />
                     </div>
                     <DotProgressBar
                       currentStep={getAdoptionStep(adoption.status)}

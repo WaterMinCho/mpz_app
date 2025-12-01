@@ -40,6 +40,9 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# ios generated types
+/ios/App/App/public/types
+
 # Include src/lib directory (override parent .gitignore)
 !src/lib/
 

@@ -85,12 +85,12 @@ export default function ProposalPage() {
           </div>
 
           <div className="mb-6">
-            <h5 className="text-dg mb-2">마펫쯔에게 한마디</h5>
+            <h5 className="text-dg mb-2">마펫쯔에게 한 마디</h5>
             <textarea
               placeholder="자유롭게 작성해주세요"
               value={content}
               onChange={handleContentChange}
-              className="w-full h-32 p-4 border border-lg rounded-md resize-none text-body placeholder:text-gr focus:outline-none focus:border-brand"
+              className="w-full h-32 px-4 py-3 border border-lg rounded-md resize-none text-body placeholder:text-gr focus:outline-none focus:border-brand"
             />
           </div>
 

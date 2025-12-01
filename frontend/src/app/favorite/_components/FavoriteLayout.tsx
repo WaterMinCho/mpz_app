@@ -45,7 +45,7 @@ export function FavoriteLayout({ children }: FavoriteLayoutProps) {
     <Container className="min-h-screen pb-20">
       <TopBar
         variant="variant4"
-        left={<h4>찜</h4>}
+        left={<h2>찜</h2>}
         right={
           isAuthenticated ? (
             <Link href="/notifications">
@@ -61,17 +61,16 @@ export function FavoriteLayout({ children }: FavoriteLayoutProps) {
             </Link>
           ) : (
             <Link href="/login">
-              <IconButton
-                icon={({ size }) => <Bell size={size} weight="bold" />}
-                size="iconM"
-              />
+              <div className="flex items-center gap-2 cursor-pointer">
+                <button>로그인</button>
+              </div>
             </Link>
           )
         }
       />
 
       {/* 탭 버튼 */}
-      <div className="mb-4">
+      <div className="w-full px-3.5 z-5">
         <TabButton
           value={activeTab}
           tabs={tabs}
@@ -79,6 +78,7 @@ export function FavoriteLayout({ children }: FavoriteLayoutProps) {
           useLinks={true}
         />
       </div>
+      <div className="border-b-2 border-lg -mt-0.5 -px-4" />
 
       {/* 메인 콘텐츠 */}
       {children}

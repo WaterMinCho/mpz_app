@@ -39,7 +39,7 @@ export function NotificationToast({
     <div
       className={cn(
         "fixed bottom-24 left-1/2 transform -translate-x-1/2 z-[9999]",
-        "flex items-center gap-3 px-4 py-3 rounded-lg shadow-lg",
+        "flex items-center gap-3 px-4 py-3 rounded-lg shadow-sm shadow-black/10",
         "border max-w-sm w-full mx-auto",
         "bg-white opacity-100",
         borderColor,

@@ -34,6 +34,7 @@ import { NotificationToast } from "@/components/ui/NotificationToast";
 import type { PetCardAnimal } from "@/types/animal";
 import type { UserAdoptionOut } from "@/types/adoption";
 import { pickImages } from "@/lib/image-picker";
+import { useCommunityUploadStore } from "@/stores/communityUploadStore";
 
 // PetCardAnimal을 확장한 타입 (adoptionId 포함)
 type ExtendedPetCardAnimal = PetCardAnimal & { adoptionId?: string };
@@ -47,15 +48,31 @@ const uploadFormSchema = z.object({
 
 export default function CommunityUploadPage() {
   const router = useRouter();
-  const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
+
+  // zustand store에서 상태 가져오기
+  const {
+    title: storeTitle,
+    content: storeContent,
+    selectedPet: storeSelectedPet,
+    tags: storeTags,
+    publicType: storePublicType,
+    setTitle: setStoreTitle,
+    setContent: setStoreContent,
+    setSelectedPet: setStoreSelectedPet,
+    setTags: setStoreTags,
+    setPublicType: setStorePublicType,
+    reset: resetStore,
+  } = useCommunityUploadStore();
+
+  const [title, setTitle] = useState(storeTitle);
+  const [content, setContent] = useState(storeContent);
   const [selectedPet, setSelectedPet] = useState<ExtendedPetCardAnimal | null>(
-    null
+    storeSelectedPet
   );
 
   const [uploadedImageUrls, setUploadedImageUrls] = useState<string[]>([]);
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
-  const [tags, setTags] = useState<string[]>([]);
+  const [tags, setTags] = useState<string[]>(storeTags);
   const [showPetSelection, setShowPetSelection] = useState(false);
   const { data: systemTags } = useGetSystemTags();
 
@@ -74,7 +91,7 @@ export default function CommunityUploadPage() {
   const [showSaveModal, setShowSaveModal] = useState(false);
   const [showBackConfirmSheet, setShowBackConfirmSheet] = useState(false);
   const [activeTab, setActiveTab] = useState("adoption");
-  const [publicType, setPublicType] = useState<PublicType>("center");
+  const [publicType, setPublicType] = useState<PublicType>(storePublicType);
   const [isUploadingImages, setIsUploadingImages] = useState(false);
 
   const { mutate: createPost, isPending } = useCreatePost();
@@ -84,11 +101,48 @@ export default function CommunityUploadPage() {
   const isAdmin = user?.userType !== "일반사용자";
   const { showToast, hideToast, toast } = useToast();
 
+  // 컴포넌트 마운트 시 store 값으로 복원 (페이지를 떠났다가 돌아왔을 때)
+  useEffect(() => {
+    // store에 저장된 값이 있고, 로컬 상태가 비어있거나 초기값과 다를 때 복원
+    if (storeTitle) setTitle(storeTitle);
+    if (storeContent) setContent(storeContent);
+    if (storeSelectedPet) setSelectedPet(storeSelectedPet);
+    if (storeTags.length > 0) setTags(storeTags);
+    if (storePublicType) setPublicType(storePublicType);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // 마운트 시에만 실행
+
   // 사용자 타입에 따라 초기 공개 범위를 지정 - 센터 계정은 항상 전체공개
   useEffect(() => {
     if (!user) return;
-    setPublicType(isAdmin ? "public" : "public");
-  }, [isAdmin, user]);
+    const newPublicType = isAdmin ? "public" : "public";
+    // store에 값이 없을 때만 설정
+    if (!storePublicType || storePublicType === "center") {
+      setPublicType(newPublicType);
+      setStorePublicType(newPublicType);
+    }
+  }, [isAdmin, user, setStorePublicType, storePublicType]);
+
+  // store와 로컬 상태 동기화 (변경사항을 store에 저장)
+  useEffect(() => {
+    setStoreTitle(title);
+  }, [title, setStoreTitle]);
+
+  useEffect(() => {
+    setStoreContent(content);
+  }, [content, setStoreContent]);
+
+  useEffect(() => {
+    setStoreSelectedPet(selectedPet);
+  }, [selectedPet, setStoreSelectedPet]);
+
+  useEffect(() => {
+    setStoreTags(tags);
+  }, [tags, setStoreTags]);
+
+  useEffect(() => {
+    setStorePublicType(publicType);
+  }, [publicType, setStorePublicType]);
 
   const { data: adoptionsData } = useGetUserAdoptions({
     filters: {
@@ -375,6 +429,8 @@ export default function CommunityUploadPage() {
       createPost(postData, {
         onSuccess: () => {
           setShowSaveModal(false);
+          // 포스트 생성 성공 시 store 초기화
+          resetStore();
           router.push("/community");
         },
         onError: (error) => {
@@ -446,16 +502,17 @@ export default function CommunityUploadPage() {
           />
           {/* 선택된 태그 표시 */}
           {tags.length > 0 && (
-            <div className="flex flex-wrap gap-2 mt-2">
+            <div className="flex flex-wrap gap-1 mt-2">
               {tags.map((tag) => (
                 <button
                   key={tag}
                   type="button"
                   onClick={() => removeTag(tag)}
-                  className="px-2 py-1 text-xs rounded-full bg-white text-brand border border-brand"
+                  className="flex items-center gap-1 px-2 py-1 text-xs rounded-full bg-white text-brand border border-brand hover:bg-brand/5 transition-colors"
                   title="클릭하여 태그 제거"
                 >
-                  #{tag}
+                  <span>#{tag}</span>
+                  <X size={12} weight="bold" className="flex-shrink-0" />
                 </button>
               ))}
             </div>

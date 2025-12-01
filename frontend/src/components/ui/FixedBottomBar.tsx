@@ -101,22 +101,24 @@ export function FixedBottomBar({
             >
               {primaryButtonText}
             </BigButton>
-            {rightIcon1 && (
-              <IconButton
-                icon={() => rightIcon1}
-                size="iconM"
-                onClick={onRightIcon1Click}
-                className="text-gr"
-              />
-            )}
-            {rightIcon2 && (
-              <IconButton
-                icon={() => rightIcon2}
-                size="iconM"
-                onClick={onRightIcon2Click}
-                className="text-gr"
-              />
-            )}
+            <div className="flex items-center gap-4 border-l border-gray-200 pl-4">
+              {rightIcon1 && (
+                <IconButton
+                  icon={() => rightIcon1}
+                  size="iconM"
+                  onClick={onRightIcon1Click}
+                  className="text-gr"
+                />
+              )}
+              {rightIcon2 && (
+                <IconButton
+                  icon={() => rightIcon2}
+                  size="iconM"
+                  onClick={onRightIcon2Click}
+                  className="text-gr"
+                />
+              )}
+            </div>
           </div>
         ) : variant === "variant3" ? (
           <div className="flex items-center gap-3">
@@ -141,26 +143,28 @@ export function FixedBottomBar({
               {primaryButtonText}
             </BigButton>
             {showDivider && <div className="mx-1 h-6 w-px bg-gray-200" />}
-            {rightIcon1 && (
-              <IconButton
-                icon={({ className }) => (
-                  <div className={cn(className, "text-gr")}>{rightIcon1}</div>
-                )}
-                size="iconM"
-                onClick={onRightIcon1Click}
-                className="text-gr"
-              />
-            )}
-            {rightIcon2 && (
-              <IconButton
-                icon={({ className }) => (
-                  <div className={cn(className, "text-gr")}>{rightIcon2}</div>
-                )}
-                size="iconM"
-                onClick={onRightIcon2Click}
-                className="text-gr"
-              />
-            )}
+            <div className="flex items-center gap-4">
+              {rightIcon1 && (
+                <IconButton
+                  icon={({ className }) => (
+                    <div className={cn(className, "text-gr")}>{rightIcon1}</div>
+                  )}
+                  size="iconM"
+                  onClick={onRightIcon1Click}
+                  className="text-gr"
+                />
+              )}
+              {rightIcon2 && (
+                <IconButton
+                  icon={({ className }) => (
+                    <div className={cn(className, "text-gr")}>{rightIcon2}</div>
+                  )}
+                  size="iconM"
+                  onClick={onRightIcon2Click}
+                  className="text-gr"
+                />
+              )}
+            </div>
           </div>
         ) : variant === "variant4" ? (
           <div className="flex items-center">

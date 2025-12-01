@@ -32,7 +32,7 @@ const FallbackImage = ({
   if (hasError || !src || src === "") {
     return (
       <div
-        className={`bg-lg flex items-center justify-center rounded-full ${className}`}
+        className={`bg-lg flex items-center justify-center rounded-md ${className}`}
       >
         <User size={24} weight="regular" className="text-gr" />
       </div>
@@ -192,7 +192,7 @@ export function CommunityCard({
           return (
             <div
               key={i}
-              className={`relative rounded-sm overflow-hidden flex-shrink-0`}
+              className={`relative rounded-md overflow-hidden flex-shrink-0`}
               style={{
                 width: size,
                 height: size,
@@ -220,7 +220,7 @@ export function CommunityCard({
     return (
       <div className="w-full flex flex-col">
         {imageUrls.length > 0 && imageUrls[0] && imageUrls[0].trim() !== "" && (
-          <div className="relative w-full aspect-square overflow-hidden rounded-sm mb-3">
+          <div className="relative w-full aspect-square overflow-hidden rounded-md mb-3">
             <FallbackImage
               src={imageUrls[0]}
               alt={title}
@@ -233,7 +233,7 @@ export function CommunityCard({
           </div>
         )}
         <div className="flex items-center gap-2 mb-2">
-          <div className="w-6 h-6 rounded-full bg-gray-300 flex-shrink-0"></div>
+          <div className="w-6 h-6 rounded-md bg-gray-300 flex-shrink-0"></div>
           <span className="text-sm font-medium text-gray-700">{author}</span>
         </div>
         <h4 className="text-bk font-bold mb-2">{title}</h4>

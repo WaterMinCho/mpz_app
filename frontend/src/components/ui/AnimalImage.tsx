@@ -12,7 +12,6 @@ interface AnimalImageProps extends ForwardImageProps {
   alt: string;
   containerClassName?: string;
   imageClassName?: string;
-  emptyText?: string;
 }
 
 /**
@@ -23,7 +22,6 @@ export default function AnimalImage({
   alt,
   containerClassName,
   imageClassName,
-  emptyText = "이미지 로딩 실패",
   onLoad,
   onError,
   ...imageProps
@@ -38,17 +36,25 @@ export default function AnimalImage({
     return (
       <div
         className={cn(
-          "bg-gray-200 flex items-center justify-center text-gray-400",
+          "bg-gray-200 flex items-center justify-center text-gray-400 rounded-md",
           containerClassName
         )}
       >
-        <span className="text-xs">{emptyText}</span>
+        <Image
+          src="/img/op-image.svg"
+          alt={alt || "이미지 없음"}
+          width={imageProps.width || 100}
+          height={imageProps.height || 100}
+          className={cn("object-contain", imageClassName)}
+        />
       </div>
     );
   }
 
   return (
-    <div className={cn("relative", containerClassName)}>
+    <div
+      className={cn("relative rounded-md overflow-hidden", containerClassName)}
+    >
       {isLoading && (
         <div className="absolute inset-0 animate-pulse bg-gray-200" />
       )}
@@ -56,7 +62,7 @@ export default function AnimalImage({
         {...imageProps}
         src={proxiedImageUrl}
         alt={alt}
-        className={cn("object-cover", imageClassName)}
+        className={cn("object-cover rounded-md", imageClassName)}
         onLoad={(event) => {
           setIsLoading(false);
           onLoad?.(event);

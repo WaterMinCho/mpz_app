@@ -154,7 +154,7 @@ export default function ConsentFormPage({ params }: ConsentFormPageProps) {
                 </div>
               </div>
             ) : (
-              <div className="rounded-2xl border border-lg bg-white px-4 py-6 text-center text-gr">
+              <div className="rounded-lg border border-lg bg-white px-4 py-6 text-center text-gr">
                 동의서 내용이 준비되지 않았습니다.
               </div>
             )}

@@ -62,7 +62,7 @@ export function ListLayout({ children }: ListLayoutProps) {
     <Container className="min-h-screen pb-20">
       <TopBar
         variant="variant4"
-        left={<h4>입양</h4>}
+        left={<h2>입양</h2>}
         right={
           isAuthenticated ? (
             <Link href="/notifications">
@@ -78,17 +78,16 @@ export function ListLayout({ children }: ListLayoutProps) {
             </Link>
           ) : (
             <Link href="/login">
-              <IconButton
-                icon={({ size }) => <Bell size={size} weight="bold" />}
-                size="iconM"
-              />
+              <div className="flex items-center gap-2 cursor-pointer">
+                <button>로그인</button>
+              </div>
             </Link>
           )
         }
       />
 
       {/* 탭 버튼 */}
-      <div>
+      <div className="w-full px-3.5 z-5">
         <TabButton
           value={activeTab}
           tabs={tabs}
@@ -96,6 +95,7 @@ export function ListLayout({ children }: ListLayoutProps) {
           useLinks={true}
         />
       </div>
+      <div className="border-b-2 border-lg -mt-0.5 -px-4" />
 
       {/* 검색 섹션 - 탭에 따라 다른 컴포넌트 렌더링 */}
       {activeTab === "animal" ? (

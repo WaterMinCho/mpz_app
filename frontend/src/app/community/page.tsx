@@ -11,9 +11,13 @@ import { Container } from "@/components/common/Container";
 import { TopBar } from "@/components/common/TopBar";
 import { NavBar } from "@/components/common/NavBar";
 import { CommunityCard, CommunityCardSkeleton } from "@/components/ui";
-import { TabButton } from "@/components/ui/TabButton";
-import { BigButton } from "@/components/ui/BigButton";
-import { IconButton } from "@/components/ui/IconButton";
+import {
+  TabButton,
+  BigButton,
+  IconButton,
+  CustomModal,
+  Toast,
+} from "@/components/ui";
 import {
   useGetPublicPosts,
   useGetCenterPosts,
@@ -26,8 +30,6 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useNotificationSocket } from "@/hooks/useNotificationSocket";
-import { CustomModal } from "@/components/ui/CustomModal";
-import { Toast } from "@/components/ui/Toast";
 import { Post } from "@/types/posts";
 
 export default function CommunityPage() {
@@ -537,7 +539,7 @@ export default function CommunityPage() {
           )
         }
       />
-      <div className="w-full overflow-x-auto scrollbar-hide">
+      <div className="w-full overflow-x-auto scrollbar-hide px-3 z-10">
         <TabButton
           value={activeTab}
           onValueChange={setActiveTab}
@@ -545,6 +547,8 @@ export default function CommunityPage() {
           variant="primary"
         />
       </div>
+      <div className="border-b-2 border-lg -mt-0.5 -px-4" />
+
       <div
         ref={scrollContainerRef}
         className="flex-1 mx-4 overflow-y-auto scrollbar-hide"
@@ -597,7 +601,7 @@ export default function CommunityPage() {
       </div>
 
       {/* 글쓰기 플로팅 버튼 */}
-      <div className="fixed bottom-24 right-4 z-50">
+      <div className="fixed bottom-32 right-4 z-50">
         <BigButton
           variant="primary"
           left={<Plus size={16} />}
