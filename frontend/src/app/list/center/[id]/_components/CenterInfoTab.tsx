@@ -11,8 +11,7 @@ interface CenterInfoTabProps {
   hasVolunteer?: boolean;
   hasFosterCare?: boolean;
   isSubscribed?: boolean;
-  isPublicData?: boolean;
-  isPublic?: boolean;
+  showLocation?: boolean;
   className?: string;
 }
 
@@ -29,14 +28,12 @@ export function CenterInfoTab({
   hasVolunteer,
   hasFosterCare,
   isSubscribed,
-  isPublic,
+  showLocation = false,
   className = "",
 }: CenterInfoTabProps) {
   const adoptionItems: InfoItem[] = [
     { label: "전화번호", value: centerNumber || "" },
-    ...(isPublic
-      ? []
-      : isPublic
+    ...(showLocation
       ? [{ label: "위치", value: location || "" }]
       : [
           {
@@ -77,7 +74,7 @@ export function CenterInfoTab({
           </tbody>
         </table>
       </div>
-      {isPublic && <KakaoMap address={location || ""} />}
+      {showLocation && <KakaoMap address={location || ""} />}
       {isSubscribed && (
         <>
           <div className="my-2 border-t border-bg" />

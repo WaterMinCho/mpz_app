@@ -35,7 +35,7 @@ console.log(center);
             hasMonitoring={center.hasMonitoring}
             hasVolunteer={center.hasVolunteer}
             hasFosterCare={center.hasFosterCare}
-            isPublic={center.isPublic}
+            showLocation={center.showLocation}
           />
         );
       case "animals":
