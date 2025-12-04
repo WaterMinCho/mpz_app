@@ -51,7 +51,7 @@ export function TopBar({
 
   const innerClassName = React.useMemo(() => {
     return cn(
-      "relative flex items-center w-full h-[54px] max-w-[420px] mx-auto",
+      "relative flex items-center w-full h-[54px] px-4 max-w-[420px] mx-auto",
       variant === "variant6" ? "bg-transparent" : "bg-white/95 backdrop-blur-sm"
     );
   }, [variant]);
@@ -71,8 +71,8 @@ export function TopBar({
             </div>
 
             {/* Center 영역 - 중앙 정렬 */}
-            <div className="flex-1 flex justify-center items-center min-w-0">
-              <div className="text-center truncate px-2">{centerContent}</div>
+            <div className="flex items-center justify-center flex-1 min-w-0">
+              <div className="px-2 text-center truncate">{centerContent}</div>
             </div>
 
             {/* Right 영역 - 오른쪽 끝에 고정 */}
