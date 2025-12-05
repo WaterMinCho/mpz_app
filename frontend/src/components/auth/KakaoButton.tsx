@@ -28,39 +28,76 @@ export function KakaoButton({
 
   const handleKakaoLogin = async () => {
     setIsLoading(true);
-    const isNative = Capacitor.isNativePlatform();
     const platform = Capacitor.getPlatform();
+    const isNative = Capacitor.isNativePlatform();
+    // iOS나 Android인 경우 네이티브로 간주
+    const isIOS = platform === "ios";
+    const isAndroid = platform === "android";
+    const shouldUseNative = isIOS || isAndroid;
 
-    console.log("카카오 로그인 시작", { isNative, platform });
+    console.log("카카오 로그인 시작", {
+      platform,
+      isNative,
+      isIOS,
+      isAndroid,
+      shouldUseNative,
+    });
 
     try {
-      if (isNative) {
-        // ⚠️ iOS 네이티브: Kakao SDK를 통한 네이티브 로그인만 사용
+      if (shouldUseNative) {
+        // ⚠️ iOS/Android 네이티브: Kakao SDK를 통한 네이티브 로그인만 사용
         // 웹뷰(WKWebView, SFSafariViewController) 사용 금지
         // - Apple App Store 심사 정책 위반 가능성
         // - 보안 문제 (피싱 위험)
         // - 카카오 정책상 권장하지 않음
         //
-        // 로그인 순서:
+        // 로그인 순서 (iOS):
         // 1. 카카오톡 앱으로 로그인 (카카오톡 설치 시, 앱 간 전환)
         // 2. 카카오 계정으로 로그인 (카카오톡 미설치 시, Safari/ASWebAuthenticationSession)
         // Kakao SDK for iOS가 자동으로 네이티브 방식으로 처리
 
         // 플러그인 사용 가능 여부 확인
+        console.log("🔍 플러그인 확인 중...", {
+          KakaoNativeLogin,
+          type: typeof KakaoNativeLogin,
+          platform,
+          isNative,
+        });
+
         if (!KakaoNativeLogin) {
-          console.error("KakaoNativeLogin 플러그인이 없습니다.");
+          console.error("❌ KakaoNativeLogin 플러그인이 없습니다.");
+          console.error("플러그인 상태:", { KakaoNativeLogin, platform });
+          alert(
+            "네이티브 카카오 로그인 플러그인을 찾을 수 없습니다.\n네이티브 빌드를 다시 실행해주세요."
+          );
           throw new Error(
             "KakaoNativeLogin 플러그인을 찾을 수 없습니다. 네이티브 빌드를 확인해주세요."
           );
         }
 
         // 플러그인 메서드 존재 여부 확인
-        if (typeof KakaoNativeLogin.login !== "function") {
-          console.error("KakaoNativeLogin.login 메서드가 없습니다.");
+        const hasLogin = typeof KakaoNativeLogin.login === "function";
+        const hasInitialize = typeof KakaoNativeLogin.initialize === "function";
+
+        console.log("🔍 플러그인 메서드 확인:", {
+          hasInitialize,
+          hasLogin,
+          hasLogout: typeof KakaoNativeLogin.logout === "function",
+          hasUnlink: typeof KakaoNativeLogin.unlink === "function",
+          pluginKeys: KakaoNativeLogin ? Object.keys(KakaoNativeLogin) : [],
+        });
+
+        if (!hasLogin) {
+          console.error("❌ KakaoNativeLogin.login 메서드가 없습니다.");
+          console.error("플러그인 객체:", KakaoNativeLogin);
+          alert(
+            "네이티브 카카오 로그인 메서드를 찾을 수 없습니다.\n앱을 다시 빌드해주세요."
+          );
           throw new Error("KakaoNativeLogin.login 메서드를 찾을 수 없습니다.");
         }
 
-        console.log("네이티브 카카오 로그인 호출 중...", {
+        console.log("✅ 네이티브 카카오 로그인 호출 중...", {
+          platform,
           plugin: KakaoNativeLogin,
           hasLogin: typeof KakaoNativeLogin.login === "function",
         });
@@ -68,9 +105,17 @@ export function KakaoButton({
         let result;
         try {
           result = await KakaoNativeLogin.login();
-          console.log("네이티브 카카오 로그인 결과:", result);
+          console.log("✅ 네이티브 카카오 로그인 결과:", result);
         } catch (pluginError) {
-          console.error("플러그인 호출 에러:", pluginError);
+          console.error("❌ 플러그인 호출 에러:", pluginError);
+          console.error("에러 상세:", {
+            message:
+              pluginError instanceof Error
+                ? pluginError.message
+                : String(pluginError),
+            stack: pluginError instanceof Error ? pluginError.stack : undefined,
+            platform,
+          });
           throw new Error(
             `네이티브 플러그인 호출 실패: ${
               pluginError instanceof Error
@@ -81,6 +126,7 @@ export function KakaoButton({
         }
 
         if (!result?.accessToken) {
+          console.error("❌ 액세스 토큰이 없습니다:", result);
           throw new Error("네이티브 카카오 액세스 토큰을 가져오지 못했습니다.");
         }
 
@@ -94,7 +140,7 @@ export function KakaoButton({
       }
 
       // 웹 환경: 기존 OAuth 플로우 사용
-      console.log("웹 환경에서 카카오 로그인 시작");
+      console.log("🌐 웹 환경에서 카카오 로그인 시작", { platform, isNative });
       const clientId = "e87b92ff4188fc038238a9a22eb0bf35";
       if (!clientId) {
         console.error("카카오 클라이언트 ID가 설정되지 않았습니다.");

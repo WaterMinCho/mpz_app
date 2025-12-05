@@ -52,7 +52,7 @@ export function SafeAreaLayout({ children }: SafeAreaLayoutProps) {
     }
   }, []);
 
-  // Safe Area는 TopBar와 NavBar에서만 처리하므로, 여기서는 전체 children에 padding을 적용하지 않음
-  // iOS 네이티브와 웹/안드로이드 모두 동일하게 처리
-  return <div className="flex min-h-screen flex-col">{children}</div>;
+  return (
+    <div className="flex min-h-screen flex-col pt-safe-top">{children}</div>
+  );
 }

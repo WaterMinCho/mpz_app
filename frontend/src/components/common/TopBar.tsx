@@ -44,14 +44,12 @@ export function TopBar({
   ...props
 }: TopBarProps) {
   const Comp = asChild ? Slot : "nav";
-  const isIOSNative = Capacitor.getPlatform() === "ios";
 
   // 안정적인 className 생성을 위해 메모이제이션
+  // Safe Area padding은 최상위 Layout에서만 처리하므로 TopBar에서는 제거
   const outerClassName = React.useMemo(() => {
-    // iOS 네이티브에서는 Safe Area padding 제거, 웹/안드로이드에서는 적용
-    const safeAreaClass = isIOSNative ? "" : "pt-safe-top";
-    return cn(topbarVariants({ variant, className }), safeAreaClass);
-  }, [variant, className, isIOSNative]);
+    return cn(topbarVariants({ variant, className }));
+  }, [variant, className]);
 
   const innerClassName = React.useMemo(() => {
     return cn(
@@ -63,10 +61,9 @@ export function TopBar({
   // center와 title 중 하나만 표시
   const centerContent = center || title;
 
-  // iOS 네이티브에서는 Safe Area가 0이므로 TopBar 높이만, 웹/안드로이드에서는 Safe Area + TopBar 높이
-  const spacerHeight = isIOSNative
-    ? "54px"
-    : "calc(var(--safe-area-top) + 54px)";
+  // Safe Area padding은 SafeAreaLayout에서 처리하므로, TopBar는 높이(54px)만 spacer로 필요
+  // 모든 플랫폼에서 동일하게 TopBar 높이만 적용
+  const spacerHeight = "54px";
 
   return (
     <>
@@ -90,9 +87,9 @@ export function TopBar({
         </nav>
       </Comp>
 
-      {!isIOSNative && (
-        <div aria-hidden className="w-full" style={{ height: spacerHeight }} />
-      )}
+      {/* TopBar가 fixed이므로, 콘텐츠가 TopBar 아래에 가려지지 않도록 spacer 추가 */}
+      {/* Safe Area는 SafeAreaLayout에서 이미 처리됨 */}
+      <div aria-hidden className="w-full" style={{ height: spacerHeight }} />
       {props.children}
     </>
   );

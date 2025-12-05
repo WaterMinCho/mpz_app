@@ -1,5 +1,10 @@
+// variables.gradle을 먼저 로드하여 rootProject.ext가 설정되도록 함
+// 이렇게 하면 capacitor 플러그인들이 rootProject.ext를 안전하게 참조할 수 있음
+apply from: 'variables.gradle'
+
 include ':app'
 include ':capacitor-cordova-android-plugins'
 project(':capacitor-cordova-android-plugins').projectDir = new File('./capacitor-cordova-android-plugins/')
 
+// capacitor.settings.gradle은 variables.gradle 이후에 로드되어야 함
 apply from: 'capacitor.settings.gradle'
