@@ -44,7 +44,8 @@ def _build_reply_response(reply):
         "user_id": str(reply.user.id),
         "content": reply.content,
         "created_at": reply.created_at,
-        "updated_at": reply.updated_at
+        "updated_at": reply.updated_at,
+        "user": _build_user_info(reply.user)
     }
 
 
@@ -52,30 +53,19 @@ def _build_user_info(user):
     """사용자 정보 구성"""
     if not user:
         return None
-    # 기본 정보
-    user_type = getattr(user, "user_type", None)
+    
+    # 사용자 타입과 센터 이름 가져오기
+    user_type = getattr(user, 'user_type', None)
     center_name = None
-
-    # 센터 계정(센터관리자/센터최고관리자/훈련사)인 경우 센터 이름 포함
-    try:
-        if user_type in ["센터관리자", "센터최고관리자", "훈련사"]:
-            center = None
-            # User 모델에 center 또는 centers 관계가 있을 수 있음
-            if hasattr(user, "center") and user.center is not None:
-                center = user.center
-            elif hasattr(user, "centers"):
-                center = user.centers.first()
-            if center:
-                center_name = center.name
-    except Exception:
-        center_name = None
-
+    if hasattr(user, 'center') and user.center:
+        center_name = user.center.name
+    
     return {
         "id": str(user.id),
-        "nickname": getattr(user, "nickname", None),
-        "image": getattr(user, "image", None),
+        "nickname": getattr(user, 'nickname', None),
+        "image": getattr(user, 'image', None),
         "user_type": user_type,
-        "center_name": center_name,
+        "center_name": center_name
     }
 
 
@@ -159,12 +149,12 @@ def get_comments(request: HttpRequest, post_id: str):
             raise HttpError(404, "게시글을 찾을 수 없습니다")
         
         # 댓글 조회
-        comments = Comment.objects.filter(post=post).select_related('user').prefetch_related('reply_set').order_by('-created_at')
+        comments = Comment.objects.filter(post=post).select_related('user', 'user__center').prefetch_related('reply_set').order_by('-created_at')
         
         comments_with_replies = []
         for comment in comments:
             # 대댓글 조회
-            replies = Reply.objects.filter(comment=comment).select_related('user').order_by('created_at')
+            replies = Reply.objects.filter(comment=comment).select_related('user', 'user__center').order_by('created_at')
             
             comment_data = _build_comment_response(
                 comment,

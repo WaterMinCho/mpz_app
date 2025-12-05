@@ -63,11 +63,33 @@ const FallbackImage = ({
   );
 };
 
+// CommunityCard에서 사용하는 User 타입
+// auth.ts의 User 타입과 호환되도록 정의
 interface User {
   id: string;
   nickname?: string | null;
   image?: string | null;
   createdAt?: string | null;
+  center?: { id?: string; name?: string } | null;
+  centers?:
+    | {
+        id?: string;
+        name?: string;
+      }
+    | Array<{
+        id?: string;
+        name?: string;
+      }>
+    | null;
+  centerName?: string | null;
+  // auth.ts의 User 타입과의 호환성을 위한 추가 필드들
+  email?: string;
+  name?: string;
+  phoneNumber?: string;
+  userType?: string;
+  centerId?: string | null;
+  owned_center?: { id?: string } | null;
+  ownedCenter?: { id?: string } | null;
 }
 
 type CommunityCardVariant = "primary" | "variant2" | "variant3" | "variant4";
@@ -80,7 +102,7 @@ interface CommunityCardProps {
   currentUserId?: string;
   onEditPost?: (postId: string) => void;
   onDeletePost?: (postId: string) => void;
-  priority?: boolean; // 첫 화면에 보이는 이미지에 priority 적용
+  priority?: boolean;
 }
 
 export function CommunityCard({
@@ -146,13 +168,36 @@ export function CommunityCard({
   const foundUser = users.find((u) => u.id === user_id);
   const rawNickname = user_nickname || foundUser?.nickname || "알 수 없음";
   const userType = item.user_type;
-  const centerName = item.center_name;
+
+  // 센터 이름 가져오기: item.center_name 우선, 없으면 foundUser에서 확인
+  let centerName = item.center_name;
+  if (!centerName && foundUser) {
+    // foundUser에 center 정보가 있는 경우 (타입에 따라 다를 수 있음)
+    let foundUserCenter: string | undefined;
+
+    if (foundUser.center?.name) {
+      foundUserCenter = foundUser.center.name;
+    } else if (foundUser.centers) {
+      if (Array.isArray(foundUser.centers) && foundUser.centers.length > 0) {
+        foundUserCenter = foundUser.centers[0]?.name;
+      } else if (!Array.isArray(foundUser.centers) && foundUser.centers.name) {
+        foundUserCenter = foundUser.centers.name;
+      }
+    } else if (foundUser.centerName) {
+      foundUserCenter = foundUser.centerName;
+    }
+
+    if (foundUserCenter) {
+      centerName = foundUserCenter;
+    }
+  }
 
   // 센터 계정인 경우 "센터이름 - 닉네임" 형식으로 표시
   const author =
     userType &&
     ["센터관리자", "센터최고관리자", "훈련사"].includes(userType) &&
-    centerName
+    centerName &&
+    centerName.trim() !== ""
       ? `${centerName} - ${rawNickname}`
       : rawNickname;
 

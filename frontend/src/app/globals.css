@@ -213,6 +213,13 @@ body {
   }
 }
 
+/* iOS 네이티브 환경에서도 safe area를 사용하도록 설정 */
+/* env(safe-area-inset-top)이 자동으로 노치 높이를 반환하므로 추가 설정 불필요 */
+/* TopBar는 safe area 아래에 위치하도록 설정 */
+html[data-capacitor-platform="ios"] .fixed.top-0 {
+  top: env(safe-area-inset-top, 0px);
+}
+
 .scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;

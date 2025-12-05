@@ -34,21 +34,10 @@ def _build_post_response(post, tags=None, images=None, user_nickname=None, user_
         comment_count = comment_total + reply_total
     
     # 사용자 타입과 센터 이름 가져오기
-    user_type = getattr(post.user, "user_type", None)
+    user_type = getattr(post.user, 'user_type', None)
     center_name = None
-    
-    # 센터 계정(센터관리자/센터최고관리자/훈련사)인 경우 센터 이름 포함
-    try:
-        if user_type in ["센터관리자", "센터최고관리자", "훈련사"]:
-            center = None
-            if hasattr(post.user, "center") and post.user.center is not None:
-                center = post.user.center
-            elif hasattr(post.user, "centers"):
-                center = post.user.centers.first()
-            if center:
-                center_name = center.name
-    except Exception:
-        center_name = None
+    if post.user.center:
+        center_name = post.user.center.name
     
     return {
         "id": str(post.id),
@@ -108,7 +97,7 @@ async def get_all_public_posts(request: HttpRequest, user_id: str = Query(None),
     try:
         @sync_to_async
         def get_public_posts():
-            posts_query = Post.objects.filter(is_all_access=True).select_related('user')
+            posts_query = Post.objects.filter(is_all_access=True).select_related('user', 'user__center')
             
             # 필터링 적용
             if user_id:
@@ -206,10 +195,10 @@ async def get_mixed_access_posts(request: HttpRequest, user_id: str = Query(None
         @sync_to_async
         def get_mixed_posts():
             # 전체 공개 게시글 조회
-            public_posts_query = Post.objects.filter(is_all_access=True).select_related('user')
+            public_posts_query = Post.objects.filter(is_all_access=True).select_related('user', 'user__center')
             
             # 제한 공개 게시글 조회 (센터 권한자만)
-            private_posts_query = Post.objects.filter(is_all_access=False).select_related('user')
+            private_posts_query = Post.objects.filter(is_all_access=False).select_related('user', 'user__center')
             
             # 필터링 적용 (전체 공개)
             if user_id:
@@ -319,7 +308,7 @@ async def get_all_public_post_detail(request: HttpRequest, post_id: str):
         @sync_to_async
         def get_public_post_detail():
             try:
-                post = Post.objects.select_related('user').get(id=post_id, is_all_access=True)
+                post = Post.objects.select_related('user', 'user__center').get(id=post_id, is_all_access=True)
             except Post.DoesNotExist:
                 return None, None, None
             
@@ -406,7 +395,7 @@ async def get_center_posts(request: HttpRequest, user_id: str = Query(None), tag
                     models.Q(is_all_access=False)                                  # 제한 공개 글
                 )
 
-            posts_query = Post.objects.select_related('user').filter(access_condition)
+            posts_query = Post.objects.select_related('user', 'user__center').filter(access_condition)
             
             # 필터링 적용
             if user_id:
@@ -525,7 +514,7 @@ async def get_center_post_detail(request: HttpRequest, post_id: str):
         @sync_to_async
         def get_center_post_detail():
             try:
-                post = Post.objects.select_related('user').get(id=post_id)
+                post = Post.objects.select_related('user', 'user__center').get(id=post_id)
             except Post.DoesNotExist:
                 return None, None, None
             

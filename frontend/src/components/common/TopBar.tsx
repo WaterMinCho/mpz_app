@@ -3,9 +3,10 @@ import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
+// import { Capacitor } from "@capacitor/core";
 
 const topbarVariants = cva(
-  "fixed left-1/2 -translate-x-1/2 top-0 z-50 w-full max-w-[420px] min-h-[54px] bg-wh pt-safe-top",
+  "fixed left-1/2 -translate-x-1/2 top-0 z-50 w-full max-w-[420px] min-h-[54px] bg-wh",
   {
     variants: {
       variant: {
@@ -45,6 +46,7 @@ export function TopBar({
   const Comp = asChild ? Slot : "nav";
 
   // 안정적인 className 생성을 위해 메모이제이션
+  // Safe Area padding은 최상위 Layout에서만 처리하므로 TopBar에서는 제거
   const outerClassName = React.useMemo(() => {
     return cn(topbarVariants({ variant, className }));
   }, [variant, className]);
@@ -58,6 +60,10 @@ export function TopBar({
 
   // center와 title 중 하나만 표시
   const centerContent = center || title;
+
+  // Safe Area padding은 SafeAreaLayout에서 처리하므로, TopBar는 높이(54px)만 spacer로 필요
+  // 모든 플랫폼에서 동일하게 TopBar 높이만 적용
+  const spacerHeight = "54px";
 
   return (
     <>
@@ -80,12 +86,10 @@ export function TopBar({
           </div>
         </nav>
       </Comp>
-      {/* 안전 영역 + TopBar 높이만큼 공간 확보 */}
-      <div
-        aria-hidden
-        className="w-full"
-        style={{ height: "calc(var(--safe-area-top) + 54px)" }}
-      />
+
+      {/* TopBar가 fixed이므로, 콘텐츠가 TopBar 아래에 가려지지 않도록 spacer 추가 */}
+      {/* Safe Area는 SafeAreaLayout에서 이미 처리됨 */}
+      <div aria-hidden className="w-full" style={{ height: spacerHeight }} />
       {props.children}
     </>
   );
