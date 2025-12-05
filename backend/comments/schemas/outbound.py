@@ -8,6 +8,8 @@ class CommentUserOut(Schema):
     id: str = Field(..., description="사용자 ID")
     nickname: Optional[str] = Field(None, description="닉네임")
     image: Optional[str] = Field(None, description="프로필 이미지")
+    user_type: Optional[str] = Field(None, description="사용자 타입")
+    center_name: Optional[str] = Field(None, description="센터 이름")
 
 
 class ReplyOut(Schema):
@@ -18,6 +20,7 @@ class ReplyOut(Schema):
     content: str = Field(..., description="대댓글 내용")
     created_at: datetime = Field(..., description="생성 시간")
     updated_at: datetime = Field(..., description="수정 시간")
+    user: Optional[CommentUserOut] = Field(None, description="작성자 정보")
 
 
 class CommentOut(Schema):
