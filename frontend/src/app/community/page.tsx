@@ -555,9 +555,7 @@ export default function CommunityPage() {
         key={activeTab}
       >
         {/* 최상단 고정 배너 */}
-        <div className="mb-4">
-          <Banner variant="sub" />
-        </div>
+        <Banner variant="sub" />
         {isLoading ? (
           // 로딩 중일 때 스켈레톤 표시
           <div className="flex flex-col gap-4">
@@ -580,8 +578,6 @@ export default function CommunityPage() {
         ) : (
           <div className="cursor-pointer">
             {filteredPosts.map((post, index) => {
-              // 첫 3개 게시글의 이미지에 priority 적용 (첫 화면에 보이는 게시글)
-              // priority는 첫 번째 게시글의 첫 번째 이미지에만 적용하여 초기 로딩 최적화
               const isPriority = index === 0;
 
               return (

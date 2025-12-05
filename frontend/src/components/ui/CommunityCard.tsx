@@ -172,13 +172,13 @@ export function CommunityCard({
   // 센터 이름: 백엔드에서 item.center_name으로 전달됨 (이미 처리됨)
   const centerName = item.center_name?.trim() || null;
 
-  // 센터 계정인 경우 "센터이름 - 닉네임" 형식으로 표시
+  // 센터 계정인 경우 "센터이름_닉네임" 형식으로 표시
   const isCenterAccount =
     userType && ["센터관리자", "센터최고관리자", "훈련사"].includes(userType);
   const author = isCenterAccount
     ? centerName && centerName !== ""
-      ? `${centerName} - ${rawNickname}`
-      : `센터 - ${rawNickname}`
+      ? `${centerName}_${rawNickname}`
+      : `센터_${rawNickname}`
     : rawNickname;
 
   // 현재 로그인된 사용자의 게시물인 경우 Auth context에서 이미지 가져오기
