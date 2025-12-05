@@ -1,9 +1,10 @@
 "use client";
 
-import { useParams } from "next/navigation";
+import { useParams, usePathname } from "next/navigation";
 import Image from "next/image";
 import { ArrowLeft, ShareNetwork, User } from "@phosphor-icons/react";
 import { useEffect, useState, useRef } from "react";
+import { useRouter } from "next/navigation";
 
 import { Container } from "@/components/common/Container";
 import { TopBar } from "@/components/common/TopBar";
@@ -27,7 +28,8 @@ export default function UserProfilePage() {
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
   const observerTarget = useRef<HTMLDivElement>(null);
-
+  const router = useRouter();
+  const pathname = usePathname();
   const {
     data: postsData,
     isLoading: isPostsLoading,
@@ -144,6 +146,14 @@ export default function UserProfilePage() {
     }
   };
 
+  const handleBack = () => {
+    if (!pathname) {
+      router.push("/");
+      return;
+    } else {
+      router.back();
+    }
+  };
   // 토스트 자동 숨김
   useEffect(() => {
     if (showToast) {
@@ -191,7 +201,7 @@ export default function UserProfilePage() {
               <IconButton
                 icon={({ size }) => <ArrowLeft size={size} weight="bold" />}
                 size="iconM"
-                onClick={() => window.history.back()}
+                onClick={handleBack}
               />
               <h2>작성자가 쓴 다른 글</h2>
             </div>

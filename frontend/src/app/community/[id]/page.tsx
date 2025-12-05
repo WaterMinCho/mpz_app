@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { ArrowLeft, ShareNetwork } from "@phosphor-icons/react";
 
 import { Container } from "@/components/common/Container";
@@ -34,7 +35,7 @@ export default function CommunityDetailPage() {
   const router = useRouter();
   const { isAuthenticated, user, isLoading: authLoading } = useAuth();
   const { isLoaded, isInitialized } = useKakaoSDK();
-
+  const pathname = usePathname();
   const [showBottomSheet, setShowBottomSheet] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
@@ -145,32 +146,30 @@ export default function CommunityDetailPage() {
       return;
     }
 
-    if (
-      typeof window !== "undefined" &&
-      window.Kakao &&
-      window.Kakao.Share
-    ) {
+    if (typeof window !== "undefined" && window.Kakao && window.Kakao.Share) {
       try {
         const communityUrl = window.location.href;
-        
+
         // 이미지 URL을 절대 URL로 변환하는 함수
-        const getAbsoluteImageUrl = (url: string | null | undefined): string => {
+        const getAbsoluteImageUrl = (
+          url: string | null | undefined
+        ): string => {
           if (!url) return `${window.location.origin}/illust/logo.svg`;
-          if (url.startsWith('http://') || url.startsWith('https://')) {
+          if (url.startsWith("http://") || url.startsWith("https://")) {
             return url;
           }
-          if (url.startsWith('/')) {
+          if (url.startsWith("/")) {
             return `${window.location.origin}${url}`;
           }
           return `${window.location.origin}/${url}`;
         };
-        
+
         // 동물 정보 기반 제목 생성: "마펫쯔: 믹스견(3살 추정)"
         let shareTitle = "마펫쯔";
         if (petCardData && animalData) {
           const breed = petCardData.breed || "믹스견";
           // 나이는 개월 단위이므로 12로 나누어 살 단위로 변환
-          const ageText = animalData.age 
+          const ageText = animalData.age
             ? (() => {
                 const ageInYears = animalData.age / 12;
                 // 1살 미만이면 개월로 표시, 1살 이상이면 살로 표시
@@ -179,7 +178,7 @@ export default function CommunityDetailPage() {
                 } else {
                   // 소수점 첫째자리까지 표시 (예: 1.5살, 3살)
                   const roundedAge = Math.round(ageInYears * 10) / 10;
-                  return roundedAge % 1 === 0 
+                  return roundedAge % 1 === 0
                     ? `${Math.round(roundedAge)}살 추정`
                     : `${roundedAge}살 추정`;
                 }
@@ -189,27 +188,33 @@ export default function CommunityDetailPage() {
         } else {
           shareTitle = post?.title || "마펫쯔";
         }
-        
+
         // 게시글 내용 요약 (100자 이내)
         const contentPreview = post?.content
           ? post.content.length > 100
             ? post.content.substring(0, 100).replace(/\n/g, " ") + "..."
             : post.content.replace(/\n/g, " ")
           : "";
-        
-        const shareDescription = contentPreview || "유기동물 입양하기! 마펫쯔와 편하게";
-        
+
+        const shareDescription =
+          contentPreview || "유기동물 입양하기! 마펫쯔와 편하게";
+
         // 게시글 이미지가 있으면 첫 번째 이미지 사용, 없으면 동물 이미지, 둘 다 없으면 기본 이미지
         // post.images[0].image_url 또는 animalData.animal_images[0].image_url 사용
         let shareImageUrl = `${window.location.origin}/illust/logo.svg`;
-        
+
         if (post?.images && post.images.length > 0) {
           shareImageUrl = getAbsoluteImageUrl(post.images[0].image_url);
-        } else if (animalData?.animal_images && animalData.animal_images.length > 0) {
+        } else if (
+          animalData?.animal_images &&
+          animalData.animal_images.length > 0
+        ) {
           // animal_images 배열의 첫 번째 이미지 사용
-          shareImageUrl = getAbsoluteImageUrl(animalData.animal_images[0].image_url);
+          shareImageUrl = getAbsoluteImageUrl(
+            animalData.animal_images[0].image_url
+          );
         }
-        
+
         // sendDefault 메서드 사용 (더 상세한 정보 포함)
         const kakaoShare = window.Kakao.Share as {
           sendScrap?: (options: { requestUrl: string }) => void;
@@ -233,7 +238,7 @@ export default function CommunityDetailPage() {
             }>;
           }) => void;
         };
-        
+
         if (kakaoShare.sendDefault) {
           kakaoShare.sendDefault({
             objectType: "feed",
@@ -260,9 +265,8 @@ export default function CommunityDetailPage() {
           // sendDefault가 없으면 sendScrap 사용 (fallback)
           kakaoShare.sendScrap({ requestUrl: communityUrl });
         }
-        
-        
-                setShowShareModal(false);
+
+        setShowShareModal(false);
       } catch (error) {
         console.error("카카오톡 공유 실패:", error);
         setShowToast(true);
@@ -431,6 +435,15 @@ export default function CommunityDetailPage() {
     setShowImageModal(true);
   };
 
+  const handleBack = () => {
+    if (!pathname) {
+      router.push("/");
+      return;
+    } else {
+      router.back();
+    }
+  };
+
   const getBottomSheetContent = () => {
     switch (bottomSheetVariant) {
       case "report":
@@ -465,7 +478,7 @@ export default function CommunityDetailPage() {
             <IconButton
               icon={({ size }) => <ArrowLeft size={size} weight="bold" />}
               size="iconM"
-              onClick={() => router.back()}
+              onClick={handleBack}
             />
           </div>
         }

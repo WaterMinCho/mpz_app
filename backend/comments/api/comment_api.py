@@ -58,12 +58,13 @@ def _build_user_info(user):
     user_type = getattr(user, 'user_type', None)
     center_name = None
     
-    # 센터 정보 가져오기: center(소속) 또는 owned_center(소유) 확인
-    # select_related로 이미 로드되어 있으므로 직접 접근
-    if hasattr(user, 'center') and user.center is not None:
-        center_name = user.center.name
-    elif hasattr(user, 'owned_center') and user.owned_center is not None:
-        center_name = user.owned_center.name
+    try:
+        if hasattr(user, 'center') and user.center is not None:
+            center_name = user.center.name
+        elif hasattr(user, 'owned_center') and user.owned_center is not None:
+            center_name = user.owned_center.name
+    except Exception:
+        center_name = None
     
     return {
         "id": str(user.id),
@@ -117,7 +118,6 @@ async def create_comment(request: HttpRequest, post_id: str, data: CommentCreate
             from notifications.utils import notify_new_comment
             await notify_new_comment(str(comment.id))
         except Exception as e:
-            # 알림 전송 실패는 로그만 남기고 API 응답에는 영향 주지 않음
             import logging
             logger = logging.getLogger(__name__)
             logger.error(f"댓글 알림 전송 실패: {e}")
