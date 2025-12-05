@@ -13,26 +13,11 @@ export function SafeAreaLayout({ children }: SafeAreaLayoutProps) {
 
     const isIOS = Capacitor.getPlatform() === "ios";
 
-    // iOS 네이티브에서는 CSS 변수를 0으로 설정하여 Safe Area 여백 제거
+    // iOS 네이티브에서도 safe area를 사용하도록 data 속성만 추가
+    // CSS 변수는 env(safe-area-inset-top)을 사용하므로 자동으로 노치 높이가 적용됨
     if (isIOS) {
-      // CSS 변수를 0으로 설정
-      document.documentElement.style.setProperty("--safe-area-top", "0px");
-      document.documentElement.style.setProperty("--safe-area-bottom", "0px");
-      document.documentElement.style.setProperty("--safe-area-left", "0px");
-      document.documentElement.style.setProperty("--safe-area-right", "0px");
-
       // html 요소에 data 속성 추가 (CSS 선택자용)
       document.documentElement.setAttribute("data-capacitor-platform", "ios");
-
-      // body에도 직접 padding/margin 제거
-      document.body.style.paddingTop = "0px";
-      document.body.style.marginTop = "0px";
-      document.body.style.paddingLeft = "0px";
-      document.body.style.paddingRight = "0px";
-
-      // html 요소에도 직접 padding 제거
-      document.documentElement.style.paddingTop = "0px";
-      document.documentElement.style.marginTop = "0px";
     }
 
     const isAndroid = /Android/i.test(window.navigator.userAgent);
