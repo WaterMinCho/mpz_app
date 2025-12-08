@@ -90,7 +90,12 @@ export function FixedBottomBar({
         {children && <div className="my-4">{children}</div>}
 
         {variant === "variant1" ? (
-          <div className="flex items-center gap-3">
+          <div
+            className={cn(
+              "flex items-center",
+              (rightIcon1 || rightIcon2) && "gap-3"
+            )}
+          >
             <BigButton
               variant="primary"
               left={primaryButtonLeft}
@@ -101,24 +106,26 @@ export function FixedBottomBar({
             >
               {primaryButtonText}
             </BigButton>
-            <div className="flex items-center gap-4 border-l border-gray-200 pl-4">
-              {rightIcon1 && (
-                <IconButton
-                  icon={() => rightIcon1}
-                  size="iconM"
-                  onClick={onRightIcon1Click}
-                  className="text-gr"
-                />
-              )}
-              {rightIcon2 && (
-                <IconButton
-                  icon={() => rightIcon2}
-                  size="iconM"
-                  onClick={onRightIcon2Click}
-                  className="text-gr"
-                />
-              )}
-            </div>
+            {(rightIcon1 || rightIcon2) && (
+              <div className="flex items-center gap-4 border-l border-gray-200 pl-4">
+                {rightIcon1 && (
+                  <IconButton
+                    icon={() => rightIcon1}
+                    size="iconM"
+                    onClick={onRightIcon1Click}
+                    className="text-gr"
+                  />
+                )}
+                {rightIcon2 && (
+                  <IconButton
+                    icon={() => rightIcon2}
+                    size="iconM"
+                    onClick={onRightIcon2Click}
+                    className="text-gr"
+                  />
+                )}
+              </div>
+            )}
           </div>
         ) : variant === "variant3" ? (
           <div className="flex items-center gap-3">
