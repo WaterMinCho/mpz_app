@@ -2,7 +2,6 @@
 
 import { ReactNode, useEffect, useState, useCallback } from "react";
 import { Capacitor } from "@capacitor/core";
-import { App } from "@capacitor/app";
 
 interface SafeAreaLayoutProps {
   children: ReactNode;
@@ -92,14 +91,10 @@ export function SafeAreaLayout({ children }: SafeAreaLayoutProps) {
     const isIOS = Capacitor.getPlatform() === "ios";
     const isAndroid = Capacitor.getPlatform() === "android";
 
-    // iOS 네이티브에서도 safe area를 사용하도록 data 속성만 추가
-    // CSS 변수는 env(safe-area-inset-top)을 사용하므로 자동으로 노치 높이가 적용됨
+    // 플랫폼 식별 data-attr만 설정
     if (isIOS) {
-      // html 요소에 data 속성 추가 (CSS 선택자용)
       document.documentElement.setAttribute("data-capacitor-platform", "ios");
     }
-
-    // Android의 경우 JavaScript로 전달된 safe area insets 사용
     if (isAndroid) {
       document.documentElement.setAttribute(
         "data-capacitor-platform",
@@ -107,10 +102,10 @@ export function SafeAreaLayout({ children }: SafeAreaLayoutProps) {
       );
     }
 
-    // 초기 safe area 값 가져오기
+    // 초기 1회만 계산
     updateSafeAreaValues();
 
-    // safe area 변경 이벤트 리스너 (Android)
+    // 안드로이드에서 네이티브가 이벤트로 보내줄 경우만 반영
     const handleSafeAreaChange = (event: CustomEvent) => {
       const { top, bottom } = event.detail;
       if (top !== undefined && top >= 0) {
@@ -133,82 +128,18 @@ export function SafeAreaLayout({ children }: SafeAreaLayoutProps) {
       }
     };
 
-    // 앱이 포그라운드로 돌아올 때 safe area 재계산
-    const handleVisibilityChange = () => {
-      if (!document.hidden) {
-        // 먼저 값을 0으로 리셋한 후 재계산 (잘못된 값 방지)
-        setSafeAreaTop(0);
-        setSafeAreaBottom(0);
-
-        // 약간의 지연을 두고 재계산 (레이아웃이 안정화된 후)
-        setTimeout(() => {
-          updateSafeAreaValues();
-        }, 50);
-
-        // 추가 재계산 (더 안정적)
-        setTimeout(() => {
-          updateSafeAreaValues();
-        }, 200);
-      }
-    };
-
-    // 앱 상태 변경 감지 (Capacitor)
-    let appStateListener: { remove: () => Promise<void> } | null = null;
-    if (Capacitor.isNativePlatform()) {
-      App.addListener("appStateChange", ({ isActive }) => {
-        if (isActive) {
-          // 먼저 값을 0으로 리셋한 후 재계산 (잘못된 값 방지)
-          setSafeAreaTop(0);
-          setSafeAreaBottom(0);
-
-          // 앱이 활성화될 때 safe area 재계산
-          setTimeout(() => {
-            updateSafeAreaValues();
-          }, 50);
-
-          // 추가 재계산 (더 안정적)
-          setTimeout(() => {
-            updateSafeAreaValues();
-          }, 200);
-        } else {
-          // 앱이 백그라운드로 갈 때는 값을 유지 (선택사항)
-        }
-      }).then((listener) => {
-        appStateListener = listener;
-      });
-    }
-
     window.addEventListener(
       "safeAreaInsetsChanged",
       handleSafeAreaChange as EventListener
     );
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-
-    // 주기적으로 safe area 값 확인 (백그라운드에서 돌아올 때를 대비)
-    // 하지만 너무 자주 실행하면 성능 문제가 있을 수 있으므로 간격을 늘림
-    const intervalId = setInterval(() => {
-      if (!document.hidden) {
-        // 현재 값이 비정상적으로 큰 경우에만 재계산
-        if (safeAreaTop > 100 || safeAreaBottom > 100) {
-          setSafeAreaTop(0);
-          setSafeAreaBottom(0);
-          updateSafeAreaValues();
-        }
-      }
-    }, 2000);
 
     return () => {
       window.removeEventListener(
         "safeAreaInsetsChanged",
         handleSafeAreaChange as EventListener
       );
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-      clearInterval(intervalId);
-      if (appStateListener) {
-        appStateListener.remove();
-      }
     };
-  }, [updateSafeAreaValues, clampValue, safeAreaTop, safeAreaBottom]);
+  }, [updateSafeAreaValues, clampValue]);
 
   // 비정상적으로 큰 값 방지 (100px 이상이면 0으로 처리)
   const normalizedSafeAreaTop = safeAreaTop > 100 ? 0 : safeAreaTop;
