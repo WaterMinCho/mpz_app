@@ -10,6 +10,10 @@ PODS:
   - CapacitorGeolocation (7.1.5):
     - Capacitor
     - IONGeolocationLib (= 1.0.1)
+  - CapacitorPluginSafeArea (4.0.3):
+    - Capacitor
+  - CapgoCapacitorNavigationBar (7.3.14):
+    - Capacitor
   - IONGeolocationLib (1.0.1)
   - KakaoSDK (2.18.2):
     - KakaoSDKAuth (= 2.18.2)
@@ -60,6 +64,8 @@ DEPENDENCIES:
   - "CapacitorCamera (from `../../node_modules/@capacitor/camera`)"
   - "CapacitorCordova (from `../../node_modules/@capacitor/ios`)"
   - "CapacitorGeolocation (from `../../node_modules/@capacitor/geolocation`)"
+  - CapacitorPluginSafeArea (from `../../node_modules/capacitor-plugin-safe-area`)
+  - "CapgoCapacitorNavigationBar (from `../../node_modules/@capgo/capacitor-navigation-bar`)"
   - KakaoSDK (~> 2.18.0)
 
 SPEC REPOS:
@@ -91,6 +97,10 @@ EXTERNAL SOURCES:
     :path: "../../node_modules/@capacitor/ios"
   CapacitorGeolocation:
     :path: "../../node_modules/@capacitor/geolocation"
+  CapacitorPluginSafeArea:
+    :path: "../../node_modules/capacitor-plugin-safe-area"
+  CapgoCapacitorNavigationBar:
+    :path: "../../node_modules/@capgo/capacitor-navigation-bar"
 
 SPEC CHECKSUMS:
   Alamofire: 7193b3b92c74a07f85569e1a6c4f4237291e7496
@@ -99,6 +109,8 @@ SPEC CHECKSUMS:
   CapacitorCamera: f9e54db0a18bb218a8dc360907d63aaefe9209ff
   CapacitorCordova: bf648a636f3c153f652d312ae145fb508b6ffced
   CapacitorGeolocation: 84f868bea4c2499aebc3bb3a88fd0a508f87ab87
+  CapacitorPluginSafeArea: 1abd81c6facac9eae0c6ae3cb0b3b53ccc135522
+  CapgoCapacitorNavigationBar: 70b9e067b12659099e0d0626e7b7f63b2bf11f8e
   IONGeolocationLib: 20f9d0248a0b5264511fb57a37e25dd2badf797a
   KakaoSDK: 438d39ca25bee3ec2eb2654b64124ae2941fde8b
   KakaoSDKAuth: 3daf72ec463876e0fe6d0d37c7d6b0b2729169f1
@@ -114,6 +126,6 @@ SPEC CHECKSUMS:
   KakaoSDKTemplate: 0fcfbbb7cc05986fe6690b85e19dd8de0fc634e6
   KakaoSDKUser: 5b0826033381d314f550dd90fbf70d3612044ad6
 
-PODFILE CHECKSUM: 050383f9a0ed01806928b216893871c092e1b76d
+PODFILE CHECKSUM: 20f59435ea4635c5d3969f9c7e2496aaddb2a3fb
 
 COCOAPODS: 1.16.2

@@ -19,6 +19,8 @@ def capacitor_pods
   pod 'CapacitorApp', :path => '../../node_modules/@capacitor/app'
   pod 'CapacitorCamera', :path => '../../node_modules/@capacitor/camera'
   pod 'CapacitorGeolocation', :path => '../../node_modules/@capacitor/geolocation'
+  pod 'CapgoCapacitorNavigationBar', :path => '../../node_modules/@capgo/capacitor-navigation-bar'
+  pod 'CapacitorPluginSafeArea', :path => '../../node_modules/capacitor-plugin-safe-area'
 end
 
 target 'App' do

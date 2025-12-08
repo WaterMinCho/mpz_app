@@ -8,11 +8,12 @@ from asgiref.sync import sync_to_async
 
 from comments.models import Comment, Reply
 from posts.models import Post
-from comments.schemas.inbound import (
-    CommentCreateIn, CommentUpdateIn
-)
+from comments.schemas.inbound import CommentCreateIn, CommentUpdateIn
 from comments.schemas.outbound import (
-    CommentOut, CommentCreateOut, CommentUpdateOut, CommentDeleteOut
+    CommentOut,
+    CommentCreateOut,
+    CommentUpdateOut,
+    CommentDeleteOut,
 )
 from api.security import jwt_auth
 

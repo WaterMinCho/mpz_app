@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
 from pathlib import Path
+from urllib.parse import urlparse
 from decouple import config
 from pathlib import Path
 import sys
@@ -35,6 +36,8 @@ DEBUG = config("DJANGO_DEBUG", default=False, cast=bool)
 ALLOWED_HOSTS = [
     ".railway.app",
     ".mpz.kr",
+    "127.0.0.1",
+    "localhost",
 ]
 
 if DEBUG:
@@ -51,7 +54,6 @@ CSRF_TRUSTED_ORIGINS = [
 ]
 
 
-# Application definition
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -62,7 +64,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     # third party
     "corsheaders",
-    "channels",  # Django Channels 추가
+    "channels",
     # local apps
     "common",
     "user",
@@ -214,6 +216,7 @@ STATICFILES_VENDOR_DIR = STATICFILES_BASE_DIR / "vendors"
 STATICFILES_DIRS = [STATICFILES_BASE_DIR]
 
 STATIC_ROOT = BASE_DIR / "local-cdn"
+STATIC_ROOT.mkdir(exist_ok=True, parents=True)
 
 # Media files (user uploads)
 MEDIA_URL = '/media/'
@@ -231,6 +234,9 @@ STORAGES = {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
     },
 }
+
+if DEBUG:
+    STORAGES["staticfiles"]["BACKEND"] = "django.contrib.staticfiles.storage.StaticFilesStorage"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field

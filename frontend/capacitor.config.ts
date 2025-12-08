@@ -36,6 +36,7 @@ const config: CapacitorConfig = {
       androidSpinnerStyle: "large",
       iosSpinnerStyle: "small",
       webSpinnerStyle: "horizontal",
+      fullscreen: false,
     },
     // KakaoLogin 네이티브 플러그인 등록
     KakaoLogin: {

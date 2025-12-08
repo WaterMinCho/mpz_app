@@ -2,6 +2,8 @@
 
 import { ReactNode, useEffect, useState, useCallback } from "react";
 import { Capacitor } from "@capacitor/core";
+import { App } from "@capacitor/app";
+import { SafeArea } from "capacitor-plugin-safe-area";
 
 interface SafeAreaLayoutProps {
   children: ReactNode;
@@ -18,7 +20,54 @@ export function SafeAreaLayout({ children }: SafeAreaLayoutProps) {
     return Math.min(Math.max(value, 0), max);
   }, []);
 
-  // Safe area 값을 가져오는 함수
+  const applyInsets = useCallback(
+    (insets: {
+      top?: number;
+      bottom?: number;
+      left?: number;
+      right?: number;
+    }) => {
+      if (typeof window === "undefined") return;
+
+      const topValue = clampValue(insets.top ?? 0);
+      const bottomValue = clampValue(insets.bottom ?? 0, 50);
+      const leftValue = clampValue(insets.left ?? 0);
+      const rightValue = clampValue(insets.right ?? 0);
+
+      document.documentElement.style.setProperty(
+        "--safe-area-top",
+        `${topValue}px`
+      );
+      document.documentElement.style.setProperty(
+        "--safe-area-bottom",
+        `${bottomValue}px`
+      );
+      document.documentElement.style.setProperty(
+        "--safe-area-left",
+        `${leftValue}px`
+      );
+      document.documentElement.style.setProperty(
+        "--safe-area-right",
+        `${rightValue}px`
+      );
+
+      setSafeAreaTop((prev) => {
+        if (Math.abs(prev - topValue) > 1) {
+          return topValue;
+        }
+        return prev;
+      });
+      setSafeAreaBottom((prev) => {
+        if (Math.abs(prev - bottomValue) > 1) {
+          return bottomValue;
+        }
+        return prev;
+      });
+    },
+    [clampValue]
+  );
+
+  // Safe area 값을 가져오는 함수 (CSS/env fallback)
   const updateSafeAreaValues = useCallback(() => {
     if (typeof window === "undefined") return;
 
@@ -26,7 +75,6 @@ export function SafeAreaLayout({ children }: SafeAreaLayoutProps) {
     const isIOS = Capacitor.getPlatform() === "ios";
 
     if (isAndroid) {
-      // Android: CSS 변수에서 값 가져오기
       const top = getComputedStyle(document.documentElement)
         .getPropertyValue("--safe-area-top")
         ?.trim();
@@ -34,28 +82,11 @@ export function SafeAreaLayout({ children }: SafeAreaLayoutProps) {
         .getPropertyValue("--safe-area-bottom")
         ?.trim();
 
-      if (top && top !== "0px" && top !== "") {
-        const topValue = clampValue(parseFloat(top));
-        setSafeAreaTop((prev) => {
-          // 값이 실제로 변경된 경우에만 업데이트
-          if (Math.abs(prev - topValue) > 1) {
-            return topValue;
-          }
-          return prev;
-        });
-      }
-
-      if (bottom && bottom !== "0px" && bottom !== "") {
-        const bottomValue = clampValue(parseFloat(bottom), 50);
-        setSafeAreaBottom((prev) => {
-          if (Math.abs(prev - bottomValue) > 1) {
-            return bottomValue;
-          }
-          return prev;
-        });
-      }
+      applyInsets({
+        top: top && top !== "0px" ? parseFloat(top) : 0,
+        bottom: bottom && bottom !== "0px" ? parseFloat(bottom) : 0,
+      });
     } else if (isIOS) {
-      // iOS: env() 값 사용
       const top = getComputedStyle(document.documentElement)
         .getPropertyValue("env(safe-area-inset-top)")
         ?.trim();
@@ -63,27 +94,12 @@ export function SafeAreaLayout({ children }: SafeAreaLayoutProps) {
         .getPropertyValue("env(safe-area-inset-bottom)")
         ?.trim();
 
-      if (top && top !== "0px" && top !== "") {
-        const topValue = clampValue(parseFloat(top));
-        setSafeAreaTop((prev) => {
-          if (Math.abs(prev - topValue) > 1) {
-            return topValue;
-          }
-          return prev;
-        });
-      }
-
-      if (bottom && bottom !== "0px" && bottom !== "") {
-        const bottomValue = clampValue(parseFloat(bottom), 50);
-        setSafeAreaBottom((prev) => {
-          if (Math.abs(prev - bottomValue) > 1) {
-            return bottomValue;
-          }
-          return prev;
-        });
-      }
+      applyInsets({
+        top: top && top !== "0px" ? parseFloat(top) : 0,
+        bottom: bottom && bottom !== "0px" ? parseFloat(bottom) : 0,
+      });
     }
-  }, [clampValue]);
+  }, [applyInsets]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -102,8 +118,25 @@ export function SafeAreaLayout({ children }: SafeAreaLayoutProps) {
       );
     }
 
-    // 초기 1회만 계산
-    updateSafeAreaValues();
+    // 플러그인으로 먼저 안전 영역을 주입 (실패하면 기존 방식 fallback)
+    let safeAreaPluginListener: { remove: () => void } | null = null;
+    (async () => {
+      if (Capacitor.isNativePlatform()) {
+        try {
+          const { insets } = await SafeArea.getSafeAreaInsets();
+          applyInsets(insets);
+          safeAreaPluginListener = await SafeArea.addListener(
+            "safeAreaChanged",
+            ({ insets }) => applyInsets(insets)
+          );
+        } catch (error) {
+          console.warn("SafeArea plugin 실패, fallback 사용", error);
+          updateSafeAreaValues();
+        }
+      } else {
+        updateSafeAreaValues();
+      }
+    })();
 
     // 안드로이드에서 네이티브가 이벤트로 보내줄 경우만 반영
     const handleSafeAreaChange = (event: CustomEvent) => {
@@ -138,8 +171,22 @@ export function SafeAreaLayout({ children }: SafeAreaLayoutProps) {
         "safeAreaInsetsChanged",
         handleSafeAreaChange as EventListener
       );
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      clearInterval(intervalId);
+      if (appStateListener) {
+        appStateListener.remove();
+      }
+      if (safeAreaPluginListener) {
+        safeAreaPluginListener.remove();
+      }
     };
-  }, [updateSafeAreaValues, clampValue]);
+  }, [
+    updateSafeAreaValues,
+    clampValue,
+    safeAreaTop,
+    safeAreaBottom,
+    applyInsets,
+  ]);
 
   // 비정상적으로 큰 값 방지 (100px 이상이면 0으로 처리)
   const normalizedSafeAreaTop = safeAreaTop > 100 ? 0 : safeAreaTop;
