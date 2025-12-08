@@ -46,15 +46,15 @@ export function TopBar({
   const Comp = asChild ? Slot : "nav";
   const [safeAreaTop, setSafeAreaTop] = React.useState(0);
 
-  // Safe area top 값 가져오기 (이벤트 기반만 사용, 주기적 확인 최소화)
+  // Safe area top 값 가져오기
   React.useEffect(() => {
     if (typeof window === "undefined") return;
 
     const isAndroid = Capacitor.getPlatform() === "android";
     const isIOS = Capacitor.getPlatform() === "ios";
 
-    // 초기 값 확인 (한 번만)
-    const checkInitialValue = () => {
+    // Safe area 값을 가져오는 함수
+    const checkSafeAreaValue = () => {
       if (isAndroid) {
         // Android: CSS 변수에서 값 가져오기
         const top = getComputedStyle(document.documentElement)
@@ -62,8 +62,13 @@ export function TopBar({
           ?.trim();
         if (top && top !== "0px" && top !== "") {
           const topValue = parseInt(top.replace("px", "")) || 0;
-          if (topValue > 0) {
-            setSafeAreaTop(topValue);
+          if (topValue > 0 && topValue <= 100) {
+            setSafeAreaTop((prev) => {
+              if (Math.abs(prev - topValue) > 1) {
+                return topValue;
+              }
+              return prev;
+            });
           }
         }
       } else if (isIOS) {
@@ -73,21 +78,40 @@ export function TopBar({
           ?.trim();
         if (top && top !== "0px" && top !== "") {
           const topValue = parseInt(top.replace("px", "")) || 0;
-          if (topValue > 0) {
-            setSafeAreaTop(topValue);
+          if (topValue > 0 && topValue <= 100) {
+            setSafeAreaTop((prev) => {
+              if (Math.abs(prev - topValue) > 1) {
+                return topValue;
+              }
+              return prev;
+            });
           }
         }
       }
     };
 
     // 즉시 확인
-    checkInitialValue();
+    checkSafeAreaValue();
 
     // safeAreaInsetsChanged 이벤트 리스너 (Android에서 값이 전달될 때만 업데이트)
     const handleSafeAreaChange = (event: CustomEvent) => {
       const { top } = event.detail;
-      if (top !== undefined && top >= 0) {
-        setSafeAreaTop(top);
+      if (top !== undefined && top >= 0 && top <= 100) {
+        setSafeAreaTop((prev) => {
+          if (Math.abs(prev - top) > 1) {
+            return top;
+          }
+          return prev;
+        });
+      }
+    };
+
+    // 앱이 포그라운드로 돌아올 때 safe area 재계산
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        setTimeout(() => {
+          checkSafeAreaValue();
+        }, 100);
       }
     };
 
@@ -95,10 +119,11 @@ export function TopBar({
       "safeAreaInsetsChanged",
       handleSafeAreaChange as EventListener
     );
+    document.addEventListener("visibilitychange", handleVisibilityChange);
 
     // 최소한의 지연 확인 (한 번만, 500ms 후)
     const timeoutId = setTimeout(() => {
-      checkInitialValue();
+      checkSafeAreaValue();
     }, 500);
 
     return () => {
@@ -106,6 +131,7 @@ export function TopBar({
         "safeAreaInsetsChanged",
         handleSafeAreaChange as EventListener
       );
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
       clearTimeout(timeoutId);
     };
   }, []);
