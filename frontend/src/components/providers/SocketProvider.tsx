@@ -204,7 +204,8 @@ export function SocketProvider({ children }: SocketProviderProps) {
           pushTokenRegisteredRef.current = false; // 실패 시 재시도 가능하도록
         });
     }
-  }, [isAuthenticated, user]); // requestPermissionAndRegisterToken은 의존성에서 제거
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthenticated, user]); // requestPermissionAndRegisterToken은 안정적인 함수이므로 의존성에서 제외
 
   // 알림 추가 함수
   const addNotification = useCallback((notification: Notification) => {

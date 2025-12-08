@@ -148,7 +148,7 @@ export function SafeAreaLayout({ children }: SafeAreaLayoutProps) {
     };
 
     // 앱 상태 변경 감지 (Capacitor)
-    let appStateListener: any = null;
+    let appStateListener: { remove: () => Promise<void> } | null = null;
     if (Capacitor.isNativePlatform()) {
       App.addListener("appStateChange", ({ isActive }) => {
         if (isActive) {
