@@ -476,57 +476,69 @@ async def create_notification_for_center_users(center_id: str, notification_type
 async def create_notification_for_user(user_id: str, notification_type: str, message: str,
                                      action_url: str = None, metadata: dict = None, priority: str = 'normal'):
     """특정 사용자에게 알림을 생성하고 FCM 푸시 알림을 전송합니다."""
-    
-    @sync_to_async
-    def create_user_notification():
-        notification = Notification.objects.create(
-            user_id=user_id,
-            notification_type=notification_type,
-            message=message,
-            priority=priority,
-            action_url=action_url,
-            metadata=metadata
-        )
-        
-        # 사용자의 활성 푸시 토큰들 수집
-        push_tokens = PushToken.objects.filter(user_id=user_id, is_active=True).values_list('token', flat=True)
-        
-        return notification, list(push_tokens)
-    
-    notification, push_tokens = await create_user_notification()
-    
-    # FCM 푸시 알림 전송
-    if push_tokens:
-        try:
-            fcm_service = FCMPushNotificationService()
-            await fcm_service.send_push_notification(
-                user_tokens=push_tokens,
-                title=message,
-                body=message,
-                data={
-                    'notification_type': notification_type,
-                    'action_url': action_url,
-                    'metadata': metadata
-                }
-            )
-        except Exception as e:
-            logger.error(f"FCM 푸시 알림 전송 실패: {e}")
-    
-    # 실시간 WebSocket 알림 전송
-    notification_data = {
-        "id": str(notification.id),
-        "message": message,
-        "notification_type": notification_type,
-        "priority": priority,
-        "action_url": action_url,
-        "metadata": metadata,
-        "created_at": notification.created_at.isoformat()
-    }
-    
     try:
-        await send_real_time_notification(user_id, notification_data)
+        logger.info(f"알림 생성 시작: user_id={user_id}, type={notification_type}, message={message[:50]}...")
+        
+        @sync_to_async
+        def create_user_notification():
+            notification = Notification.objects.create(
+                user_id=user_id,
+                notification_type=notification_type,
+                message=message,
+                priority=priority,
+                action_url=action_url,
+                metadata=metadata
+            )
+            
+            # 사용자의 활성 푸시 토큰들 수집
+            push_tokens = PushToken.objects.filter(user_id=user_id, is_active=True).values_list('token', flat=True)
+            
+            return notification, list(push_tokens)
+        
+        notification, push_tokens = await create_user_notification()
+        logger.info(f"알림 생성 완료: notification_id={notification.id}, push_tokens={len(push_tokens)}개")
+        
+        # FCM 푸시 알림 전송
+        if push_tokens:
+            try:
+                fcm_service = FCMPushNotificationService()
+                await fcm_service.send_push_notification(
+                    user_tokens=push_tokens,
+                    title=message,
+                    body=message,
+                    data={
+                        'notification_type': notification_type,
+                        'action_url': action_url,
+                        'metadata': metadata
+                    }
+                )
+                logger.info(f"FCM 푸시 알림 전송 성공: user_id={user_id}")
+            except Exception as e:
+                logger.error(f"FCM 푸시 알림 전송 실패: {e}")
+        else:
+            logger.info(f"FCM 푸시 토큰 없음: user_id={user_id}")
+        
+        # 실시간 WebSocket 알림 전송
+        notification_data = {
+            "id": str(notification.id),
+            "message": message,
+            "notification_type": notification_type,
+            "priority": priority,
+            "action_url": action_url,
+            "metadata": metadata,
+            "created_at": notification.created_at.isoformat()
+        }
+        
+        try:
+            await send_real_time_notification(user_id, notification_data)
+            logger.info(f"WebSocket 알림 전송 성공: user_id={user_id}, notification_id={notification.id}")
+        except Exception as e:
+            logger.error(f"실시간 알림 전송 실패 (사용자 {user_id}): {e}")
+            
+        return notification
     except Exception as e:
-        logger.error(f"실시간 알림 전송 실패 (사용자 {user_id}): {e}")
+        logger.error(f"create_notification_for_user 실패: user_id={user_id}, type={notification_type}, 오류: {str(e)}")
+        raise
     
     return notification
 
@@ -644,67 +656,124 @@ async def notify_monitoring_delayed_for_user(adoption_id: str, delay_days: int):
 
 async def notify_new_comment(comment_id: str):
     """새로운 댓글 알림을 포스트 작성자에게 전송합니다."""
-    
-    @sync_to_async
-    def get_comment_info():
-        comment = Comment.objects.select_related('post', 'user').get(id=comment_id)
-        return comment
-    
-    comment = await get_comment_info()
-    
-    # 본인이 댓글을 단 경우는 알림을 보내지 않음
-    if comment.user.id == comment.post.user.id:
-        return
-    
-    message = f"{comment.user.nickname}님이 '{comment.post.title}'에 댓글을 달았습니다. 지금 바로 확인해보세요."
-    action_url = f"/community/{post.id}"
-    metadata = {
-        'comment_id': str(comment.id),
-        'post_id': str(comment.post.id),
-        'commenter_id': str(comment.user.id)
-    }
-    
-    await create_notification_for_user(
-        user_id=str(comment.post.user.id),
-        notification_type='community',
-        message=message,
-        action_url=action_url,
-        metadata=metadata,
-        priority='normal'
-    )
+    try:
+        @sync_to_async
+        def get_comment_info():
+            comment = Comment.objects.select_related('post', 'user').get(id=comment_id)
+            return comment
+        
+        comment = await get_comment_info()
+        
+        # 본인이 댓글을 단 경우는 알림을 보내지 않음
+        if comment.user.id == comment.post.user.id:
+            return
+        
+        # nickname이 없으면 username 사용
+        commenter_name = getattr(comment.user, 'nickname', None) or getattr(comment.user, 'username', '사용자')
+        
+        message = f"{commenter_name}님이 '{comment.post.title}'에 댓글을 달았습니다. 지금 바로 확인해보세요."
+        action_url = f"/community/{comment.post.id}"
+        metadata = {
+            'comment_id': str(comment.id),
+            'post_id': str(comment.post.id),
+            'commenter_id': str(comment.user.id)
+        }
+        
+        await create_notification_for_user(
+            user_id=str(comment.post.user.id),
+            notification_type='comment',
+            message=message,
+            action_url=action_url,
+            metadata=metadata,
+            priority='normal'
+        )
+        
+        logger.info(f"댓글 알림 생성 완료: {comment_id} -> {comment.post.user.id}")
+    except Exception as e:
+        logger.error(f"댓글 알림 생성 실패: {comment_id}, 오류: {str(e)}")
+        raise
 
 
 async def notify_new_reply(reply_id: str):
     """새로운 대댓글 알림을 댓글 작성자에게 전송합니다."""
-    
-    @sync_to_async
-    def get_reply_info():
-        reply = Reply.objects.select_related('comment', 'comment__post', 'user').get(id=reply_id)
-        return reply
-    
-    reply = await get_reply_info()
-    
-    # 본인이 대댓글을 단 경우는 알림을 보내지 않음
-    if reply.user.id == reply.comment.user.id:
-        return
-    
-    message = f"{reply.user.nickname}님이 '{reply.comment.post.title}'의 댓글에 대댓글을 달았습니다. 지금 바로 확인해보세요."
-    action_url = f"/community/{post.id}"
-    metadata = {
-        'reply_id': str(reply.id),
-        'comment_id': str(reply.comment.id),
-        'post_id': str(reply.comment.post.id),
-        'replier_id': str(reply.user.id)
-    }
-    
-    await create_notification_for_user(
-        user_id=str(reply.comment.user.id),
-        notification_type='community',
-        message=message,
-        action_url=action_url,
-        metadata=metadata,
-        priority='normal'
-    )
+    try:
+        @sync_to_async
+        def get_reply_info():
+            reply = Reply.objects.select_related('comment', 'comment__post', 'user').get(id=reply_id)
+            return reply
+        
+        reply = await get_reply_info()
+        
+        # 본인이 대댓글을 단 경우는 알림을 보내지 않음
+        if reply.user.id == reply.comment.user.id:
+            return
+        
+        # nickname이 없으면 username 사용
+        replier_name = getattr(reply.user, 'nickname', None) or getattr(reply.user, 'username', '사용자')
+        
+        message = f"{replier_name}님이 '{reply.comment.post.title}'의 댓글에 대댓글을 달았습니다. 지금 바로 확인해보세요."
+        action_url = f"/community/{reply.comment.post.id}"
+        metadata = {
+            'reply_id': str(reply.id),
+            'comment_id': str(reply.comment.id),
+            'post_id': str(reply.comment.post.id),
+            'replier_id': str(reply.user.id)
+        }
+        
+        await create_notification_for_user(
+            user_id=str(reply.comment.user.id),
+            notification_type='reply',
+            message=message,
+            action_url=action_url,
+            metadata=metadata,
+            priority='normal'
+        )
+        
+        logger.info(f"대댓글 알림 생성 완료: {reply_id} -> {reply.comment.user.id}")
+    except Exception as e:
+        logger.error(f"대댓글 알림 생성 실패: {reply_id}, 오류: {str(e)}")
+        raise
+
+
+async def notify_post_like(post_id: str, user_id: str):
+    """게시글 좋아요 알림을 포스트 작성자에게 전송합니다."""
+    try:
+        @sync_to_async
+        def get_post_info():
+            from posts.models import Post
+            post = Post.objects.select_related('user').get(id=post_id)
+            liker = User.objects.get(id=user_id)
+            return post, liker
+        
+        post, liker = await get_post_info()
+        
+        # 본인이 좋아요를 누른 경우는 알림을 보내지 않음
+        if liker.id == post.user.id:
+            return
+        
+        # nickname이 없으면 username 사용
+        liker_name = getattr(liker, 'nickname', None) or getattr(liker, 'username', '사용자')
+        
+        message = f"{liker_name}님이 '{post.title}' 게시글을 좋아합니다."
+        action_url = f"/community/{post.id}"
+        metadata = {
+            'post_id': str(post.id),
+            'liker_id': str(liker.id)
+        }
+        
+        await create_notification_for_user(
+            user_id=str(post.user.id),
+            notification_type='like',
+            message=message,
+            action_url=action_url,
+            metadata=metadata,
+            priority='normal'
+        )
+        
+        logger.info(f"좋아요 알림 생성 완료: {post_id} -> {post.user.id}")
+    except Exception as e:
+        logger.error(f"좋아요 알림 생성 실패: {post_id}, {user_id}, 오류: {str(e)}")
+        raise
 
 
 async def check_and_notify_monitoring_delays():

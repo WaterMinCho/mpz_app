@@ -237,10 +237,17 @@ export function useWebPushNotification() {
         const detectedPlatform = detectPlatform();
         if (detectedPlatform === "android") {
           const result = await registerAndroidFCMToken();
-          if (!result) {
-            isRegisteringRef.current = false;
+
+          // 네이티브(Firebase + Capacitor) 토큰을 받았다면 그대로 종료
+          if (result) {
+            return true;
           }
-          return result;
+
+          // Capacitor가 없는 안드로이드 모바일 웹 등에서는 웹 푸시로 fallback
+          console.warn(
+            "안드로이드 네이티브 토큰을 받지 못했습니다. 웹 푸시로 대체 시도합니다."
+          );
+          isRegisteringRef.current = true; // 웹 푸시 등록 진행을 계속하기 위해 플래그 복구
         }
 
         // 웹 플랫폼 - 브라우저 지원 확인

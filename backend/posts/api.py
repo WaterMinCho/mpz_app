@@ -856,7 +856,19 @@ async def toggle_post_like(request: HttpRequest, post_id: str):
                 "total_likes": total_likes
             }
 
-        return await toggle_like()
+        result = await toggle_like()
+        
+        # 좋아요 추가 시 알림 전송
+        if result["is_liked"]:
+            try:
+                from notifications.utils import notify_post_like
+                await notify_post_like(post_id, str(current_user.id))
+            except Exception as e:
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.error(f"좋아요 알림 전송 실패: {e}")
+        
+        return result
 
     except HttpError:
         raise
