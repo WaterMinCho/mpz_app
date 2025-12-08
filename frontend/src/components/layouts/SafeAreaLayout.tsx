@@ -30,5 +30,13 @@ export function SafeAreaLayout({ children }: SafeAreaLayoutProps) {
     }
   }, []);
 
-  return <div className="flex min-h-screen flex-col">{children}</div>;
+  return (
+    <>
+      {/* 상단 safe area 영역을 흰색으로 채움 */}
+      <div className="fixed top-0 left-0 right-0 h-safe-top bg-wh z-50" />
+      <div className="flex min-h-screen flex-col pt-safe-top bg-wh">
+        {children}
+      </div>
+    </>
+  );
 }
