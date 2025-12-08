@@ -138,10 +138,8 @@ export function TopBar({
     return safeAreaTop > 0 ? { top: `${safeAreaTop}px` } : { top: "0px" };
   }, [safeAreaTop]);
 
-  // Spacer 높이: safe area top + TopBar 높이
-  const spacerHeight = React.useMemo(() => {
-    return `${safeAreaTop + 54}px`;
-  }, [safeAreaTop]);
+  // Spacer 높이: TopBar 높이만 (safe area top은 이미 TopBar 위치에 포함됨)
+  const spacerHeight = "54px";
 
   return (
     <>
