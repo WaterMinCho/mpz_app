@@ -48,8 +48,25 @@ class AppDelegate: UIResponder, UIApplicationDelegate, MessagingDelegate, UNUser
 
     // FCM 토큰 수신/갱신
     func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
-        print("FCM 토큰: \(fcmToken ?? "nil")")
-        // TODO: 백엔드에 토큰 전달
+        print("\n")
+        print("========================================")
+        print("🔥 FCM 토큰 수신!")
+        print("========================================")
+        print("\(fcmToken ?? "nil")")
+        print("========================================")
+        print("👆 이 토큰을 복사해서 Firebase Console에 붙여넣으세요")
+        print("========================================")
+        print("\n")
+        
+        // JavaScript로 토큰 전달
+        if let token = fcmToken {
+            DispatchQueue.main.async {
+                if let bridge = (self.window?.rootViewController as? CAPBridgeViewController)?.bridge {
+                    bridge.eval(js: "window.dispatchEvent(new CustomEvent('fcmToken', { detail: '\(token)' }));")
+                    print("✅ FCM 토큰을 JavaScript로 전달 완료")
+                }
+            }
+        }
     }
 
     // 포그라운드 수신 시 표시 방식

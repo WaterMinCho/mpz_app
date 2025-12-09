@@ -159,9 +159,17 @@ class FCMPushNotificationService:
         # 플랫폼별 옵션 (필요 시 확장 가능)
         if platform == "ios":
             payload["message"]["apns"] = {
+                "headers": {
+                    "apns-priority": "10",
+                },
                 "payload": {
                     "aps": {
+                        "alert": {
+                            "title": title,
+                            "body": body,
+                        },
                         "sound": "default",
+                        "badge": 1,
                         "content-available": 1,
                     }
                 }

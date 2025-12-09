@@ -2,17 +2,17 @@ PODS:
   - Alamofire (5.9.1)
   - Capacitor (7.4.4):
     - CapacitorCordova
-  - CapacitorApp (7.1.0):
+  - CapacitorApp (7.1.1):
     - Capacitor
-  - CapacitorCamera (7.0.2):
+  - CapacitorCamera (7.0.3):
     - Capacitor
   - CapacitorCordova (7.4.4)
-  - CapacitorGeolocation (7.1.5):
+  - CapacitorGeolocation (7.1.6):
     - Capacitor
     - IONGeolocationLib (= 1.0.1)
   - CapacitorPluginSafeArea (4.0.3):
     - Capacitor
-  - CapgoCapacitorNavigationBar (7.3.14):
+  - CapgoCapacitorNavigationBar (7.3.18):
     - Capacitor
   - Firebase/CoreOnly (11.15.0):
     - FirebaseCore (~> 11.15.0)
@@ -134,12 +134,12 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   Alamofire: f36a35757af4587d8e4f4bfa223ad10be2422b8c
   Capacitor: 358dd1c3fdd71d969547b17e159fd8a7736cb45f
-  CapacitorApp: 26587c2ce485d88ddb39adb21cac64f8e481afe3
-  CapacitorCamera: f9e54db0a18bb218a8dc360907d63aaefe9209ff
+  CapacitorApp: 63b237168fc869e758481dba283315a85743ee78
+  CapacitorCamera: 6746827d82376f31cea9224945c0458c9fd0b0b2
   CapacitorCordova: bf648a636f3c153f652d312ae145fb508b6ffced
-  CapacitorGeolocation: 84f868bea4c2499aebc3bb3a88fd0a508f87ab87
+  CapacitorGeolocation: a65213fef581c7b8c5d486abbd5a6d00192a179e
   CapacitorPluginSafeArea: 1abd81c6facac9eae0c6ae3cb0b3b53ccc135522
-  CapgoCapacitorNavigationBar: 70b9e067b12659099e0d0626e7b7f63b2bf11f8e
+  CapgoCapacitorNavigationBar: 3c59704af4b6774bebb36beaab82643c141dfa83
   Firebase: d99ac19b909cd2c548339c2241ecd0d1599ab02e
   FirebaseCore: efb3893e5b94f32b86e331e3bd6dadf18b66568e
   FirebaseCoreInternal: 9afa45b1159304c963da48addb78275ef701c6b4

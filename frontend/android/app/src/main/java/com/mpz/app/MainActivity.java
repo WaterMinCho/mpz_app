@@ -151,7 +151,13 @@ public class MainActivity extends BridgeActivity {
 
                     // FCM 토큰 가져오기 성공
                     String token = task.getResult();
-                    Log.d("MainActivity", "FCM 토큰: " + token);
+                    Log.d("MainActivity", "\n========================================");
+                    Log.d("MainActivity", "🔥 FCM 토큰 수신!");
+                    Log.d("MainActivity", "========================================");
+                    Log.d("MainActivity", token);
+                    Log.d("MainActivity", "========================================");
+                    Log.d("MainActivity", "👆 이 토큰을 복사해서 Firebase Console에 붙여넣으세요");
+                    Log.d("MainActivity", "========================================\n");
                     
                     // JavaScript로 토큰 전달
                     sendTokenToJavaScript(token);

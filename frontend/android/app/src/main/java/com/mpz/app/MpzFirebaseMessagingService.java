@@ -36,7 +36,13 @@ public class MpzFirebaseMessagingService extends FirebaseMessagingService {
     @Override
     public void onNewToken(@NonNull String token) {
         super.onNewToken(token);
-        Log.d(TAG, "새로운 FCM 토큰: " + token);
+        Log.d(TAG, "\n========================================");
+        Log.d(TAG, "🔥 FCM 토큰 수신!");
+        Log.d(TAG, "========================================");
+        Log.d(TAG, token);
+        Log.d(TAG, "========================================");
+        Log.d(TAG, "👆 이 토큰을 복사해서 Firebase Console에 붙여넣으세요");
+        Log.d(TAG, "========================================\n");
         
         // TODO: 백엔드 서버로 토큰 전송
         // 예: sendTokenToServer(token);

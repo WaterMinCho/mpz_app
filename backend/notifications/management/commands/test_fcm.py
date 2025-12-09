@@ -77,7 +77,7 @@ class Command(BaseCommand):
         
         @sync_to_async
         def get_user_push_tokens(user):
-            return list(PushToken.objects.filter(user=user, is_active=True).values_list('token', flat=True))
+            return list(PushToken.objects.filter(user=user, is_active=True).values_list('token', 'platform'))
         
         # 테스트 사용자 가져오기
         test_user = await get_test_user()
@@ -85,18 +85,28 @@ class Command(BaseCommand):
             self.style.SUCCESS(f'테스트 사용자: {test_user.username} ({test_user.email})')
         )
         
-        # 사용자의 푸시 토큰 확인
-        push_tokens = await get_user_push_tokens(test_user)
+        # 사용자의 푸시 토큰 확인 (플랫폼 포함)
+        push_tokens_with_platform = await get_user_push_tokens(test_user)
         
-        if not push_tokens:
+        if not push_tokens_with_platform:
             self.stdout.write(
                 self.style.WARNING('사용자에게 등록된 푸시 토큰이 없습니다')
             )
             return
         
         self.stdout.write(
-            self.style.SUCCESS(f'발견된 푸시 토큰: {len(push_tokens)}개')
+            self.style.SUCCESS(f'발견된 푸시 토큰: {len(push_tokens_with_platform)}개')
         )
+        
+        # 플랫폼별 토큰 정보 출력
+        tokens_by_platform = {}
+        for token, platform in push_tokens_with_platform:
+            if platform not in tokens_by_platform:
+                tokens_by_platform[platform] = []
+            tokens_by_platform[platform].append(token)
+            self.stdout.write(
+                f'  - {platform}: {token[:30]}...'
+            )
         
         if options['dry_run']:
             self.stdout.write(
@@ -107,36 +117,62 @@ class Command(BaseCommand):
         # FCM 서비스 초기화
         fcm_service = FCMPushNotificationService()
         
-        if not fcm_service.fcm_server_key:
+        if not fcm_service.fcm_project_id:
             self.stdout.write(
-                self.style.ERROR('FCM_SERVER_KEY가 설정되지 않았습니다')
+                self.style.ERROR('FCM_PROJECT_ID가 설정되지 않았습니다')
             )
             return
         
-        # FCM 알림 전송
+        if not fcm_service.credentials:
+            self.stdout.write(
+                self.style.ERROR('FIREBASE_ADMIN_CREDENTIALS가 설정되지 않았습니다')
+            )
+            return
+        
+        # FCM 알림 전송 (플랫폼별로)
         self.stdout.write('FCM 푸시 알림을 전송합니다...')
         
         try:
-            result = await fcm_service.send_push_notification(
-                user_tokens=push_tokens,
-                title=options['title'],
-                body=options['body'],
-                data={
-                    'test': True,
-                    'timestamp': str(asyncio.get_event_loop().time())
-                }
-            )
+            all_results = {}
+            for platform, tokens in tokens_by_platform.items():
+                self.stdout.write(f'\n{platform} 플랫폼 ({len(tokens)}개 토큰)에 알림 전송 중...')
+                result = await fcm_service.send_push_notification(
+                    user_tokens=tokens,
+                    title=options['title'],
+                    body=options['body'],
+                    data={
+                        'test': True,
+                        'timestamp': str(asyncio.get_event_loop().time())
+                    },
+                    platform=platform  # 플랫폼 정보 전달
+                )
+                all_results[platform] = result
+                
+                if result.get('success'):
+                    self.stdout.write(
+                        self.style.SUCCESS(f'{platform} 플랫폼 전송 성공: {result.get("success_count", 0)}개 성공')
+                    )
+                else:
+                    self.stdout.write(
+                        self.style.ERROR(f'{platform} 플랫폼 전송 실패: {result}')
+                    )
+                    if result.get('failures'):
+                        for failure in result['failures']:
+                            self.stdout.write(
+                                self.style.WARNING(f'  실패 상세: {failure}')
+                            )
             
-            if result.get('success'):
-                self.stdout.write(
-                    self.style.SUCCESS(f'FCM 푸시 알림 전송 성공: {result}')
-                )
-            else:
-                self.stdout.write(
-                    self.style.ERROR(f'FCM 푸시 알림 전송 실패: {result}')
-                )
+            # 전체 결과 요약
+            total_success = sum(r.get('success_count', 0) for r in all_results.values())
+            total_failure = sum(r.get('failure_count', 0) for r in all_results.values())
+            
+            self.stdout.write(
+                self.style.SUCCESS(f'\n전체 결과: 성공 {total_success}개, 실패 {total_failure}개')
+            )
                 
         except Exception as e:
             self.stdout.write(
                 self.style.ERROR(f'FCM 전송 중 오류 발생: {e}')
             )
+            import traceback
+            self.stdout.write(traceback.format_exc())

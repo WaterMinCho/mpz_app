@@ -146,6 +146,50 @@ export async function getAndroidFCMToken(): Promise<string | null> {
   });
 }
 
+// iOS FCM 토큰 가져오기
+export async function getIOSFCMToken(): Promise<string | null> {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  // Capacitor가 없으면 웹 플랫폼
+  const capWindow = window as CapacitorWindow;
+  if (!capWindow.Capacitor) {
+    return null;
+  }
+
+  const capPlatform = capWindow.Capacitor.getPlatform();
+  if (capPlatform !== "ios") {
+    return null;
+  }
+
+  // 전역 리스너가 없으면 한 번만 등록
+  if (!fcmTokenListenerAdded) {
+    window.addEventListener("fcmToken", handleFCMTokenGlobal);
+    fcmTokenListenerAdded = true;
+  }
+
+  return new Promise((resolve) => {
+    // 타임아웃 (10초 - iOS는 초기화 시간이 좀 더 걸릴 수 있음)
+    const timeoutId = setTimeout(() => {
+      // 대기 목록에서 제거
+      const index = pendingResolvers.indexOf(resolve);
+      if (index > -1) {
+        pendingResolvers.splice(index, 1);
+      }
+      console.warn("iOS FCM 토큰을 받는 데 시간이 너무 오래 걸립니다.");
+      resolve(null);
+    }, 10000);
+
+    // 대기 목록에 추가
+    const wrappedResolve = (token: string | null) => {
+      clearTimeout(timeoutId);
+      resolve(token);
+    };
+    pendingResolvers.push(wrappedResolve);
+  });
+}
+
 // VAPID 공개 키를 Uint8Array로 변환하는 헬퍼 함수
 function urlBase64ToUint8Array(base64String: string): BufferSource {
   const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
@@ -223,6 +267,62 @@ export function useWebPushNotification() {
     }
   }, [registerPushToken]);
 
+  // iOS FCM 토큰 등록
+  const registerIOSFCMToken = useCallback(async (): Promise<boolean> => {
+    try {
+      const token = await getIOSFCMToken();
+      if (!token) {
+        console.warn("iOS FCM 토큰을 받을 수 없습니다.");
+        isRegisteringRef.current = false;
+        return false;
+      }
+
+      console.log("iOS FCM 토큰 받음:", token);
+
+      // 서버에 토큰 등록
+      await registerPushToken.mutateAsync({
+        token,
+        platform: "ios",
+      });
+
+      console.log("iOS 푸시 알림이 성공적으로 등록되었습니다.");
+      hasRegisteredRef.current = true;
+      isRegisteringRef.current = false;
+      errorCountRef.current = 0;
+      return true;
+    } catch (error: unknown) {
+      errorCountRef.current += 1;
+      console.error("iOS 푸시 알림 등록 실패:", error);
+
+      // 에러가 "get() returned more than one PushToken"인 경우, 이미 등록된 것으로 간주
+      const errorMessage =
+        (error as { response?: { data?: { detail?: string } } })?.response?.data
+          ?.detail ||
+        (error as { message?: string })?.message ||
+        String(error);
+      if (errorMessage.includes("get() returned more than one PushToken")) {
+        console.warn(
+          "이미 여러 개의 토큰이 존재합니다. 등록 완료로 처리합니다."
+        );
+        hasRegisteredRef.current = true; // 이미 등록된 것으로 처리
+        isRegisteringRef.current = false;
+        errorCountRef.current = 0;
+        return true;
+      }
+
+      // 에러가 3번 이상 발생하면 더 이상 시도하지 않음
+      if (errorCountRef.current >= 3) {
+        console.error(
+          "푸시 토큰 등록이 3번 연속 실패했습니다. 더 이상 시도하지 않습니다."
+        );
+        hasRegisteredRef.current = true; // 더 이상 시도하지 않도록 플래그 설정
+      }
+
+      isRegisteringRef.current = false;
+      return false;
+    }
+  }, [registerPushToken]);
+
   const requestPermissionAndRegisterToken =
     useCallback(async (): Promise<boolean> => {
       // 이미 등록 중이거나 등록 완료된 경우 스킵
@@ -233,8 +333,54 @@ export function useWebPushNotification() {
 
       isRegisteringRef.current = true;
       try {
-        // 안드로이드 플랫폼 확인
+        // 플랫폼 확인
         const detectedPlatform = detectPlatform();
+
+        // iOS 플랫폼 처리
+        if (detectedPlatform === "ios") {
+          // 먼저 localStorage에서 이미 저장된 토큰이 있는지 확인
+          const savedToken =
+            typeof window !== "undefined"
+              ? localStorage.getItem("fcm_token_debug")
+              : null;
+
+          if (savedToken) {
+            console.log(
+              "저장된 iOS FCM 토큰 발견, 즉시 등록 시도:",
+              savedToken.substring(0, 20) + "..."
+            );
+            try {
+              await registerPushToken.mutateAsync({
+                token: savedToken,
+                platform: "ios",
+              });
+              console.log("저장된 iOS FCM 토큰이 성공적으로 등록되었습니다.");
+              hasRegisteredRef.current = true;
+              isRegisteringRef.current = false;
+              errorCountRef.current = 0;
+              return true;
+            } catch (error) {
+              console.warn("저장된 토큰 등록 실패, 새 토큰 대기:", error);
+              // 저장된 토큰 등록 실패 시 새 토큰을 기다림
+            }
+          }
+
+          const result = await registerIOSFCMToken();
+
+          // 네이티브(Firebase + Capacitor) 토큰을 받았다면 그대로 종료
+          if (result) {
+            return true;
+          }
+
+          // iOS 네이티브 토큰을 받지 못한 경우 웹 푸시는 지원하지 않음
+          console.warn(
+            "iOS 네이티브 토큰을 받지 못했습니다. iOS에서는 웹 푸시를 지원하지 않습니다."
+          );
+          isRegisteringRef.current = false;
+          return false;
+        }
+
+        // 안드로이드 플랫폼 처리
         if (detectedPlatform === "android") {
           const result = await registerAndroidFCMToken();
 
@@ -346,7 +492,7 @@ export function useWebPushNotification() {
         isRegisteringRef.current = false;
         return false;
       }
-    }, [registerPushToken, registerAndroidFCMToken]); // registerAndroidFCMToken은 내부에서 사용되므로 의존성에 포함
+    }, [registerPushToken, registerAndroidFCMToken, registerIOSFCMToken]); // registerAndroidFCMToken과 registerIOSFCMToken은 내부에서 사용되므로 의존성에 포함
 
   // 사용자 제스처로 알림 권한 요청
   const requestPermissionWithUserGesture =
