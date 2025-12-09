@@ -24,14 +24,14 @@ export const useGeolocation = (options: UseGeolocationOptions = {}) => {
     longitude: null,
     accuracy: null,
     error: null,
-    isLoading: true,
+    isLoading: false, // 기본적으로 요청 전까지 로딩 아님
   });
   const watchIdRef = useRef<number | null>(null);
   const timeoutRef = useRef<number | null>(null);
   const bestPositionRef = useRef<GeolocationPosition | null>(null);
 
+  // 마운트 해제 시 워치/타임아웃 정리
   useEffect(() => {
-    requestLocation();
     return () => {
       if (watchIdRef.current !== null && navigator.geolocation) {
         navigator.geolocation.clearWatch(watchIdRef.current);
@@ -40,14 +40,7 @@ export const useGeolocation = (options: UseGeolocationOptions = {}) => {
         window.clearTimeout(timeoutRef.current);
       }
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    options.enableHighAccuracy,
-    options.timeout,
-    options.maximumAge,
-    options.accuracyThresholdMeters,
-    options.watchTimeoutMs,
-  ]);
+  }, []);
 
   const requestLocation = async () => {
     setState((prev) => ({ ...prev, isLoading: true, error: null }));

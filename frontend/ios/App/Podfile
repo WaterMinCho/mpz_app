@@ -3,11 +3,6 @@ require_relative '../../node_modules/@capacitor/ios/scripts/pods_helpers'
 platform :ios, '14.0'
 use_frameworks!
 
-# CocoaPods repositories
-source 'https://cdn.cocoapods.org/'
-# 카카오 SDK는 기본 CocoaPods 저장소에서 제공됩니다
-# source 'https://devrepo.kakao.com/nexus/content/groups/public/'
-
 # workaround to avoid Xcode caching of Pods that requires
 # Product -> Clean Build Folder after new Cordova plugins installed
 # Requires CocoaPods 1.6 or newer
@@ -26,8 +21,10 @@ end
 target 'App' do
   capacitor_pods
   # Add your Pods here
-  # Kakao SDK
-  pod 'KakaoSDK', '~> 2.18.0'
+  pod 'Firebase/Messaging'
+  pod 'KakaoSDKCommon'
+  pod 'KakaoSDKAuth'
+  pod 'KakaoSDKUser'
 end
 
 post_install do |installer|

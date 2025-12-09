@@ -45,17 +45,6 @@ export function KakaoButton({
 
     try {
       if (shouldUseNative) {
-        // ⚠️ iOS/Android 네이티브: Kakao SDK를 통한 네이티브 로그인만 사용
-        // 웹뷰(WKWebView, SFSafariViewController) 사용 금지
-        // - Apple App Store 심사 정책 위반 가능성
-        // - 보안 문제 (피싱 위험)
-        // - 카카오 정책상 권장하지 않음
-        //
-        // 로그인 순서 (iOS):
-        // 1. 카카오톡 앱으로 로그인 (카카오톡 설치 시, 앱 간 전환)
-        // 2. 카카오 계정으로 로그인 (카카오톡 미설치 시, Safari/ASWebAuthenticationSession)
-        // Kakao SDK for iOS가 자동으로 네이티브 방식으로 처리
-
         // 플러그인 사용 가능 여부 확인
         console.log("🔍 플러그인 확인 중...", {
           KakaoNativeLogin,
@@ -64,20 +53,13 @@ export function KakaoButton({
           isNative,
         });
 
-        if (!KakaoNativeLogin) {
-          console.error("❌ KakaoNativeLogin 플러그인이 없습니다.");
-          console.error("플러그인 상태:", { KakaoNativeLogin, platform });
-          alert(
-            "네이티브 카카오 로그인 플러그인을 찾을 수 없습니다.\n네이티브 빌드를 다시 실행해주세요."
-          );
-          throw new Error(
-            "KakaoNativeLogin 플러그인을 찾을 수 없습니다. 네이티브 빌드를 확인해주세요."
-          );
-        }
-
-        // 플러그인 메서드 존재 여부 확인
-        const hasLogin = typeof KakaoNativeLogin.login === "function";
-        const hasInitialize = typeof KakaoNativeLogin.initialize === "function";
+        // 플러그인 존재 여부 확인 (없으면 바로 에러 안내)
+        const hasInitialize =
+          KakaoNativeLogin && typeof KakaoNativeLogin.initialize === "function";
+        const hasLogin =
+          KakaoNativeLogin &&
+          typeof KakaoNativeLogin.login === "function" &&
+          hasInitialize;
 
         console.log("🔍 플러그인 메서드 확인:", {
           hasInitialize,
@@ -88,12 +70,13 @@ export function KakaoButton({
         });
 
         if (!hasLogin) {
-          console.error("❌ KakaoNativeLogin.login 메서드가 없습니다.");
-          console.error("플러그인 객체:", KakaoNativeLogin);
-          alert(
-            "네이티브 카카오 로그인 메서드를 찾을 수 없습니다.\n앱을 다시 빌드해주세요."
+          console.error(
+            "❌ KakaoNativeLogin 플러그인이 없습니다 (iOS/Android)"
           );
-          throw new Error("KakaoNativeLogin.login 메서드를 찾을 수 없습니다.");
+          alert(
+            "카카오톡 앱 연동을 위해 네이티브 플러그인이 필요합니다.\n앱을 다시 빌드하거나 플러그인 설치 상태를 확인해주세요."
+          );
+          throw new Error("KakaoNativeLogin 플러그인이 누락되었습니다.");
         }
 
         console.log("✅ 네이티브 카카오 로그인 호출 중...", {

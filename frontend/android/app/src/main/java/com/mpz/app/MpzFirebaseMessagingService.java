@@ -2,9 +2,12 @@ package com.mpz.app;
 
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Intent;
 import android.os.Build;
 import android.util.Log;
 import androidx.annotation.NonNull;
+import androidx.core.app.NotificationCompat;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 import java.util.Map;
@@ -52,6 +55,8 @@ public class MpzFirebaseMessagingService extends FirebaseMessagingService {
         Log.d(TAG, "푸시 알림 수신");
         Log.d(TAG, "From: " + remoteMessage.getFrom());
         
+        createNotificationChannel();
+
         // 알림 데이터 확인
         if (remoteMessage.getNotification() != null) {
             String title = remoteMessage.getNotification().getTitle();
@@ -66,8 +71,8 @@ public class MpzFirebaseMessagingService extends FirebaseMessagingService {
             Log.d(TAG, "커스텀 데이터: " + data);
         }
         
-        // TODO: 알림 표시 또는 Capacitor로 전달
-        // 예: showNotification(remoteMessage);
+        // 알림 표시
+        showNotification(remoteMessage);
         sendMessageToCapacitor(remoteMessage);
     }
 
@@ -91,6 +96,56 @@ public class MpzFirebaseMessagingService extends FirebaseMessagingService {
                 Log.d(TAG, "알림 채널 생성 완료: " + CHANNEL_ID);
             }
         }
+    }
+
+    /**
+     * 알림을 생성해 표시합니다. data-only 메시지도 표시되도록 처리.
+     */
+    private void showNotification(RemoteMessage remoteMessage) {
+        NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        if (notificationManager == null) {
+            Log.w(TAG, "NotificationManager null");
+            return;
+        }
+
+        String title = null;
+        String body = null;
+
+        if (remoteMessage.getNotification() != null) {
+            title = remoteMessage.getNotification().getTitle();
+            body = remoteMessage.getNotification().getBody();
+        }
+
+        Map<String, String> data = remoteMessage.getData();
+        if (data != null) {
+            if (title == null) title = data.get("title");
+            if (body == null) body = data.get("body");
+        }
+
+        if (title == null) title = "MPZ";
+        if (body == null) body = "새 알림이 도착했습니다.";
+
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        PendingIntent pendingIntent = PendingIntent.getActivity(
+            this,
+            0,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+        );
+
+        NotificationCompat.Builder notificationBuilder =
+            new NotificationCompat.Builder(this, CHANNEL_ID)
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .setContentTitle(title)
+                .setContentText(body)
+                .setAutoCancel(true)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setContentIntent(pendingIntent);
+
+        // 메시지마다 다른 ID로 여러 개 표시
+        int notificationId = (int) System.currentTimeMillis();
+        notificationManager.notify(notificationId, notificationBuilder.build());
     }
 
     /**

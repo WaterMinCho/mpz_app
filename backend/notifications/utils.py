@@ -30,6 +30,7 @@ def resolve_notification_title(notification_type: str, message: str) -> str:
         "like": "좋아요",
         "comment": "댓글",
         "reply": "대댓글",
+        "community": "커뮤니티",
         "matching": "매칭",
         "matching_result": "매칭 결과",
         "adoption": "입양",
@@ -37,6 +38,23 @@ def resolve_notification_title(notification_type: str, message: str) -> str:
         "adoption_rejected": "입양 반려",
     }
     return type_to_title.get(notification_type, message or "새 알림")
+
+
+def normalize_notification_type(notification_type: str, metadata: Optional[Dict] = None):
+    """
+    모델 choices(community/adoption/monitoring/other)에 맞게 타입을 정규화합니다.
+    세부 타입(comment/reply/like 등)은 metadata.sub_type에 보존합니다.
+    """
+    metadata = metadata or {}
+    type_map = {
+        "comment": "community",
+        "reply": "community",
+        "like": "community",
+    }
+    normalized = type_map.get(notification_type, notification_type)
+    if normalized != notification_type:
+        metadata = {**metadata, "sub_type": notification_type}
+    return normalized, metadata
 
 
 class FCMPushNotificationService:
@@ -165,7 +183,9 @@ async def create_and_send_notification(
         Notification: 생성된 알림 객체
     """
     from user.models import User
-    
+
+    notification_type, metadata = normalize_notification_type(notification_type, metadata)
+
     @sync_to_async
     def create_notification():
         try:
@@ -187,7 +207,8 @@ async def create_and_send_notification(
     notification = await create_notification()
 
     # 타입 기반 제목 결정
-    title = resolve_notification_title(notification_type, message)
+    title_key = metadata.get("sub_type") if metadata and "sub_type" in metadata else notification_type
+    title = resolve_notification_title(title_key, message)
     
     # 푸시 알림 전송
     if send_push:
@@ -504,8 +525,11 @@ async def create_notification_for_user(user_id: str, notification_type: str, mes
     try:
         logger.info(f"알림 생성 시작: user_id={user_id}, type={notification_type}, message={message[:50]}...")
 
+        notification_type, metadata = normalize_notification_type(notification_type, metadata)
+
         # 타입 기반 제목 결정
-        title = resolve_notification_title(notification_type, message)
+        title_key = metadata.get("sub_type") if metadata and "sub_type" in metadata else notification_type
+        title = resolve_notification_title(title_key, message)
         
         @sync_to_async
         def create_user_notification():
