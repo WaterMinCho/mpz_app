@@ -49,7 +49,8 @@ function NotificationCard({
     if (
       type?.includes("comment") ||
       type?.includes("reply") ||
-      type?.includes("community")
+      type?.includes("community") ||
+      type?.includes("like")
     ) {
       return "커뮤니티";
     }
@@ -61,15 +62,15 @@ function NotificationCard({
 
   // type에 따른 벨 색상 결정
   const getBellColor = () => {
-    console.log("NotificationCard type:", type); // 디버깅용
+    console.log("NotificationCard type:", type);
     if (type?.includes("monitoring")) return "text-red";
     if (
       type?.includes("comment") ||
       type?.includes("reply") ||
-      type?.includes("community")
+      type?.includes("community") ||
+      type?.includes("like")
     )
       return "text-yellow";
-    // 기본값 (type이 없거나 기존 로직)
     return "text-green";
   };
 

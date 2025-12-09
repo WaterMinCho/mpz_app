@@ -264,7 +264,7 @@ export default function Home() {
           className="fixed z-50 transition-transform right-4 rounded-full bg-transparent shadow-lg hover:scale-105"
           style={{
             bottom:
-              "calc(var(--safe-area-bottom, env(safe-area-inset-bottom, 0px)) + 80px)", // 네비 높이(64) + 여백 16
+              "calc(var(--safe-area-bottom, env(safe-area-inset-bottom, 0px)) + 80px)",
           }}
           aria-label="상담 채널로 이동"
         >

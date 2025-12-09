@@ -305,11 +305,19 @@ except ImportError:
 # Django Channels Settings
 ASGI_APPLICATION = "cfehome.asgi.application"
 
+# Redis / Channels 설정
+RAW_REDIS_URL = config("REDIS_URL", default=None)
+if RAW_REDIS_URL:
+    # channels_redis는 hosts에 list/tuple 형태를 요구하므로 문자열을 리스트로 감싼다
+    REDIS_HOSTS = [RAW_REDIS_URL]
+else:
+    REDIS_HOSTS = None
+
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": config("REDIS_URL", default=None),
+            "hosts": REDIS_HOSTS,
         },
     },
 }

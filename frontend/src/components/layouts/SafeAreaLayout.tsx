@@ -225,6 +225,13 @@ export function SafeAreaLayout({ children }: SafeAreaLayoutProps) {
       : "env(safe-area-inset-bottom, 0px)";
   const combinedBottomPadding = `calc(${safeAreaBottomStyle} + ${NAV_HEIGHT}px)`;
 
+  // iOS에서 env 값을 항상 보장하도록 overlay 전용 높이(calc max)
+  const safeAreaTopOverlayHeight =
+    "max(var(--safe-area-top, 0px), env(safe-area-inset-top, 0px))";
+  const safeAreaBottomOverlayHeight =
+    "max(var(--safe-area-bottom, 0px), env(safe-area-inset-bottom, 0px))";
+  const navOverlayHeight = `calc(${safeAreaBottomOverlayHeight} + ${NAV_HEIGHT}px)`;
+
   return (
     <div
       className="relative flex min-h-screen flex-col bg-wh"
@@ -235,35 +242,6 @@ export function SafeAreaLayout({ children }: SafeAreaLayoutProps) {
         backgroundColor: "#fff",
       }}
     >
-      {/* 상단/하단 safe area를 흰색으로 덮어 투명 노출 방지 */}
-      <div
-        aria-hidden
-        className="pointer-events-none fixed inset-x-0 top-0"
-        style={{
-          height: safeAreaTopStyle,
-          backgroundColor: "#fff",
-          zIndex: 50,
-        }}
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none fixed inset-x-0 bottom-0"
-        style={{
-          height: safeAreaBottomStyle,
-          backgroundColor: "#fff",
-          zIndex: 50,
-        }}
-      />
-      {/* 하단 네비게이션 영역 전체(네비+safe-area)를 흰색으로 덮어 blur 투명 노출 방지 */}
-      <div
-        aria-hidden
-        className="pointer-events-none fixed inset-x-0 bottom-0"
-        style={{
-          height: combinedBottomPadding,
-          backgroundColor: "#fff",
-          zIndex: 45,
-        }}
-      />
       {children}
     </div>
   );

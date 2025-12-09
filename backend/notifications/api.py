@@ -31,11 +31,28 @@ router = Router(tags=["Notifications"])
 
 def _build_notification_response(notification):
     """알림 응답 데이터를 구성합니다."""
+    # metadata에서 세부 타입(sub_type)을 추출해 클라이언트로 내려줌
+    metadata = notification.metadata
+    sub_type = None
+    if isinstance(metadata, str):
+        try:
+            import json
+            metadata_obj = json.loads(metadata)
+        except Exception:
+            metadata_obj = None
+    else:
+        metadata_obj = metadata if isinstance(metadata, dict) else None
+
+    if metadata_obj and isinstance(metadata_obj, dict):
+        sub_type = metadata_obj.get("sub_type")
+
+    outgoing_type = sub_type or notification.notification_type
+
     return NotificationOut(
         id=str(notification.id),
         user_id=str(notification.user.id),
         message=notification.message,
-        notification_type=notification.notification_type,
+        notification_type=outgoing_type,
         priority=notification.priority,
         is_read=notification.is_read,
         read_at=notification.read_at.isoformat() if notification.read_at else None,

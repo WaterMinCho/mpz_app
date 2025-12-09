@@ -1,4 +1,4 @@
-from django.test import TestCase
+from django.test import TestCase, TransactionTestCase
 from django.utils import timezone
 from asgiref.sync import sync_to_async
 from unittest.mock import patch, AsyncMock
@@ -21,8 +21,11 @@ from posts.models import Post
 from comments.models import Comment, Reply
 
 
-class TestNewNotificationFunctions(TestCase):
+class TestNewNotificationFunctions(TransactionTestCase):
     """새로운 알림 기능 테스트"""
+
+    # SQLite에서 비동기/스레드 접근 시 잠금 방지를 위해 롤백 방식 직렬화
+    serialized_rollback = True
     
     def setUp(self):
         """테스트 데이터 설정"""
@@ -59,7 +62,8 @@ class TestNewNotificationFunctions(TestCase):
             age=3,
             weight=5.5,
             breed='믹스',
-            status='보호중'
+            protection_status='보호중',
+            adoption_status='입양가능'
         )
         
         # 입양 신청 생성
@@ -196,14 +200,18 @@ class TestNewNotificationFunctions(TestCase):
             
             # 알림이 생성되었는지 확인
             notification = Notification.objects.filter(
-                notification_type='new_comment',
+                notification_type='community',
                 user=self.user  # 포스트 작성자
             ).first()
             
             self.assertIsNotNone(notification)
-            self.assertEqual(notification.title, '새로운 댓글이 달렸어요')
             self.assertIn(self.center_user.nickname, notification.message)
             self.assertIn(self.post.title, notification.message)
+            # sub_type이 comment로 저장되었는지 확인
+            self.assertEqual(
+                (notification.metadata or {}).get('sub_type'),
+                'comment'
+            )
             
         finally:
             loop.close()

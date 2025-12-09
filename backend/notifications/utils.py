@@ -858,9 +858,9 @@ async def notify_monitoring_delayed_for_user(adoption_id: str, delay_days: int):
 async def notify_new_comment(comment_id: str):
     """새로운 댓글 알림을 포스트 작성자에게 전송합니다."""
     try:
-        @sync_to_async
+        @sync_to_async(thread_sensitive=True)
         def get_comment_info():
-            comment = Comment.objects.select_related('post', 'user').get(id=comment_id)
+            comment = Comment.objects.select_related('post__user', 'user').get(id=comment_id)
             return comment
         
         comment = await get_comment_info()
@@ -898,7 +898,7 @@ async def notify_new_comment(comment_id: str):
 async def notify_new_reply(reply_id: str):
     """새로운 대댓글 알림을 댓글 작성자에게 전송합니다."""
     try:
-        @sync_to_async
+        @sync_to_async(thread_sensitive=True)
         def get_reply_info():
             reply = Reply.objects.select_related('comment', 'comment__post', 'user').get(id=reply_id)
             return reply

@@ -13,6 +13,7 @@ interface SearchInputProps {
   className?: string;
   readOnly?: boolean;
   autoFocus?: boolean;
+  triggerOnContainerClick?: boolean;
 }
 
 export function SearchInput({
@@ -25,6 +26,7 @@ export function SearchInput({
   className,
   readOnly = false,
   autoFocus = false,
+  triggerOnContainerClick = true,
 }: SearchInputProps) {
   const isPrimaryGroup = variant === "primary" || variant === "variant2";
 
@@ -48,8 +50,8 @@ export function SearchInput({
   return (
     <div
       className={containerStyle}
-      onClick={onSearch}
-      style={{ cursor: "pointer" }}
+      onClick={triggerOnContainerClick ? onSearch : undefined}
+      style={{ cursor: triggerOnContainerClick ? "pointer" : "text" }}
     >
       <input
         className={cn(

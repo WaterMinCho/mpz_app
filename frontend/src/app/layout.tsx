@@ -105,7 +105,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <head>
         <link rel="manifest" href="/manifest.json" />
       </head>
-      <body className={inter.className}>
+      <body
+        className={`${inter.className} bg-wh max-w-[420px] mx-auto shadow-md `}
+      >
         <QueryProvider>
           <AuthProvider>
             <KakaoProvider>

@@ -305,6 +305,7 @@ export function AnimalSearchSection({
           value={localSearchValue}
           onChange={handleSearchChange}
           onSearch={handleSearch}
+          triggerOnContainerClick={false}
           placeholder="품종으로 검색해보세요."
           variant="primary"
           readOnly={false}

@@ -5,6 +5,8 @@ import { join } from "path";
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const imageUrl = searchParams.get("url");
+  const cacheControl =
+    "public, max-age=86400, s-maxage=86400, immutable, stale-while-revalidate=86400";
 
   if (!imageUrl) {
     return NextResponse.json({ error: "URL is required" }, { status: 400 });
@@ -12,11 +14,17 @@ export async function GET(request: NextRequest) {
 
   try {
     const decodedUrl = decodeURIComponent(imageUrl);
-    const response = await fetch(decodedUrl, {
-      headers: {
-        "User-Agent": "Mozilla/5.0",
-      },
-    });
+    const response = await fetch(
+      decodedUrl,
+      // force-cache: 동일 URL에 대해 서버단 캐시 사용
+      {
+        headers: {
+          "User-Agent": "Mozilla/5.0",
+        },
+        cache: "force-cache",
+        next: { revalidate: 86400 },
+      }
+    );
 
     if (!response.ok) {
       // 404 또는 다른 에러 발생 시 기본 이미지 반환
@@ -33,7 +41,7 @@ export async function GET(request: NextRequest) {
           return new NextResponse(new Uint8Array(defaultImageBuffer), {
             headers: {
               "Content-Type": "image/png",
-              "Cache-Control": "public, max-age=86400",
+              "Cache-Control": cacheControl,
             },
           });
         } catch (fallbackError) {
@@ -130,7 +138,7 @@ export async function GET(request: NextRequest) {
         return new NextResponse(new Uint8Array(defaultImageBuffer), {
           headers: {
             "Content-Type": "image/png",
-            "Cache-Control": "public, max-age=86400",
+            "Cache-Control": cacheControl,
           },
         });
       } catch (fallbackError) {
@@ -145,7 +153,7 @@ export async function GET(request: NextRequest) {
     return new NextResponse(imageBuffer, {
       headers: {
         "Content-Type": contentType,
-        "Cache-Control": "public, max-age=86400",
+        "Cache-Control": cacheControl,
       },
     });
   } catch (error) {
@@ -164,7 +172,7 @@ export async function GET(request: NextRequest) {
       return new NextResponse(new Uint8Array(defaultImageBuffer), {
         headers: {
           "Content-Type": "image/png",
-          "Cache-Control": "public, max-age=86400",
+          "Cache-Control": cacheControl,
         },
       });
     } catch (fallbackError) {
