@@ -27,6 +27,17 @@ import { BottomSheet } from "@/components/ui/BottomSheet";
 import { App } from "@capacitor/app";
 import { Capacitor } from "@capacitor/core";
 
+// FCM 토큰 디버깅용
+if (typeof window !== "undefined") {
+  window.addEventListener("fcmToken", (event: Event) => {
+    console.log("=== FCM 토큰 수신 ===");
+    console.log("토큰:", (event as CustomEvent).detail);
+    console.log("===================");
+    // 토큰을 localStorage에 저장 (디버깅용)
+    localStorage.setItem("fcm_token_debug", (event as CustomEvent).detail);
+  });
+}
+
 export default function Home() {
   const { isAuthenticated } = useAuth();
   const router = useRouter();
