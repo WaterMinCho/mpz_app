@@ -41,9 +41,13 @@ export default function Notification() {
   const markNotificationRead = useMarkNotificationRead();
   const markAllNotificationsRead = useMarkAllNotificationsRead();
 
+  // API 알림 목록 메모이제이션
+  const allNotifications = useMemo(
+    () => notificationsData?.pages?.flatMap((page) => page.data || []) || [],
+    [notificationsData]
+  );
+
   // API 알림 + 소켓 알림을 병합(신규 알림 우선)하여 중복 제거
-  const allNotifications =
-    notificationsData?.pages?.flatMap((page) => page.data || []) || [];
   const notifications = useMemo(() => {
     const merged = [...socketNotifications, ...allNotifications];
     const seen = new Set<string>();

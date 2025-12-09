@@ -225,13 +225,6 @@ export function SafeAreaLayout({ children }: SafeAreaLayoutProps) {
       : "env(safe-area-inset-bottom, 0px)";
   const combinedBottomPadding = `calc(${safeAreaBottomStyle} + ${NAV_HEIGHT}px)`;
 
-  // iOS에서 env 값을 항상 보장하도록 overlay 전용 높이(calc max)
-  const safeAreaTopOverlayHeight =
-    "max(var(--safe-area-top, 0px), env(safe-area-inset-top, 0px))";
-  const safeAreaBottomOverlayHeight =
-    "max(var(--safe-area-bottom, 0px), env(safe-area-inset-bottom, 0px))";
-  const navOverlayHeight = `calc(${safeAreaBottomOverlayHeight} + ${NAV_HEIGHT}px)`;
-
   return (
     <div
       className="relative flex min-h-screen flex-col bg-wh"
