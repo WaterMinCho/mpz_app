@@ -96,17 +96,39 @@ export function SocketProvider({ children }: SocketProviderProps) {
             const data = JSON.parse(event.data);
 
             if (data.type === "new_notification") {
+              // metadata의 sub_type을 우선 사용해 세부 알림 타입을 복원
+              const rawMetadata = data.metadata || null;
+              let parsedMetadata: Notification["metadata"] = rawMetadata;
+
+              if (typeof rawMetadata === "string") {
+                try {
+                  parsedMetadata = JSON.parse(rawMetadata);
+                } catch (error) {
+                  console.warn("메타데이터 파싱 실패:", error);
+                  parsedMetadata = rawMetadata;
+                }
+              }
+
+              const subType =
+                parsedMetadata &&
+                typeof parsedMetadata === "object" &&
+                "sub_type" in parsedMetadata
+                  ? String((parsedMetadata as Record<string, unknown>).sub_type)
+                  : undefined;
+              const notificationType =
+                subType || data.notification_type || "other";
+
               const notification: Notification = {
                 id: data.id || "",
                 user_id: user.id,
                 title: data.title || data.message || "",
                 message: data.message || "",
-                notification_type: data.notification_type || "other",
+                notification_type: notificationType,
                 priority: data.priority || "normal",
                 is_read: data.is_read || false,
                 read_at: data.read_at || null,
                 action_url: data.action_url || null,
-                metadata: data.metadata || null,
+                metadata: parsedMetadata,
                 created_at: data.created_at || new Date().toISOString(),
                 updated_at: data.created_at || new Date().toISOString(),
               };
