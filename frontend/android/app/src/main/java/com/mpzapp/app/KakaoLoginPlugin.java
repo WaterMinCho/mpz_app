@@ -1,4 +1,4 @@
-package com.mpz.app;
+package com.mpzapp.app;
 
 import com.getcapacitor.Plugin;
 import com.getcapacitor.PluginCall;

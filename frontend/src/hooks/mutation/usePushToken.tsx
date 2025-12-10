@@ -314,10 +314,17 @@ export function useWebPushNotification() {
       console.log("iOS FCM 토큰 받음:", token);
 
       // 서버에 토큰 등록
-      await registerPushToken.mutateAsync({
-        token,
-        platform: "ios",
-      });
+      try {
+        console.log("iOS 푸시 토큰 서버 등록 시도");
+        await registerPushToken.mutateAsync({
+          token,
+          platform: "ios",
+        });
+        console.log("iOS 푸시 토큰 서버 등록 완료");
+      } catch (err) {
+        console.error("iOS 푸시 토큰 서버 등록 실패:", err);
+        throw err;
+      }
 
       console.log("iOS 푸시 알림이 성공적으로 등록되었습니다.");
       hasRegisteredRef.current = true;

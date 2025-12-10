@@ -25,6 +25,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate, MessagingDelegate, UNUser
             }
         }
 
+        // 노치/상·하단 안전 영역이 투명하게 보이지 않도록 기본 배경을 흰색으로 설정
+        if let window = self.window {
+            window.backgroundColor = .white
+            window.rootViewController?.view.backgroundColor = .white
+            if let bridgeVC = window.rootViewController as? CAPBridgeViewController {
+                bridgeVC.bridge?.webView?.backgroundColor = .white
+                bridgeVC.bridge?.webView?.scrollView.backgroundColor = .white
+                bridgeVC.view.backgroundColor = .white
+            }
+        }
+
         return true
     }
 
