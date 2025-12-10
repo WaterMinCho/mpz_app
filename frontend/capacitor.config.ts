@@ -38,8 +38,8 @@ const config: CapacitorConfig = {
       webSpinnerStyle: "horizontal",
       fullscreen: false,
     },
-    // KakaoLogin 네이티브 플러그인 등록
-    KakaoLogin: {
+    // KakaoLogin (Capacitor plugin)
+    KakaoLoginPlugin: {
       appKey: "30c65f4b266ed8e462b30c91518d174b",
     },
     Keyboard: {

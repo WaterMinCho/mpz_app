@@ -1,18 +1,18 @@
 PODS:
-  - Alamofire (5.9.1)
+  - Alamofire (5.10.2)
   - Capacitor (7.4.4):
     - CapacitorCordova
-  - CapacitorApp (7.1.1):
+  - CapacitorApp (7.1.0):
     - Capacitor
-  - CapacitorCamera (7.0.3):
+  - CapacitorCamera (7.0.2):
     - Capacitor
   - CapacitorCordova (7.4.4)
-  - CapacitorGeolocation (7.1.6):
+  - CapacitorGeolocation (7.1.5):
     - Capacitor
     - IONGeolocationLib (= 1.0.1)
   - CapacitorPluginSafeArea (4.0.3):
     - Capacitor
-  - CapgoCapacitorNavigationBar (7.3.18):
+  - CapgoCapacitorNavigationBar (7.3.14):
     - Capacitor
   - Firebase/CoreOnly (11.15.0):
     - FirebaseCore (~> 11.15.0)
@@ -67,17 +67,36 @@ PODS:
     - GoogleUtilities/Logger
     - GoogleUtilities/Privacy
   - IONGeolocationLib (1.0.1)
-  - KakaoSDKAuth (2.22.7):
-    - KakaoSDKCommon (= 2.22.7)
-  - KakaoSDKCommon (2.22.7):
-    - KakaoSDKCommon/Common (= 2.22.7)
-    - KakaoSDKCommon/Network (= 2.22.7)
-  - KakaoSDKCommon/Common (2.22.7)
-  - KakaoSDKCommon/Network (2.22.7):
-    - Alamofire (~> 5.9.0)
-    - KakaoSDKCommon/Common (= 2.22.7)
-  - KakaoSDKUser (2.22.7):
-    - KakaoSDKAuth (= 2.22.7)
+  - KakaoSDKAuth (2.18.2):
+    - KakaoSDKCommon (= 2.18.2)
+  - KakaoSDKCommon (2.18.2):
+    - KakaoSDKCommon/Common (= 2.18.2)
+    - KakaoSDKCommon/Network (= 2.18.2)
+  - KakaoSDKCommon/Common (2.18.2)
+  - KakaoSDKCommon/Network (2.18.2):
+    - Alamofire (~> 5.1)
+    - KakaoSDKCommon/Common (= 2.18.2)
+  - KakaoSDKShare (2.18.2):
+    - KakaoSDKCommon (= 2.18.2)
+    - KakaoSDKTemplate (= 2.18.2)
+  - KakaoSDKStory (2.18.2):
+    - KakaoSDKUser (= 2.18.2)
+  - KakaoSDKTalk (2.18.2):
+    - KakaoSDKTemplate (= 2.18.2)
+    - KakaoSDKUser (= 2.18.2)
+  - KakaoSDKTemplate (2.18.2):
+    - KakaoSDKCommon/Common (= 2.18.2)
+  - KakaoSDKUser (2.18.2):
+    - KakaoSDKAuth (= 2.18.2)
+  - KichunsungCapacitorKakaoLoginPlugin (3.1.0-beta.1):
+    - Capacitor
+    - KakaoSDKAuth (= 2.18.2)
+    - KakaoSDKCommon (= 2.18.2)
+    - KakaoSDKShare (= 2.18.2)
+    - KakaoSDKStory (= 2.18.2)
+    - KakaoSDKTalk (= 2.18.2)
+    - KakaoSDKTemplate (= 2.18.2)
+    - KakaoSDKUser (= 2.18.2)
   - nanopb (3.30910.0):
     - nanopb/decode (= 3.30910.0)
     - nanopb/encode (= 3.30910.0)
@@ -94,9 +113,10 @@ DEPENDENCIES:
   - CapacitorPluginSafeArea (from `../../node_modules/capacitor-plugin-safe-area`)
   - "CapgoCapacitorNavigationBar (from `../../node_modules/@capgo/capacitor-navigation-bar`)"
   - Firebase/Messaging
-  - KakaoSDKAuth
-  - KakaoSDKCommon
-  - KakaoSDKUser
+  - KakaoSDKAuth (= 2.18.2)
+  - KakaoSDKCommon (= 2.18.2)
+  - KakaoSDKUser (= 2.18.2)
+  - "KichunsungCapacitorKakaoLoginPlugin (from `../../node_modules/@kichunsung/capacitor-kakao-login-plugin`)"
 
 SPEC REPOS:
   trunk:
@@ -111,6 +131,10 @@ SPEC REPOS:
     - IONGeolocationLib
     - KakaoSDKAuth
     - KakaoSDKCommon
+    - KakaoSDKShare
+    - KakaoSDKStory
+    - KakaoSDKTalk
+    - KakaoSDKTemplate
     - KakaoSDKUser
     - nanopb
     - PromisesObjC
@@ -130,16 +154,18 @@ EXTERNAL SOURCES:
     :path: "../../node_modules/capacitor-plugin-safe-area"
   CapgoCapacitorNavigationBar:
     :path: "../../node_modules/@capgo/capacitor-navigation-bar"
+  KichunsungCapacitorKakaoLoginPlugin:
+    :path: "../../node_modules/@kichunsung/capacitor-kakao-login-plugin"
 
 SPEC CHECKSUMS:
-  Alamofire: f36a35757af4587d8e4f4bfa223ad10be2422b8c
+  Alamofire: 7193b3b92c74a07f85569e1a6c4f4237291e7496
   Capacitor: 358dd1c3fdd71d969547b17e159fd8a7736cb45f
-  CapacitorApp: 63b237168fc869e758481dba283315a85743ee78
-  CapacitorCamera: 6746827d82376f31cea9224945c0458c9fd0b0b2
+  CapacitorApp: 26587c2ce485d88ddb39adb21cac64f8e481afe3
+  CapacitorCamera: f9e54db0a18bb218a8dc360907d63aaefe9209ff
   CapacitorCordova: bf648a636f3c153f652d312ae145fb508b6ffced
-  CapacitorGeolocation: a65213fef581c7b8c5d486abbd5a6d00192a179e
+  CapacitorGeolocation: 84f868bea4c2499aebc3bb3a88fd0a508f87ab87
   CapacitorPluginSafeArea: 1abd81c6facac9eae0c6ae3cb0b3b53ccc135522
-  CapgoCapacitorNavigationBar: 3c59704af4b6774bebb36beaab82643c141dfa83
+  CapgoCapacitorNavigationBar: 70b9e067b12659099e0d0626e7b7f63b2bf11f8e
   Firebase: d99ac19b909cd2c548339c2241ecd0d1599ab02e
   FirebaseCore: efb3893e5b94f32b86e331e3bd6dadf18b66568e
   FirebaseCoreInternal: 9afa45b1159304c963da48addb78275ef701c6b4
@@ -148,12 +174,17 @@ SPEC CHECKSUMS:
   GoogleDataTransport: aae35b7ea0c09004c3797d53c8c41f66f219d6a7
   GoogleUtilities: 00c88b9a86066ef77f0da2fab05f65d7768ed8e1
   IONGeolocationLib: 20f9d0248a0b5264511fb57a37e25dd2badf797a
-  KakaoSDKAuth: 45204252ff7c379c0f86c5573f97ec36885afca0
-  KakaoSDKCommon: 132164a6bac8bcd3a4346d3bf777f34f8f39fdca
-  KakaoSDKUser: 4c9cf1da78710d19d0b2c2dd32d1a44c544cdfa4
+  KakaoSDKAuth: 3daf72ec463876e0fe6d0d37c7d6b0b2729169f1
+  KakaoSDKCommon: 516f68bc6b223ed502c34a362d6ecc9145e0dcc0
+  KakaoSDKShare: 8980e83a3a80bd805ab859c102dd41ed6801424e
+  KakaoSDKStory: 63c8deb29ba1baa0bcd6ab9fcf0d3310226a5e41
+  KakaoSDKTalk: 567d2697b419b4f01f2f8bdb28e13100817c4090
+  KakaoSDKTemplate: 0fcfbbb7cc05986fe6690b85e19dd8de0fc634e6
+  KakaoSDKUser: 5b0826033381d314f550dd90fbf70d3612044ad6
+  KichunsungCapacitorKakaoLoginPlugin: 7a189c9cd61db1505c7392f85adf236d86ee1a08
   nanopb: fad817b59e0457d11a5dfbde799381cd727c1275
   PromisesObjC: f5707f49cb48b9636751c5b2e7d227e43fba9f47
 
-PODFILE CHECKSUM: 2b42ec44150669d70c412fa291490827646cda8e
+PODFILE CHECKSUM: b1b55b4cc4e57c261c08b6115cb89c6b67c9a554
 
 COCOAPODS: 1.16.2
