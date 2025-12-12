@@ -7,9 +7,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:243303192524:android:ac4db7cfcfc8c5937bef69",
+        "mobilesdk_app_id": "1:243303192524:android:b24a6a1744cb64487bef69",
         "android_client_info": {
-          "package_name": "com.mpz.app"
+          "package_name": "com.mpzapp.app"
         }
       },
       "oauth_client": [],

@@ -1,13 +1,17 @@
-package com.mpz.app;
+package com.mpzapp.app;
 
 import android.graphics.Color;
+import android.Manifest;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowInsets;
+import androidx.core.app.ActivityCompat;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
+import androidx.core.content.ContextCompat;
 import com.getcapacitor.BridgeActivity;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -18,15 +22,24 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class MainActivity extends BridgeActivity {
     private Runnable lightInsetsRunnable;
     private final AtomicBoolean safeAreaInsetsInitialized = new AtomicBoolean(false);
+    private int lastSafeTop = -1;
+    private int lastSafeBottom = -1;
+    private int lastSafeLeft = -1;
+    private int lastSafeRight = -1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         registerPlugin(KakaoLoginPlugin.class);
         super.onCreate(savedInstanceState);
 
-        WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
-        getWindow().setStatusBarColor(Color.TRANSPARENT);
-        getWindow().setNavigationBarColor(Color.TRANSPARENT);
+        // 시스템 바 영역까지 앱이 그리지 않도록 설정하여 상단 안전 영역이 흰색으로 채워지게 함
+        WindowCompat.setDecorFitsSystemWindows(getWindow(), true);
+        // 상태바/내비게이션 바를 흰색으로 채워 노치 영역이 투명하게 보이지 않도록 처리
+        getWindow().setStatusBarColor(Color.WHITE);
+        getWindow().setNavigationBarColor(Color.WHITE);
+
+        // Android 13+ 알림 권한 요청
+        requestNotificationPermissionIfNeeded();
 
         lightInsetsRunnable = () -> {
             WindowInsetsControllerCompat insetsController =
@@ -42,6 +55,20 @@ public class MainActivity extends BridgeActivity {
         
         // FCM 토큰 가져오기
         getFCMToken();
+    }
+
+    private void requestNotificationPermissionIfNeeded() {
+        if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.TIRAMISU) {
+            return;
+        }
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+            != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(
+                this,
+                new String[]{Manifest.permission.POST_NOTIFICATIONS},
+                1001
+            );
+        }
     }
     
     /**
@@ -100,6 +127,15 @@ public class MainActivity extends BridgeActivity {
      * Safe area insets를 JavaScript로 전달
      */
     private void sendSafeAreaInsetsToJavaScript(int top, int bottom, int left, int right) {
+        // 값이 이전과 동일하면 재계산/재전달 생략
+        if (top == lastSafeTop && bottom == lastSafeBottom && left == lastSafeLeft && right == lastSafeRight) {
+            return;
+        }
+        lastSafeTop = top;
+        lastSafeBottom = bottom;
+        lastSafeLeft = left;
+        lastSafeRight = right;
+
         // Bridge가 준비될 때까지 재시도
         if (getBridge() == null || getBridge().getWebView() == null) {
             // Bridge가 아직 준비되지 않았으면 100ms 후 재시도

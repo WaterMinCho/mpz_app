@@ -3,6 +3,8 @@ import Capacitor
 import FirebaseCore
 import FirebaseMessaging
 import UserNotifications
+import KakaoSDKCommon
+import KakaoSDKAuth
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate, MessagingDelegate, UNUserNotificationCenterDelegate {
@@ -11,6 +13,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, MessagingDelegate, UNUser
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         FirebaseApp.configure()
+        // 카카오 SDK 초기화 (네이티브 앱 키)
+        KakaoSDK.initSDK(appKey: "30c65f4b266ed8e462b30c91518d174b")
 
         UNUserNotificationCenter.current().delegate = self
         Messaging.messaging().delegate = self
@@ -25,14 +29,32 @@ class AppDelegate: UIResponder, UIApplicationDelegate, MessagingDelegate, UNUser
             }
         }
 
+        // 노치/상·하단 안전 영역이 투명하게 보이지 않도록 기본 배경을 흰색으로 설정
+        if let window = self.window {
+            window.backgroundColor = .white
+            window.rootViewController?.view.backgroundColor = .white
+            if let bridgeVC = window.rootViewController as? CAPBridgeViewController {
+                bridgeVC.bridge?.webView?.backgroundColor = .white
+                bridgeVC.bridge?.webView?.scrollView.backgroundColor = .white
+                bridgeVC.view.backgroundColor = .white
+            }
+        }
+
         return true
     }
 
     func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey: Any] = [:]) -> Bool {
+        // 카카오 로그인 리다이렉트 처리
+        if AuthApi.isKakaoTalkLoginUrl(url) {
+            return AuthController.handleOpenUrl(url: url)
+        }
         return ApplicationDelegateProxy.shared.application(app, open: url, options: options)
     }
 
     func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool {
+        if let url = userActivity.webpageURL, AuthApi.isKakaoTalkLoginUrl(url) {
+            return AuthController.handleOpenUrl(url: url)
+        }
         return ApplicationDelegateProxy.shared.application(application, continue: userActivity, restorationHandler: restorationHandler)
     }
 
@@ -60,13 +82,75 @@ class AppDelegate: UIResponder, UIApplicationDelegate, MessagingDelegate, UNUser
         
         // JavaScript로 토큰 전달
         if let token = fcmToken {
-            DispatchQueue.main.async {
-                if let bridge = (self.window?.rootViewController as? CAPBridgeViewController)?.bridge {
-                    bridge.eval(js: "window.dispatchEvent(new CustomEvent('fcmToken', { detail: '\(token)' }));")
-                    print("✅ FCM 토큰을 JavaScript로 전달 완료")
-                }
+            // bridge가 준비될 때까지 여러 번 시도
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                self.sendTokenToJavaScript(token: token, retryCount: 0)
             }
         }
+    }
+    
+    // JavaScript로 토큰 전달 (재시도 로직 포함)
+    private func sendTokenToJavaScript(token: String, retryCount: Int) {
+        let maxRetries = 30 // 최대 3초 대기 (0.1초 * 30)
+        
+        guard let bridge = (self.window?.rootViewController as? CAPBridgeViewController)?.bridge else {
+            if retryCount < maxRetries {
+                if retryCount % 10 == 0 {
+                    print("⏳ Bridge 준비 대기 중... (\(retryCount + 1)/\(maxRetries))")
+                }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    self.sendTokenToJavaScript(token: token, retryCount: retryCount + 1)
+                }
+            } else {
+                print("❌ Bridge를 찾을 수 없습니다. 토큰 전달 실패")
+            }
+            return
+        }
+        
+        // 토큰을 Base64로 인코딩하여 안전하게 전달
+        guard let tokenData = token.data(using: .utf8) else {
+            print("❌ 토큰 인코딩 실패")
+            return
+        }
+        let base64Token = tokenData.base64EncodedString()
+        
+        // JavaScript 코드: localStorage 저장 + 이벤트 전달 (분리 실행)
+        let saveCode = """
+            try {
+                var token = atob('\(base64Token)');
+                if (typeof localStorage !== 'undefined') {
+                    localStorage.setItem('fcm_token_debug', token);
+                    console.log('✅ localStorage에 FCM 토큰 저장 완료');
+                }
+            } catch(e) {
+                console.error('localStorage 저장 실패:', e);
+            }
+        """
+        
+        let eventCode = """
+            try {
+                var token = atob('\(base64Token)');
+                if (typeof window !== 'undefined' && window.dispatchEvent) {
+                    var event = new CustomEvent('fcmToken', { detail: token });
+                    window.dispatchEvent(event);
+                    console.log('✅ fcmToken 이벤트 전달 완료');
+                } else {
+                    console.warn('⚠️ window 또는 dispatchEvent가 없습니다');
+                }
+            } catch(e) {
+                console.error('이벤트 전달 실패:', e);
+            }
+        """
+        
+        // localStorage 저장 먼저
+        bridge.eval(js: saveCode)
+        
+        // 약간의 지연 후 이벤트 전달 (웹뷰 완전 로드 대기)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+            bridge.eval(js: eventCode)
+        }
+        
+        print("✅ FCM 토큰을 JavaScript로 전달 완료 (재시도: \(retryCount)회)")
     }
 
     // 포그라운드 수신 시 표시 방식

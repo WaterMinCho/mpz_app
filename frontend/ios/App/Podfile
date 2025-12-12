@@ -15,6 +15,7 @@ def capacitor_pods
   pod 'CapacitorCamera', :path => '../../node_modules/@capacitor/camera'
   pod 'CapacitorGeolocation', :path => '../../node_modules/@capacitor/geolocation'
   pod 'CapgoCapacitorNavigationBar', :path => '../../node_modules/@capgo/capacitor-navigation-bar'
+  pod 'KichunsungCapacitorKakaoLoginPlugin', :path => '../../node_modules/@kichunsung/capacitor-kakao-login-plugin'
   pod 'CapacitorPluginSafeArea', :path => '../../node_modules/capacitor-plugin-safe-area'
 end
 
@@ -22,9 +23,9 @@ target 'App' do
   capacitor_pods
   # Add your Pods here
   pod 'Firebase/Messaging'
-  pod 'KakaoSDKCommon'
-  pod 'KakaoSDKAuth'
-  pod 'KakaoSDKUser'
+  pod 'KakaoSDKCommon', '2.18.2'
+  pod 'KakaoSDKAuth', '2.18.2'
+  pod 'KakaoSDKUser', '2.18.2'
 end
 
 post_install do |installer|
