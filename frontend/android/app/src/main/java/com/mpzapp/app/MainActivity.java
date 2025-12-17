@@ -6,6 +6,7 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
 import android.view.WindowInsets;
 import androidx.core.app.ActivityCompat;
 import androidx.core.view.WindowCompat;
@@ -32,11 +33,26 @@ public class MainActivity extends BridgeActivity {
         registerPlugin(KakaoLoginPlugin.class);
         super.onCreate(savedInstanceState);
 
-        // 시스템 바 영역까지 앱이 그리지 않도록 설정하여 상단 안전 영역이 흰색으로 채워지게 함
-        WindowCompat.setDecorFitsSystemWindows(getWindow(), true);
-        // 상태바/내비게이션 바를 흰색으로 채워 노치 영역이 투명하게 보이지 않도록 처리
+        // 투명/반투명 플래그 제거 후 시스템 바 영역까지 앱이 직접 그리도록 설정
+        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS | WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+        WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
+        // 상태바/내비게이션 바 아이콘을 밝게 유지
+        WindowInsetsControllerCompat controller =
+            WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
+        if (controller != null) {
+            controller.setAppearanceLightStatusBars(true);
+            controller.setAppearanceLightNavigationBars(true);
+        }
+        // 상태바/내비게이션 바 배경을 흰색으로 지정
         getWindow().setStatusBarColor(Color.WHITE);
         getWindow().setNavigationBarColor(Color.WHITE);
+        // 루트/웹뷰 배경을 흰색으로 지정해 투명 영역 방지 + 오버스크롤 비활성
+        getWindow().getDecorView().setBackgroundColor(Color.WHITE);
+        if (getBridge() != null && getBridge().getWebView() != null) {
+            getBridge().getWebView().setBackgroundColor(Color.WHITE);
+            getBridge().getWebView().setOverScrollMode(View.OVER_SCROLL_NEVER);
+        }
 
         // Android 13+ 알림 권한 요청
         requestNotificationPermissionIfNeeded();

@@ -47,7 +47,6 @@ export default function Notification() {
     [notificationsData]
   );
 
-  // API 알림 + 소켓 알림을 병합(신규 알림 우선)하여 중복 제거
   const notifications = useMemo(() => {
     const merged = [...socketNotifications, ...allNotifications];
     const seen = new Set<string>();
