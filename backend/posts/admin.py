@@ -9,7 +9,8 @@ class PostAdmin(admin.ModelAdmin):
     search_fields = ['user__username', 'title', 'content']
     list_editable = ['is_all_access']
     readonly_fields = ['created_at', 'updated_at']
-    list_select_related = False  # 명시적으로 비활성화
+    list_select_related = ['user']
+    autocomplete_fields = ['user', 'animal']
     
     fieldsets = (
         ('기본 정보', {
@@ -30,6 +31,7 @@ class PostImageAdmin(admin.ModelAdmin):
     list_editable = ['order_index']
     readonly_fields = ['created_at', 'updated_at']
     ordering = ['post', 'order_index']
+    autocomplete_fields = ['post']
     
     fieldsets = (
         ('기본 정보', {
@@ -48,6 +50,7 @@ class PostTagAdmin(admin.ModelAdmin):
     list_filter = ['created_at']
     search_fields = ['post__title', 'tag_name']
     readonly_fields = ['created_at', 'updated_at']
+    autocomplete_fields = ['post']
     
     fieldsets = (
         ('기본 정보', {
@@ -113,6 +116,7 @@ class PostLikeAdmin(admin.ModelAdmin):
     list_filter = ['created_at']
     search_fields = ['user__username', 'post__title']
     readonly_fields = ['created_at', 'updated_at']
+    autocomplete_fields = ['user', 'post']
     
     fieldsets = (
         ('기본 정보', {

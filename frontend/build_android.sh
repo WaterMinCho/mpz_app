@@ -3,7 +3,7 @@ set -e
 
 echo "🚀 Android 패키징 시작 (Capacitor + Next.js)..."
 
-FRONTEND_DIR="/Users/jhy20/mpz_fullstack/frontend"
+FRONTEND_DIR="/Users/rutdev/mpz_fullstack/frontend"
 ANDROID_DIR="$FRONTEND_DIR/android"
 WEB_BUILD_DIR="$FRONTEND_DIR/.next"
 APK_DEBUG_PATH="$ANDROID_DIR/app/build/outputs/apk/debug/app-debug.apk"
@@ -82,6 +82,73 @@ else
 	echo "   - Android SDK Platform-Tools"
 fi
 
+echo "☕ Java/JDK 경로 확인 및 JAVA_HOME 설정"
+# JAVA_HOME 자동 탐색
+JAVA_HOME_FOUND=""
+if [ -n "$JAVA_HOME" ] && [ -d "$JAVA_HOME" ] && [ -f "$JAVA_HOME/bin/java" ]; then
+	JAVA_HOME_FOUND="$JAVA_HOME"
+	echo "✔ 기존 JAVA_HOME 사용: $JAVA_HOME_FOUND"
+else
+	# macOS에서 /usr/libexec/java_home 사용 (가장 정확한 방법)
+	if [ -x "/usr/libexec/java_home" ]; then
+		JAVA_HOME_FOUND=$(/usr/libexec/java_home 2>/dev/null)
+		if [ -n "$JAVA_HOME_FOUND" ] && [ -d "$JAVA_HOME_FOUND" ] && [ -f "$JAVA_HOME_FOUND/bin/java" ]; then
+			echo "✔ /usr/libexec/java_home으로 발견: $JAVA_HOME_FOUND"
+		else
+			JAVA_HOME_FOUND=""
+		fi
+	fi
+	
+	# java 명령어 경로에서 추출
+	if [ -z "$JAVA_HOME_FOUND" ] && command -v java >/dev/null 2>&1; then
+		JAVA_PATH=$(command -v java)
+		# java 명령어가 심볼릭 링크인 경우 실제 경로 찾기
+		if [ -L "$JAVA_PATH" ]; then
+			JAVA_PATH=$(readlink "$JAVA_PATH" 2>/dev/null || echo "$JAVA_PATH")
+		fi
+		# JAVA_HOME 경로 추출 (bin/java 제거)
+		JAVA_HOME_CANDIDATE=$(dirname "$(dirname "$JAVA_PATH")")
+		if [ -d "$JAVA_HOME_CANDIDATE" ] && [ -f "$JAVA_HOME_CANDIDATE/bin/java" ]; then
+			JAVA_HOME_FOUND="$JAVA_HOME_CANDIDATE"
+		fi
+	fi
+	
+	# Homebrew OpenJDK 경로 확인
+	if [ -z "$JAVA_HOME_FOUND" ]; then
+		for jdk_version in 21 17 11 8; do
+			BREW_JDK_PATH="/opt/homebrew/opt/openjdk@${jdk_version}"
+			if [ -d "$BREW_JDK_PATH" ] && [ -f "$BREW_JDK_PATH/bin/java" ]; then
+				JAVA_HOME_FOUND="$BREW_JDK_PATH"
+				break
+			fi
+		done
+	fi
+	
+	# /Library/Java/JavaVirtualMachines 경로 확인
+	if [ -z "$JAVA_HOME_FOUND" ]; then
+		if [ -d "/Library/Java/JavaVirtualMachines" ]; then
+			LATEST_JDK=$(ls -t /Library/Java/JavaVirtualMachines/ 2>/dev/null | head -1)
+			if [ -n "$LATEST_JDK" ]; then
+				JDK_PATH="/Library/Java/JavaVirtualMachines/$LATEST_JDK/Contents/Home"
+				if [ -d "$JDK_PATH" ] && [ -f "$JDK_PATH/bin/java" ]; then
+					JAVA_HOME_FOUND="$JDK_PATH"
+				fi
+			fi
+		fi
+	fi
+	
+	if [ -n "$JAVA_HOME_FOUND" ]; then
+		export JAVA_HOME="$JAVA_HOME_FOUND"
+		echo "✔ JAVA_HOME 자동 설정: $JAVA_HOME"
+		java -version 2>&1 | head -1 || true
+	else
+		echo "❌ Java를 찾을 수 없습니다. 다음 중 하나를 설치하세요:"
+		echo "   - Homebrew: brew install openjdk@21"
+		echo "   - 또는 Android Studio의 내장 JDK 사용"
+		exit 1
+	fi
+fi
+
 echo "🏗️ Gradle 빌드 실행 (assembleDebug)"
 cd "$ANDROID_DIR"
 
@@ -104,7 +171,7 @@ if [ -f "$APK_DEBUG_PATH" ]; then
 	echo "✅ 디버그 APK 빌드 성공: $APK_DEBUG_PATH"
 	du -h "$APK_DEBUG_PATH" | awk '{print "📊 파일 크기:", $1}'
 	# 편의상 프로젝트 루트로 복사
-	PROJECT_ROOT="/Users/jhy20/mpz_fullstack"
+	PROJECT_ROOT="/Users/rutdev/mpz_fullstack"
 	DEST_APK="$PROJECT_ROOT/MPZ-debug.apk"
 	cp "$APK_DEBUG_PATH" "$DEST_APK"
 	echo "📁 사본 복사: $DEST_APK"
@@ -122,6 +189,11 @@ echo "   - 서명 키 설정 방법: android/app/keystore 및 signingConfigs 설
 if [ -f "$AAB_RELEASE_PATH" ]; then
 	echo "✅ 릴리스 AAB 빌드 성공: $AAB_RELEASE_PATH"
 	du -h "$AAB_RELEASE_PATH" | awk '{print "📊 파일 크기:", $1}'
+	# 편의상 프로젝트 루트로 복사
+	PROJECT_ROOT="/Users/rutdev/mpz_fullstack"
+	DEST_AAB="$PROJECT_ROOT/MPZ-release.aab"
+	cp "$AAB_RELEASE_PATH" "$DEST_AAB"
+	echo "📁 사본 복사: $DEST_AAB"
 else
 	echo "ℹ️ 릴리스 AAB를 찾을 수 없습니다. 서명 설정 후 다시 시도하세요."
 fi
