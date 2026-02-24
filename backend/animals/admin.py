@@ -4,9 +4,23 @@ from django.urls import reverse
 from django.utils.safestring import mark_safe
 from .models import Animal, AnimalImage, AnimalMegaphone, AdoptionApplication
 
-class AnimalAdmin(admin.ModelAdmin):
-    """동물 관리자"""
+
+class AnimalImageInline(admin.TabularInline):
+    """동물 이미지 인라인"""
+    model = AnimalImage
+    extra = 1
+    fields = ('image_url', 'is_primary', 'sequence', 'image_url_preview')
+    readonly_fields = ('image_url_preview',)
     
+    def image_url_preview(self, obj):
+        if obj.image_url:
+            return mark_safe(f'<img src="{obj.image_url}" style="max-height: 50px; max-width: 50px;" />')
+        return "이미지 없음"
+    image_url_preview.short_description = '미리보기'
+
+
+@admin.register(Animal)
+class AnimalAdmin(admin.ModelAdmin):
     list_display = [
         'name', 'center', 'age', 'weight', 'is_female_display', 
         'protection_status', 'adoption_status', 'is_public_data',
@@ -14,16 +28,16 @@ class AnimalAdmin(admin.ModelAdmin):
     ]
     list_filter = [
         'protection_status', 'adoption_status', 'is_female', 'is_public_data',
-        'center', 'admission_date', 'created_at'
+        'center__region', 'admission_date', 'created_at'
     ]
-    search_fields = ['name', 'announce_number', 'public_notice_number', 'breed']
+    search_fields = ['name', 'announce_number', 'public_notice_number', 'breed', 'center__name']
     list_per_page = 25
-    
-    # 센터별 그룹화
     list_select_related = ['center']
-    
-    inlines = []
+    autocomplete_fields = ['center']
+    inlines = [AnimalImageInline]
 
+    autocomplete_fields = ['center']
+    
     fieldsets = (
         ('기본 정보', {
             'fields': ('name', 'center', 'announce_number', 'breed', 'age', 
@@ -48,44 +62,67 @@ class AnimalAdmin(admin.ModelAdmin):
     readonly_fields = ('created_at', 'updated_at', 'megaphone_count')
     
     def is_female_display(self, obj):
-        """암컷 표시 (아이콘 포함)"""
         if obj.is_female:
             return format_html('<span style="color: pink;">♀ 암컷</span>')
         return format_html('<span style="color: blue;">♂ 수컷</span>')
     is_female_display.short_description = '성별'
     
     def get_queryset(self, request):
-        """관리자용 쿼리셋 최적화"""
         qs = super().get_queryset(request)
-        return qs.select_related('center').prefetch_related('animalimage_set')
+        return qs.select_related('center')
 
-class AnimalImageInline(admin.TabularInline):
-    """동물 이미지 인라인"""
-    model = AnimalImage
-    extra = 1
-    fields = ('image_url', 'is_primary', 'sequence')
-    readonly_fields = ('image_url_preview',)
+
+@admin.register(AnimalImage)
+class AnimalImageAdmin(admin.ModelAdmin):
+    list_display = ['id', 'animal', 'image_url_preview', 'is_primary', 'sequence', 'created_at']
+    list_filter = ['is_primary', 'created_at']
+    search_fields = ['animal__name', 'animal__center__name']
+    list_select_related = ['animal']
+    list_per_page = 25
+    autocomplete_fields = ['animal']
+    ordering = ['animal', 'sequence']
+    readonly_fields = ['created_at', 'updated_at']
+    
+    fieldsets = (
+        ('기본 정보', {
+            'fields': ('animal', 'image_url', 'is_primary', 'sequence')
+        }),
+        ('시간 정보', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
     
     def image_url_preview(self, obj):
-        """이미지 URL 미리보기"""
         if obj.image_url:
-            return mark_safe(f'<img src="{obj.image_url}" style="max-height: 50px; max-width: 50px;" />')
+            return mark_safe(f'<img src="{obj.image_url}" style="max-height: 40px; max-width: 40px;" />')
         return "이미지 없음"
     image_url_preview.short_description = '미리보기'
 
-AnimalAdmin.inlines = [AnimalImageInline]
 
-# Animal 모델 등록(중복 등록 방지)
-try:
-    admin.site.register(Animal, AnimalAdmin)
-except admin.sites.AlreadyRegistered:
-    pass
+@admin.register(AnimalMegaphone)
+class AnimalMegaphoneAdmin(admin.ModelAdmin):
+    list_display = ['id', 'user', 'animal', 'created_at']
+    list_filter = ['created_at']
+    search_fields = ['user__username', 'animal__name', 'animal__center__name']
+    list_select_related = ['user', 'animal']
+    list_per_page = 25
+    autocomplete_fields = ['user', 'animal']
+    readonly_fields = ['created_at', 'updated_at']
+    
+    fieldsets = (
+        ('기본 정보', {
+            'fields': ('user', 'animal')
+        }),
+        ('시간 정보', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
 
 
 @admin.register(AdoptionApplication)
 class AdoptionApplicationAdmin(admin.ModelAdmin):
-    """입양 신청 관리자"""
-    
     list_display = [
         'user_link', 'animal_link', 'status_display', 'application_date',
         'approval_date', 'processing_days', 'contact_phone', 'is_active'
@@ -99,9 +136,8 @@ class AdoptionApplicationAdmin(admin.ModelAdmin):
         'animal__name', 'reason', 'contact_phone', 'contact_email'
     ]
     list_per_page = 20
-    
-    # 사용자와 동물 관계 설정
-    list_select_related = ['user', 'animal', 'processed_by']
+    list_select_related = ['user', 'animal', 'animal__center', 'processed_by']
+    autocomplete_fields = ['user', 'animal', 'processed_by']
     
     fieldsets = (
         ('신청자 정보', {
@@ -123,14 +159,12 @@ class AdoptionApplicationAdmin(admin.ModelAdmin):
     readonly_fields = ('application_date',)
     
     def get_readonly_fields(self, request, obj=None):
-        """신청자는 상태 변경만 가능하도록"""
         if obj and obj.status != 'pending':
             return self.readonly_fields + ('user', 'animal', 'reason', 'contact_phone', 
                                          'contact_email', 'home_address')
         return self.readonly_fields
     
     def user_link(self, obj):
-        """사용자 링크"""
         if obj.user:
             url = reverse('admin:user_user_change', args=[obj.user.id])
             return format_html('<a href="{}">{}</a>', url, obj.user.username)
@@ -138,7 +172,6 @@ class AdoptionApplicationAdmin(admin.ModelAdmin):
     user_link.short_description = '신청자'
     
     def animal_link(self, obj):
-        """동물 링크"""
         if obj.animal:
             url = reverse('admin:animals_animal_change', args=[obj.animal.id])
             return format_html('<a href="{}">{}</a>', url, obj.animal.name)
@@ -146,7 +179,6 @@ class AdoptionApplicationAdmin(admin.ModelAdmin):
     animal_link.short_description = '동물'
     
     def status_display(self, obj):
-        """상태 컬러 표시"""
         colors = {
             'pending': 'orange',
             'approved': 'green', 
@@ -159,49 +191,19 @@ class AdoptionApplicationAdmin(admin.ModelAdmin):
     status_display.short_description = '상태'
     
     def processing_days(self, obj):
-        """처리 경과일"""
         return obj.processing_days
     processing_days.short_description = '경과일'
     
     def is_active(self, obj):
-        """활성 신청 여부"""
         return obj.is_active
     is_active.boolean = True
     is_active.short_description = '활성'
     
     def save_model(self, request, obj, form, change):
-        """관리자 저장 시 처리자 정보 추가"""
         if not obj.processed_by:
             obj.processed_by = request.user
         super().save_model(request, obj, form, change)
     
     def get_queryset(self, request):
-        """활성 신청 우선 표시"""
         qs = super().get_queryset(request)
-        return qs.select_related('user', 'animal', 'processed_by').prefetch_related('animal__animalimage_set')
-
-# 기존 모델들도 등록 (이미 등록되어 있다면 중복 등록 방지)
-try:
-    admin.site.register(AnimalImage)
-except admin.sites.AlreadyRegistered:
-    pass
-
-try:
-    admin.site.register(AnimalMegaphone)
-except admin.sites.AlreadyRegistered:
-    pass
-
-# 동물 목록에서 입양 신청 수 표시를 위한 커스텀 필드
-class AnimalWithApplicationsAdmin(AnimalAdmin):
-    """입양 신청이 있는 동물 우선 표시"""
-    
-    def pending_applications_count(self, obj):
-        """대기중인 입양 신청 수"""
-        count = obj.adoptionapplication_set.filter(status='pending').count()
-        if count > 0:
-            url = reverse('admin:animals_adoptionapplication_changelist')
-            return format_html('<a href="{}?animal__id__exact={}">{}</a>', 
-                              url, obj.id, count)
-        return 0
-    pending_applications_count.short_description = '대기 신청'
-
+        return qs.select_related('user', 'animal', 'animal__center', 'processed_by')

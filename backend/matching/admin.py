@@ -23,6 +23,7 @@ class MatchingQuestionnaireAdmin(admin.ModelAdmin):
     list_filter = ['is_active']
     search_fields = ['title', 'description']
     list_editable = ['is_active']
+    list_per_page = 25
     inlines = [MatchingQuestionInline]
     
     fieldsets = (
@@ -39,10 +40,13 @@ class MatchingQuestionnaireAdmin(admin.ModelAdmin):
 @admin.register(MatchingQuestion)
 class MatchingQuestionAdmin(admin.ModelAdmin):
     list_display = ['questionnaire', 'sequence', 'question_text', 'question_type', 'weight', 'category']
-    list_filter = ['questionnaire', 'question_type', 'category']
+    list_filter = ['question_type', 'category']
     search_fields = ['question_text', 'questionnaire__title']
     list_editable = ['sequence', 'weight']
     ordering = ['questionnaire', 'sequence']
+    list_select_related = ['questionnaire']
+    list_per_page = 25
+    autocomplete_fields = ['questionnaire']
     
     fieldsets = (
         ('기본 정보', {
@@ -61,9 +65,12 @@ class MatchingQuestionAdmin(admin.ModelAdmin):
 @admin.register(MatchingResponse)
 class MatchingResponseAdmin(admin.ModelAdmin):
     list_display = ['user', 'questionnaire', 'question', 'selected_options', 'created_at']
-    list_filter = ['user__user_type', 'questionnaire']
+    list_filter = ['user__user_type']
     search_fields = ['user__username', 'question__question_text']
     readonly_fields = ['created_at', 'updated_at']
+    list_select_related = ['user', 'questionnaire', 'question']
+    list_per_page = 25
+    autocomplete_fields = ['user', 'questionnaire', 'question']
     
     fieldsets = (
         ('기본 정보', {
@@ -79,10 +86,13 @@ class MatchingResponseAdmin(admin.ModelAdmin):
 @admin.register(MatchingSession)
 class MatchingSessionAdmin(admin.ModelAdmin):
     list_display = ['user', 'questionnaire', 'is_completed', 'completed_at', 'created_at']
-    list_filter = ['is_completed', 'user__user_type', 'questionnaire']
+    list_filter = ['is_completed', 'user__user_type']
     search_fields = ['user__username', 'questionnaire__title']
     list_editable = ['is_completed']
     readonly_fields = ['created_at', 'updated_at']
+    list_select_related = ['user', 'questionnaire']
+    list_per_page = 25
+    autocomplete_fields = ['user', 'questionnaire']
     
     fieldsets = (
         ('기본 정보', {
@@ -101,10 +111,13 @@ class MatchingSessionAdmin(admin.ModelAdmin):
 @admin.register(MatchingResult)
 class MatchingResultAdmin(admin.ModelAdmin):
     list_display = ['session', 'animal', 'match_score', 'recommendation_level', 'created_at']
-    list_filter = ['recommendation_level', 'animal__status', 'animal__center__region']
+    list_filter = ['recommendation_level', 'animal__center__region']
     search_fields = ['session__user__username', 'animal__name', 'animal__center__name']
     list_editable = ['recommendation_level']
     readonly_fields = ['created_at', 'updated_at']
+    list_select_related = ['session', 'session__user', 'animal', 'animal__center']
+    list_per_page = 25
+    autocomplete_fields = ['session', 'animal']
     
     fieldsets = (
         ('기본 정보', {
@@ -130,6 +143,9 @@ class UserPreferenceAdmin(admin.ModelAdmin):
     list_filter = ['animal_type', 'size_preference', 'activity_level', 'user__user_type']
     search_fields = ['user__username', 'session__questionnaire__title']
     readonly_fields = ['created_at', 'updated_at']
+    list_select_related = ['user', 'session', 'session__questionnaire']
+    list_per_page = 25
+    autocomplete_fields = ['user', 'session']
     
     fieldsets = (
         ('기본 정보', {

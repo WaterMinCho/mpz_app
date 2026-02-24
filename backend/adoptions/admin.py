@@ -31,6 +31,9 @@ class AdoptionAdmin(admin.ModelAdmin):
     search_fields = ['user__username', 'animal__name', 'animal__center__name']
     list_editable = ['status', 'monitoring_status']
     readonly_fields = ['created_at', 'updated_at']
+    list_select_related = ['user', 'animal', 'animal__center']
+    list_per_page = 25
+    autocomplete_fields = ['user', 'animal']
     inlines = [AdoptionQuestionResponseInline, AdoptionMonitoringInline, AdoptionMonitoringCheckInline]
     
     fieldsets = (
@@ -57,16 +60,23 @@ class AdoptionAdmin(admin.ModelAdmin):
             'classes': ('collapse',)
         }),
     )
+    
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        return qs.select_related('user', 'animal', 'animal__center')
 
 
 @admin.register(AdoptionQuestion)
 class AdoptionQuestionAdmin(admin.ModelAdmin):
     list_display = ['id', 'center', 'sequence', 'content', 'is_active', 'created_at']
     list_display_links = ['id']
-    list_filter = ['center', 'is_active']
+    list_filter = ['is_active']
     search_fields = ['center__name', 'content']
     list_editable = ['sequence', 'is_active']
     ordering = ['center', 'sequence']
+    list_select_related = ['center']
+    list_per_page = 25
+    autocomplete_fields = ['center']
 
 
 @admin.register(AdoptionQuestionResponse)
@@ -75,16 +85,22 @@ class AdoptionQuestionResponseAdmin(admin.ModelAdmin):
     list_filter = ['adoption__status']
     search_fields = ['adoption__user__username', 'adoption__animal__name', 'question__content']
     readonly_fields = ['created_at', 'updated_at']
+    list_select_related = ['adoption', 'adoption__user', 'question']
+    list_per_page = 25
+    autocomplete_fields = ['adoption', 'question']
 
 
 @admin.register(AdoptionContract)
 class AdoptionContractAdmin(admin.ModelAdmin):
     list_display = ['id', 'adoption', 'template', 'status', 'user_signed_at', 'center_signed_at']
     list_display_links = ['id']
-    list_filter = ['status', 'template__center']
+    list_filter = ['status']
     search_fields = ['adoption__user__username', 'adoption__animal__name']
     list_editable = ['status']
     readonly_fields = ['created_at', 'updated_at']
+    list_select_related = ['adoption', 'adoption__user', 'adoption__animal', 'template']
+    list_per_page = 25
+    autocomplete_fields = ['adoption', 'template']
     
     fieldsets = (
         ('기본 정보', {
@@ -109,13 +125,19 @@ class AdoptionMonitoringAdmin(admin.ModelAdmin):
     list_filter = ['adoption__status']
     search_fields = ['adoption__user__username', 'adoption__animal__name']
     readonly_fields = ['created_at', 'updated_at']
+    list_select_related = ['adoption', 'adoption__user', 'adoption__animal']
+    list_per_page = 25
+    autocomplete_fields = ['adoption']
 
 
 @admin.register(AdoptionMonitoringCheck)
 class AdoptionMonitoringCheckAdmin(admin.ModelAdmin):
     list_display = ['id', 'adoption', 'check_sequence', 'status', 'check_date', 'expected_check_date']
-    list_filter = ['status', 'adoption__status']
+    list_filter = ['status']
     search_fields = ['adoption__user__username', 'adoption__animal__name']
     list_editable = ['status']
     readonly_fields = ['created_at', 'updated_at']
+    list_select_related = ['adoption', 'adoption__user', 'adoption__animal']
+    list_per_page = 25
+    autocomplete_fields = ['adoption']
     ordering = ['adoption', 'check_sequence']

@@ -10,6 +10,7 @@ class PostAdmin(admin.ModelAdmin):
     list_editable = ['is_all_access']
     readonly_fields = ['created_at', 'updated_at']
     list_select_related = ['user']
+    list_per_page = 25
     autocomplete_fields = ['user', 'animal']
     
     fieldsets = (
@@ -30,6 +31,8 @@ class PostImageAdmin(admin.ModelAdmin):
     search_fields = ['post__title', 'post__user__username']
     list_editable = ['order_index']
     readonly_fields = ['created_at', 'updated_at']
+    list_select_related = ['post']
+    list_per_page = 25
     ordering = ['post', 'order_index']
     autocomplete_fields = ['post']
     
@@ -50,6 +53,8 @@ class PostTagAdmin(admin.ModelAdmin):
     list_filter = ['created_at']
     search_fields = ['post__title', 'tag_name']
     readonly_fields = ['created_at', 'updated_at']
+    list_select_related = ['post']
+    list_per_page = 25
     autocomplete_fields = ['post']
     
     fieldsets = (
@@ -70,6 +75,7 @@ class SystemTagAdmin(admin.ModelAdmin):
     search_fields = ['name', 'description']
     list_editable = ['sequence', 'is_active']
     readonly_fields = ['usage_count', 'created_at', 'updated_at']
+    list_per_page = 25
     ordering = ['sequence', 'name']
     
     fieldsets = (
@@ -116,6 +122,8 @@ class PostLikeAdmin(admin.ModelAdmin):
     list_filter = ['created_at']
     search_fields = ['user__username', 'post__title']
     readonly_fields = ['created_at', 'updated_at']
+    list_select_related = ['user', 'post']
+    list_per_page = 25
     autocomplete_fields = ['user', 'post']
     
     fieldsets = (

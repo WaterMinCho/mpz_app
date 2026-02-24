@@ -8,6 +8,9 @@ class CommentAdmin(admin.ModelAdmin):
     list_filter = ['created_at']
     search_fields = ['user__username', 'content', 'post__title']
     readonly_fields = ['created_at', 'updated_at']
+    list_select_related = ['user', 'post']
+    list_per_page = 25
+    autocomplete_fields = ['user', 'post']
     
     fieldsets = (
         ('기본 정보', {
@@ -26,6 +29,9 @@ class ReplyAdmin(admin.ModelAdmin):
     list_filter = ['created_at']
     search_fields = ['user__username', 'comment__content', 'content']
     readonly_fields = ['created_at', 'updated_at']
+    list_select_related = ['user', 'comment', 'comment__post']
+    list_per_page = 25
+    autocomplete_fields = ['user', 'comment']
     
     fieldsets = (
         ('기본 정보', {

@@ -12,8 +12,8 @@ class UserAdmin(BaseUserAdmin):
     search_fields = ['username', 'email', 'nickname', 'phone_number', 'kakao_id']
     list_editable = ['user_type', 'is_phone_verified']
     readonly_fields = ['created_at', 'updated_at']
+    list_per_page = 25
     
-    # BaseUserAdmin의 기본 fieldsets를 오버라이드하여 first_name, last_name 제거
     fieldsets = (
         (None, {
             'fields': ('username', 'password')
@@ -29,7 +29,7 @@ class UserAdmin(BaseUserAdmin):
             'classes': ('collapse',)
         }),
         ('권한', {
-            'fields': ('is_active', 'is_staff',  'groups', 'user_permissions')
+            'fields': ('is_active', 'is_staff', 'groups', 'user_permissions')
         }),
         ('중요한 날짜', {
             'fields': ('last_login', 'date_joined')
@@ -60,6 +60,9 @@ class JwtAdmin(admin.ModelAdmin):
     list_filter = ['user__user_type']
     search_fields = ['user__username']
     readonly_fields = ['created_at', 'updated_at']
+    list_select_related = ['user']
+    list_per_page = 25
+    autocomplete_fields = ['user']
     
     fieldsets = (
         ('기본 정보', {
@@ -79,6 +82,7 @@ class PhoneVerificationRequestAdmin(admin.ModelAdmin):
     search_fields = ['phone_number', 'verification_code']
     list_editable = ['is_used']
     readonly_fields = ['created_at', 'updated_at']
+    list_per_page = 25
     
     fieldsets = (
         ('기본 정보', {
@@ -101,6 +105,9 @@ class PhoneVerificationTokenAdmin(admin.ModelAdmin):
     search_fields = ['user__username', 'phone_number', 'token']
     list_editable = ['is_used']
     readonly_fields = ['created_at', 'updated_at']
+    list_select_related = ['user']
+    list_per_page = 25
+    autocomplete_fields = ['user']
     
     fieldsets = (
         ('기본 정보', {

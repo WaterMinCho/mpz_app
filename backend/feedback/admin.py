@@ -18,6 +18,8 @@ class FeedbackAdmin(admin.ModelAdmin):
         'created_at', 'updated_at'
     ]
     list_editable = ['status', 'priority']
+    list_select_related = ['user']
+    autocomplete_fields = ['user', 'admin']
     date_hierarchy = 'created_at'
     
     fieldsets = (

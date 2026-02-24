@@ -9,6 +9,9 @@ class NotificationAdmin(admin.ModelAdmin):
     search_fields = ['user__username', 'message']
     list_editable = ['priority', 'is_read']
     readonly_fields = ['created_at', 'updated_at']
+    list_select_related = ['user']
+    list_per_page = 25
+    autocomplete_fields = ['user']
     
     fieldsets = (
         ('기본 정보', {
@@ -31,6 +34,9 @@ class PushTokenAdmin(admin.ModelAdmin):
     search_fields = ['user__username', 'device_id', 'token']
     list_editable = ['is_active']
     readonly_fields = ['created_at', 'updated_at']
+    list_select_related = ['user']
+    list_per_page = 25
+    autocomplete_fields = ['user']
     
     fieldsets = (
         ('기본 정보', {

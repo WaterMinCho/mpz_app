@@ -11,6 +11,8 @@ class CenterAdmin(admin.ModelAdmin):
     search_fields = ['name', 'owner__username', 'center_number', 'region']
     list_editable = ['verified', 'is_public', 'is_subscribed', 'has_volunteer', 'has_foster_care', 'show_phone_number', 'show_location']
     readonly_fields = ['created_at', 'updated_at']
+    list_select_related = ['owner']
+    list_per_page = 25
     
     fieldsets = (
         ('기본 정보', {
@@ -38,11 +40,9 @@ class CenterAdmin(admin.ModelAdmin):
     )
     
     def get_queryset(self, request):
-        """센터 목록 조회 시 안전한 쿼리셋 반환"""
         return super().get_queryset(request).select_related('owner')
     
     def save_model(self, request, obj, form, change):
-        """센터 저장 시 안전한 저장 처리"""
         try:
             super().save_model(request, obj, form, change)
         except Exception as e:
@@ -51,10 +51,8 @@ class CenterAdmin(admin.ModelAdmin):
             raise
     
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
-        """owner 필드에 대한 안전한 폼 필드 설정"""
         if db_field.name == "owner":
             from user.models import User
-            # 올바른 user_type 선택지 사용 ('최고관리자' -> '센터최고관리자')
             kwargs["queryset"] = User.objects.filter(
                 user_type__in=['센터관리자', '센터최고관리자']
             )
@@ -64,10 +62,13 @@ class CenterAdmin(admin.ModelAdmin):
 @admin.register(AdoptionContractTemplate)
 class AdoptionContractTemplateAdmin(admin.ModelAdmin):
     list_display = ['title', 'center', 'is_active', 'created_at']
-    list_filter = ['is_active', 'center']
+    list_filter = ['is_active', ('center__region', admin.FieldListFilter)]
     search_fields = ['title', 'center__name']
     list_editable = ['is_active']
     readonly_fields = ['created_at', 'updated_at']
+    list_select_related = ['center']
+    list_per_page = 25
+    autocomplete_fields = ['center']
     
     fieldsets = (
         ('기본 정보', {
@@ -86,10 +87,13 @@ class AdoptionContractTemplateAdmin(admin.ModelAdmin):
 @admin.register(AdoptionConsent)
 class AdoptionConsentAdmin(admin.ModelAdmin):
     list_display = ['title', 'center', 'is_active', 'created_at']
-    list_filter = ['is_active', 'center']
+    list_filter = ['is_active', ('center__region', admin.FieldListFilter)]
     search_fields = ['title', 'center__name']
     list_editable = ['is_active']
     readonly_fields = ['created_at', 'updated_at']
+    list_select_related = ['center']
+    list_per_page = 25
+    autocomplete_fields = ['center']
     
     fieldsets = (
         ('기본 정보', {
@@ -112,6 +116,7 @@ class PresetContractTemplateAdmin(admin.ModelAdmin):
     search_fields = ['title']
     list_editable = ['is_active']
     readonly_fields = ['created_at', 'updated_at']
+    list_per_page = 25
     
     fieldsets = (
         ('기본 정보', {
@@ -134,6 +139,7 @@ class PresetConsentAdmin(admin.ModelAdmin):
     search_fields = ['title']
     list_editable = ['is_active']
     readonly_fields = ['created_at', 'updated_at']
+    list_per_page = 25
     
     fieldsets = (
         ('기본 정보', {
@@ -162,6 +168,7 @@ class PresetQuestionAdmin(admin.ModelAdmin):
     list_editable = ['is_active', 'sequence']
     ordering = ['category', 'sequence']
     readonly_fields = ['created_at', 'updated_at']
+    list_per_page = 25
     
     fieldsets = (
         ('기본 정보', {
@@ -177,11 +184,14 @@ class PresetQuestionAdmin(admin.ModelAdmin):
 @admin.register(QuestionForm)
 class QuestionFormAdmin(admin.ModelAdmin):
     list_display = ['center', 'question', 'type', 'is_required', 'sequence', 'created_at']
-    list_filter = ['center', 'type', 'is_required']
+    list_filter = ['type', 'is_required']
     search_fields = ['center__name', 'question']
     list_editable = ['is_required', 'sequence']
     ordering = ['center', 'sequence']
     readonly_fields = ['created_at', 'updated_at']
+    list_select_related = ['center']
+    list_per_page = 25
+    autocomplete_fields = ['center']
     
     fieldsets = (
         ('기본 정보', {

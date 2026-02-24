@@ -8,6 +8,9 @@ class CenterFavoriteAdmin(admin.ModelAdmin):
     list_filter = ['center__region', 'center__verified']
     search_fields = ['user__username', 'center__name']
     readonly_fields = ['created_at', 'updated_at']
+    list_select_related = ['user', 'center']
+    list_per_page = 25
+    autocomplete_fields = ['user', 'center']
     
     fieldsets = (
         ('기본 정보', {
@@ -26,6 +29,9 @@ class AnimalFavoriteAdmin(admin.ModelAdmin):
     list_filter = ['animal__protection_status', 'animal__adoption_status', 'animal__center__region']
     search_fields = ['user__username', 'animal__name', 'animal__center__name']
     readonly_fields = ['created_at', 'updated_at']
+    list_select_related = ['user', 'animal', 'animal__center']
+    list_per_page = 25
+    autocomplete_fields = ['user', 'animal']
     
     def animal_center(self, obj):
         return obj.animal.center.name if obj.animal and obj.animal.center else '-'
@@ -48,6 +54,9 @@ class PersonalityTestAdmin(admin.ModelAdmin):
     list_filter = ['test_type']
     search_fields = ['user__username', 'test_type']
     readonly_fields = ['created_at', 'updated_at', 'completed_at']
+    list_select_related = ['user']
+    list_per_page = 25
+    autocomplete_fields = ['user']
     
     fieldsets = (
         ('기본 정보', {

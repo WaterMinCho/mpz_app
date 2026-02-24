@@ -5,10 +5,13 @@ from notices.models import Notice, SuperadminNotice
 @admin.register(Notice)
 class NoticeAdmin(admin.ModelAdmin):
     list_display = ['id', 'center', 'title', 'notice_type', 'is_published', 'is_pinned', 'view_count', 'created_at']
-    list_filter = ['center', 'notice_type', 'is_published', 'is_pinned']
+    list_filter = ['notice_type', 'is_published', 'is_pinned']
     search_fields = ['center__name', 'title', 'content']
     list_editable = ['is_published', 'is_pinned']
     readonly_fields = ['created_at', 'updated_at', 'view_count']
+    list_select_related = ['center']
+    list_per_page = 25
+    autocomplete_fields = ['center']
     
     fieldsets = (
         ('기본 정보', {
@@ -31,6 +34,7 @@ class SuperadminNoticeAdmin(admin.ModelAdmin):
     search_fields = ['title', 'content']
     list_editable = ['is_published', 'is_pinned']
     readonly_fields = ['created_at', 'updated_at', 'view_count']
+    list_per_page = 25
     
     fieldsets = (
         ('기본 정보', {
