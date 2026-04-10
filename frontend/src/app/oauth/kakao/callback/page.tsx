@@ -4,7 +4,7 @@ import { useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/components/providers/AuthProvider";
 import instance from "@/lib/axios-instance";
-import { isIOSSafari, isPrivateMode } from "@/lib/storage-utils";
+import { isIOSSafari } from "@/lib/storage-utils";
 
 function KakaoCallbackContent() {
   const router = useRouter();
@@ -15,7 +15,6 @@ function KakaoCallbackContent() {
     const handleCallback = async () => {
       try {
         const isIOS = isIOSSafari();
-        const isPrivate = await isPrivateMode();
 
         if (isIOS) {
           document.body.style.overflow = "hidden";
