@@ -1,6 +1,9 @@
 # 베이스 이미지: Node.js LTS (예: 20.x)
 FROM node:20-alpine
 
+ARG NEXT_PUBLIC_API_BASE_URL
+ENV NEXT_PUBLIC_API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL
+
 # package.json과 package-lock.json 복사
 COPY ./package*.json ./
 

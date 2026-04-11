@@ -4,7 +4,7 @@ import axios, {
   InternalAxiosRequestConfig,
 } from "axios";
 
-const BASE_URL = "https://api.mpz.kr/v1/";
+const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "https://api.mpz.kr/v1/";
 //const BASE_URL = "http://127.0.0.1:8000/v1/";
 
 // 디버깅: 환경 변수 확인 (개발 환경에서만)
