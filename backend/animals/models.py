@@ -149,6 +149,43 @@ class AnimalImage(BaseModel):
         return f"{animal_name} - 이미지 {self.sequence}"
 
 
+class SyncLog(models.Model):
+    """공공데이터 동기화 실행 로그"""
+
+    STRATEGY_CHOICES = [
+        ('incremental', '증분 동기화'),
+        ('full', '전체 동기화'),
+        ('status_check', '상태 체크'),
+        ('status_sync', '상태 동기화'),
+    ]
+    STATUS_CHOICES = [
+        ('success', '성공'),
+        ('failed', '실패'),
+        ('partial', '부분 성공'),
+    ]
+
+    strategy = models.CharField(max_length=20, choices=STRATEGY_CHOICES)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='success')
+    created_count = models.IntegerField(default=0)
+    updated_count = models.IntegerField(default=0)
+    deleted_count = models.IntegerField(default=0)
+    error_count = models.IntegerField(default=0)
+    total_count = models.IntegerField(default=0)
+    duration_seconds = models.FloatField(null=True, blank=True)
+    error_message = models.TextField(blank=True, null=True)
+    started_at = models.DateTimeField()
+    finished_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'sync_logs'
+        verbose_name = '동기화 로그'
+        verbose_name_plural = '동기화 로그들'
+        ordering = ['-started_at']
+
+    def __str__(self):
+        return f"[{self.status}] {self.strategy} - {self.started_at:%Y-%m-%d %H:%M} ({self.duration_seconds:.1f}s)"
+
+
 class AnimalMegaphone(BaseModel):
     """동물 확성기(좋아요) 모델"""
     

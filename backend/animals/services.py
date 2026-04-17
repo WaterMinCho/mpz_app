@@ -1,4 +1,5 @@
 import httpx
+import logging
 import mimetypes
 import os
 import xml.etree.ElementTree as ET
@@ -13,6 +14,8 @@ from django.utils import timezone
 
 from cloudflare.services import R2Client
 from centers.models import Center
+
+logger = logging.getLogger(__name__)
 from .models import Animal, AnimalImage
 from .schemas.public_data import PublicDataAnimalOut
 
@@ -71,8 +74,8 @@ class PublicDataService:
                     
                     # 500 에러 처리
                     if response.status_code == 500:
-                        print(f"⚠️ 공공데이터 API 500 에러: {response.url}")
-                        print(f"   응답 내용: {response.text}")
+                        logger.warning(f"공공데이터 API 500 에러: {response.url}")
+                        logger.warning(f"응답 내용: {response.text[:200]}")
                         break  # 해당 페이지 건너뛰기
                     
                     response.raise_for_status()
@@ -116,12 +119,12 @@ class PublicDataService:
                 full_url = f"{url}?{query_string}"
                 
                 async with httpx.AsyncClient(timeout=30.0) as client:
-                    print(f"📄 페이지 {current_page} 가져오는 중...", end='\r')
+                    logger.debug(f"페이지 {current_page} 가져오는 중...")
                     response = await client.get(full_url)
                     
                     # 500 에러 처리
                     if response.status_code == 500:
-                        print(f"\n⚠️ 공공데이터 API 500 에러 (페이지 {current_page}): {response.url}")
+                        logger.warning(f"공공데이터 API 500 에러 (페이지 {current_page}): {response.url}")
                         break  # 해당 페이지 건너뛰기
                     
                     response.raise_for_status()
@@ -129,16 +132,16 @@ class PublicDataService:
                     
                     # 더 이상 데이터가 없으면 중단
                     if not page_animals:
-                        print(f"\n✅ 페이지 {current_page}: 데이터 없음, 종료")
+                        logger.info(f"페이지 {current_page}: 데이터 없음, 종료")
                         break
                     
                     all_animals.extend(page_animals)
-                    print(f"✅ 페이지 {current_page} 완료: {len(page_animals)}개 (누적: {len(all_animals):,}개)")
+                    logger.info(f"페이지 {current_page} 완료: {len(page_animals)}개 (누적: {len(all_animals):,}개)")
                     current_page += 1
                     
                     # 페이지당 동물 수가 요청한 수보다 적으면 마지막 페이지
                     if len(page_animals) < min(num_of_rows, 1000):
-                        print(f"\n✅ 마지막 페이지 도달 (페이지당 {len(page_animals)}개 < {min(num_of_rows, 1000)}개)")
+                        logger.info(f"마지막 페이지 도달 (페이지당 {len(page_animals)}개)")
                         break
         
         return all_animals
@@ -212,12 +215,12 @@ class PublicDataService:
                     )
                     items.append(animal_out)
                 except Exception as e:
-                    print(f"스키마 변환 오류: {e}")
+                    logger.error(f"스키마 변환 오류: {e}")
                     continue
             
             return items
         except ET.ParseError as e:
-            print(f"XML 파싱 오류: {e}")
+            logger.error(f"XML 파싱 오류: {e}")
             return []
     
     async def process_abandoned_animals(self, animals_data: List[PublicDataAnimalOut], batch_size: int = 1000) -> Dict:
@@ -234,7 +237,7 @@ class PublicDataService:
             batch_num = (i // batch_size) + 1
             total_batches = (total + batch_size - 1) // batch_size
             
-            print(f"📦 배치 처리 중: {batch_num}/{total_batches} ({len(batch)}개)")
+            logger.info(f"배치 처리 중: {batch_num}/{total_batches} ({len(batch)}개)")
             
             for animal_data in batch:
                 try:
@@ -263,12 +266,12 @@ class PublicDataService:
                         created_count += 1
                         
                 except Exception as e:
-                    print(f"동물 데이터 처리 오류: {e}")
+                    logger.error(f"동물 데이터 처리 오류: {e}", exc_info=True)
                     error_count += 1
             
             # 배치 완료 후 진행 상황 출력
             processed = min(i + batch_size, total)
-            print(f"✅ 배치 {batch_num} 완료: 진행률 {processed}/{total} ({processed/total*100:.1f}%)")
+            logger.info(f"배치 {batch_num} 완료: {processed}/{total}")
         
         return {
             'created': created_count,
@@ -469,7 +472,7 @@ class PublicDataService:
                 
                 if updated:
                     await sync_to_async(center.save)()
-                    print(f"센터 정보 업데이트 완료: {center.name} ({center.public_reg_no})")
+                    logger.debug(f"센터 정보 업데이트: {center.name} ({center.public_reg_no})")
             
             return center
         
@@ -656,7 +659,7 @@ class PublicDataService:
         
         # 알 수 없는 상태값에 대한 경고 로그
         if status not in protection_mapping:
-            print(f"⚠️ 알 수 없는 process_state 값: '{public_status}' -> '보호중'으로 매핑")
+            logger.warning(f"알 수 없는 process_state: '{public_status}'")
         
         return mapped_status
     
@@ -732,7 +735,7 @@ class PublicDataService:
             try:
                 self._r2_client = R2Client()
             except Exception as exc:
-                print(f"⚠️ R2 클라이언트 초기화 실패: {exc}")
+                logger.error(f"R2 클라이언트 초기화 실패: {exc}")
                 self._r2_disabled = True
                 return None
         return self._r2_client
@@ -768,7 +771,7 @@ class PublicDataService:
             response.raise_for_status()
             return response.content, response.headers.get("Content-Type")
         except Exception as exc:
-            print(f"⚠️ 공공데이터 이미지 다운로드 실패 ({image_url}): {exc}")
+            logger.warning(f"공공데이터 이미지 다운로드 실패 ({image_url}): {exc}")
             return None, None
     
     async def _upload_image_to_r2(
@@ -794,7 +797,7 @@ class PublicDataService:
             )
             return result.get("url")
         except Exception as exc:
-            print(f"⚠️ R2 업로드 실패 ({original_url}): {exc}")
+            logger.warning(f"R2 업로드 실패 ({original_url}): {exc}")
             return None
     
     async def _process_animal_images(self, animal: Animal, animal_data: PublicDataAnimalOut):
@@ -832,6 +835,6 @@ class PublicDataService:
         
         if images:
             await sync_to_async(AnimalImage.objects.bulk_create)(images)
-            print(f"동물 이미지 처리 완료: {animal.public_notice_number} - {len(images)}개 이미지 (R2 변환 여부: {'Y' if any(img.image_url.startswith('https://') for img in images) else 'N'})")
+            logger.info(f"동물 이미지 처리 완료: {animal.public_notice_number} - {len(images)}개")
         else:
-            print(f"동물 이미지 없음: {animal.public_notice_number}")
+            logger.debug(f"동물 이미지 없음: {animal.public_notice_number}")

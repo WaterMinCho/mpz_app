@@ -1,3 +1,4 @@
+import logging
 from ninja import Router, Query
 from ninja.errors import HttpError
 from ninja.pagination import paginate
@@ -6,7 +7,9 @@ from django.utils import timezone
 from django.db.models import Q
 from asgiref.sync import sync_to_async
 from typing import List
-from .models import Animal, AnimalMegaphone, AnimalImage
+from .models import Animal, AnimalMegaphone, AnimalImage, SyncLog
+
+logger = logging.getLogger(__name__)
 from animals.schemas.inbound import (
     AnimalCreateIn, AnimalUpdateIn, AnimalStatusUpdateIn,
     AnimalListQueryIn, MegaphoneToggleIn, RelatedAnimalsQueryIn
@@ -1221,66 +1224,38 @@ async def sync_public_data(
     sync_strategy: str = Query("incremental", description="동기화 전략 (incremental: 최근 데이터만, full: 전체 데이터, status_check: 상태 체크만, status_sync: 기존 동물 상태 동기화)")
 ):
     """공공데이터 API에서 유기동물 정보를 동기화합니다."""
+    started_at = timezone.now()
+
+    # 인증 확인 (스케줄러용 별도 키 사용)
+    x_api_key = request.headers.get('X-API-Key')
+    sync_api_key = getattr(settings, 'SYNC_API_KEY', None)
+
+    if not sync_api_key:
+        logger.error("SYNC_API_KEY가 설정되지 않았습니다")
+        raise HttpError(500, "서버 설정 오류입니다")
+
+    if not x_api_key or x_api_key != sync_api_key:
+        logger.warning("sync_public_data: 유효하지 않은 API 키로 접근 시도")
+        raise HttpError(401, "유효하지 않은 API 키입니다")
+
+    # 공공데이터 서비스 키 확인
+    service_key = getattr(settings, 'PUBLIC_DATA_SERVICE_KEY', None)
+    if not service_key:
+        logger.error("PUBLIC_DATA_SERVICE_KEY가 설정되지 않았습니다")
+        raise HttpError(500, "공공데이터 서비스 키가 설정되지 않았습니다")
+
     try:
-        # 헤더 기반 인증 확인 (QStash용)
-        x_api_key = request.headers.get('X-API-Key')
-        expected_api_key = getattr(settings, 'PUBLIC_DATA_SERVICE_KEY', None)
-        
-        # 디버깅용 로그
-        print(f"🔍 디버깅 정보:")
-        print(f"   받은 X-API-Key: {x_api_key}")
-        print(f"   설정된 API Key: {expected_api_key}")
-        print(f"   키 일치 여부: {x_api_key == expected_api_key}")
-        
-        if not expected_api_key:
-            raise HttpError(500, "공공데이터 API 키가 설정되지 않았습니다")
-        
-        if not x_api_key or x_api_key != expected_api_key:
-            raise HttpError(401, f"유효하지 않은 API 키입니다. 받은 키: {x_api_key}, 예상 키: {expected_api_key}")
-        
-        # 서비스 키 확인
-        service_key = getattr(settings, 'PUBLIC_DATA_SERVICE_KEY', None)
-        if not service_key:
-            raise HttpError(500, "공공데이터 서비스 키가 설정되지 않았습니다")
-        
-        # 날짜 설정 (전체 데이터 가져오기)
-        if not bgnde:
-            # 날짜를 지정하지 않으면 모든 데이터 가져오기
-            bgnde = None
-        if not endde:
-            endde = None
-        
         # 동기화 전략에 따른 설정
-        is_initial_sync = False
-        if sync_strategy == "full":
-            is_initial_sync = True
-        elif sync_strategy == "status_check":
-            # 상태 체크만: 전체 데이터를 가져와서 상태만 업데이트
-            is_initial_sync = True
-        # incremental은 기본값으로 is_initial_sync = False
-        
+        is_initial_sync = sync_strategy in ("full", "status_check")
+
         # 연도별 상태 자동 설정
         if not state:
-            if bgnde:
-                start_year = int(bgnde[:4])
-                if 2019 <= start_year <= 2022:
-                    state = "protect"  # 2019-2022년은 보호중만
-                else:
-                    state = "protect"  # 2023년 이후는 기본값
-            else:
-                # 날짜가 지정되지 않은 경우 전체 데이터이므로 상태 필터 없음
-                state = None
-        
-        print(f"📅 데이터 가져오기 설정: 날짜={bgnde or '전체'}, 상태={state or '전체'}")
-        print(f"🔍 동기화 전략: {sync_strategy}, 초기 동기화: {is_initial_sync}")
-        
-        # 공공데이터 서비스 초기화
+            state = "protect" if bgnde else None
+
+        logger.info(f"공공데이터 동기화 시작 - 전략: {sync_strategy}, 날짜: {bgnde or '전체'}~{endde or '전체'}")
+
         public_data_service = PublicDataService(service_key)
-        
-        # 유기동물 데이터 가져오기
-        # - Y: 예 (중성화됨) -> neutering=True
-        # - N: 아니오 (중성화 안됨) -> neutering=False
-        # - U: 미상 (알 수 없음) -> neutering=False
+
         animals_data = await public_data_service.fetch_abandoned_animals(
             bgnde=bgnde,
             endde=endde,
@@ -1290,39 +1265,66 @@ async def sync_public_data(
             num_of_rows=num_of_rows,
             is_initial_sync=is_initial_sync
         )
-        
+
         if not animals_data:
+            await sync_to_async(SyncLog.objects.create)(
+                strategy=sync_strategy,
+                status='success',
+                created_count=0, updated_count=0, deleted_count=0,
+                error_count=0, total_count=0,
+                duration_seconds=(timezone.now() - started_at).total_seconds(),
+                started_at=started_at,
+            )
             return 200, PublicDataSyncResponseOut(
                 message="동기화할 데이터가 없습니다",
-                result=PublicDataSyncResultOut(
-                    created=0,
-                    updated=0,
-                    errors=0,
-                    total=0
-                )
+                result=PublicDataSyncResultOut(created=0, updated=0, errors=0, total=0)
             )
-        
-        # 동물 데이터 처리
+
         result = await public_data_service.process_abandoned_animals(animals_data)
-        
-        # 동기화 전략에 따른 메시지
+        duration = (timezone.now() - started_at).total_seconds()
+
+        sync_status = 'partial' if result['errors'] > 0 else 'success'
+        await sync_to_async(SyncLog.objects.create)(
+            strategy=sync_strategy,
+            status=sync_status,
+            created_count=result['created'],
+            updated_count=result['updated'],
+            deleted_count=result.get('deleted', 0),
+            error_count=result['errors'],
+            total_count=result['total'],
+            duration_seconds=duration,
+            started_at=started_at,
+        )
+
         if sync_strategy == "status_check":
-            message = f"상태 체크 완료: {result['updated']}개 동물 상태 업데이트"
+            message = f"상태 체크 완료: {result['updated']}개 업데이트"
         elif sync_strategy == "full":
             message = f"전체 동기화 완료: {result['created']}개 생성, {result['updated']}개 업데이트"
         else:
             message = f"증분 동기화 완료: {result['created']}개 생성, {result['updated']}개 업데이트"
-        
+
+        logger.info(f"공공데이터 동기화 완료 - {message} (소요: {duration:.1f}초)")
+
         return 200, PublicDataSyncResponseOut(
             message=message,
             result=PublicDataSyncResultOut(**result)
         )
-        
+
     except HttpError:
         raise
     except Exception as e:
-        print(f"공공데이터 동기화 오류: {e}")
-        raise HttpError(500, f"공공데이터 동기화 중 오류가 발생했습니다: {str(e)}")
+        duration = (timezone.now() - started_at).total_seconds()
+        logger.exception(f"공공데이터 동기화 중 예외 발생: {e}")
+        await sync_to_async(SyncLog.objects.create)(
+            strategy=sync_strategy,
+            status='failed',
+            created_count=0, updated_count=0, deleted_count=0,
+            error_count=1, total_count=0,
+            duration_seconds=duration,
+            error_message=str(e),
+            started_at=started_at,
+        )
+        raise HttpError(500, "공공데이터 동기화 중 오류가 발생했습니다")
 
 
 @router.get(
@@ -1389,16 +1391,18 @@ async def sync_existing_animals_status(
 ):
     """기존 공공데이터 동물들의 상태를 동기화합니다."""
     try:
-        # 헤더 기반 인증 확인 (QStash용)
+        # 인증 확인 (스케줄러용 별도 키 사용)
         x_api_key = request.headers.get('X-API-Key')
-        expected_api_key = getattr(settings, 'PUBLIC_DATA_SERVICE_KEY', None)
-        
-        if not expected_api_key:
-            raise HttpError(500, "공공데이터 API 키가 설정되지 않았습니다")
-        
-        if not x_api_key or x_api_key != expected_api_key:
-            raise HttpError(401, f"유효하지 않은 API 키입니다")
-        
+        sync_api_key = getattr(settings, 'SYNC_API_KEY', None)
+
+        if not sync_api_key:
+            logger.error("SYNC_API_KEY가 설정되지 않았습니다")
+            raise HttpError(500, "서버 설정 오류입니다")
+
+        if not x_api_key or x_api_key != sync_api_key:
+            logger.warning("sync_existing_animals_status: 유효하지 않은 API 키로 접근 시도")
+            raise HttpError(401, "유효하지 않은 API 키입니다")
+
         # 서비스 키 확인
         service_key = getattr(settings, 'PUBLIC_DATA_SERVICE_KEY', None)
         if not service_key:

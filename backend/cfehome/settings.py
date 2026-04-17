@@ -30,6 +30,9 @@ SECRET_KEY = config("DJANGO_SECRET_KEY")
 # 공공데이터 서비스 키
 PUBLIC_DATA_SERVICE_KEY = config("PUBLIC_DATA_SERVICE_KEY", default="")
 
+# 동기화 API 인증 키 (스케줄러 → 동기화 엔드포인트 호출 시 사용, 정부 API 키와 분리)
+SYNC_API_KEY = config("SYNC_API_KEY", default="")
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config("DJANGO_DEBUG", default=False, cast=bool)
 
