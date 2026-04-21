@@ -131,12 +131,12 @@ function NavBar() {
             active={getActiveTab() === "list"}
             onClick={() => handleTabClick("list")}
           />
-          <NavbarBtn
+          {/* <NavbarBtn
             icon={<Chats weight="bold" />}
             label="커뮤니티"
             active={getActiveTab() === "commmunity"}
             onClick={() => handleTabClick("commmunity")}
-          />
+          /> */}
           <NavbarBtn
             icon={<Heart weight="bold" />}
             label="찜"

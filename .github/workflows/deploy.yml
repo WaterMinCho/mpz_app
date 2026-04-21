@@ -43,8 +43,11 @@ jobs:
           envs: APP_ENV
           script: |
             cd ~/mpz_app
-            export NEXT_PUBLIC_API_BASE_URL=$(grep '^NEXT_PUBLIC_API_BASE_URL' backend/.env.$APP_ENV | cut -d= -f2-)
-            set -a && source backend/.env.$APP_ENV && set +a || true
+
+            # Docker Compose가 자동으로 읽는 .env 파일 생성
+            echo "APP_ENV=$APP_ENV" > .env
+            grep '^NEXT_PUBLIC_API_BASE_URL' backend/.env.$APP_ENV >> .env || true
+
             APP_ENV=$APP_ENV docker compose -f docker-compose.prod.yml up -d --build
             APP_ENV=$APP_ENV docker compose -f docker-compose.prod.yml restart nginx
             APP_ENV=$APP_ENV docker compose -f docker-compose.prod.yml exec -T backend python manage.py migrate --noinput
