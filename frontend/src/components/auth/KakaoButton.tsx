@@ -130,7 +130,8 @@ export function KakaoButton({
         return;
       }
 
-      const redirectUri = "https://api.mpz.kr/v1/kakao/login/callback";
+      const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL || "https://api.mpz.kr/v1/";
+      const redirectUri = `${apiBase.replace(/\/$/, "")}/kakao/login/callback`;
       const state = crypto.randomUUID().replace(/-/g, "");
       const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(
         redirectUri

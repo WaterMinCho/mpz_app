@@ -189,12 +189,6 @@ async def kakao_login_callback(request, code: str, state: str, redirect_uri: str
         else:
             actual_redirect_uri = REDIRECT_URI
             
-        actual_redirect_uri = "https://api.mpz.kr/v1/kakao/login/callback"
-        
-        print(f"프론트엔드에서 전달된 redirect_uri: {redirect_uri}")
-        print(f"디코딩된 redirect_uri: {actual_redirect_uri}")
-        print(f"설정된 REDIRECT_URI: {REDIRECT_URI}")
-            
         print(f"사용할 redirect_uri: {actual_redirect_uri}")
         print(f"설정된 CLIENT_ID: {CLIENT_ID}")
         print(f"설정된 CLIENT_SECRET: {CLIENT_SECRET[:10]}...")

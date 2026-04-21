@@ -44,9 +44,9 @@ jobs:
           script: |
             cd ~/mpz_app
 
-            # Docker Compose가 자동으로 읽는 .env 파일 생성
+            # Docker Compose가 자동으로 읽는 .env 파일 생성 (NEXT_PUBLIC_* 빌드 변수 포함)
             echo "APP_ENV=$APP_ENV" > .env
-            grep '^NEXT_PUBLIC_API_BASE_URL' backend/.env.$APP_ENV >> .env || true
+            grep '^NEXT_PUBLIC_' backend/.env.$APP_ENV >> .env || true
 
             APP_ENV=$APP_ENV docker compose -f docker-compose.prod.yml up -d --build
             APP_ENV=$APP_ENV docker compose -f docker-compose.prod.yml restart nginx
