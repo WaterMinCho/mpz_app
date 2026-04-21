@@ -113,6 +113,7 @@ export function CenterInfo({
               src={imgSrc}
               alt={`${name} 센터 이미지`}
               fill
+              sizes="48px"
               className="object-cover"
               onError={() => {
                 if (imgSrc !== "/img/dummyImg.png") {

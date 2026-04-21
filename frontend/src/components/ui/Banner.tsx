@@ -73,7 +73,6 @@ export function Banner({ variant, className = "" }: BannerProps) {
           alt={targetBanner.alt || targetBanner.title || "배너"}
           fill
           className="object-cover"
-          unoptimized
           onError={(e) => {
             e.currentTarget.src = "/img/banner.jpg";
           }}

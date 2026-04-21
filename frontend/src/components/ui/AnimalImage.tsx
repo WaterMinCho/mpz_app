@@ -28,16 +28,12 @@ export default function AnimalImage({
 }: AnimalImageProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
-  const [retryCount, setRetryCount] = useState(0);
-
   const proxiedImageUrl = useMemo(() => getProxyImageUrl(imageUrl), [imageUrl]);
   const shouldShowFallback = !proxiedImageUrl || hasError;
 
-  // proxiedImageUrl이 변경될 때만 상태 초기화
   useEffect(() => {
     setIsLoading(true);
     setHasError(false);
-    setRetryCount(0);
   }, [proxiedImageUrl]);
 
   if (shouldShowFallback) {
@@ -71,18 +67,13 @@ export default function AnimalImage({
         src={proxiedImageUrl}
         alt={alt}
         className={cn("object-cover", imageClassName)}
-        unoptimized={true}
+        sizes={imageProps.sizes || "(max-width: 420px) 50vw, 33vw"}
         onLoad={(event) => {
           setIsLoading(false);
           setHasError(false);
           onLoad?.(event);
         }}
         onError={(event) => {
-          console.error("AnimalImage: 이미지 로드 실패", {
-            proxiedImageUrl,
-            imageUrl,
-            retryCount,
-          });
           setHasError(true);
           setIsLoading(false);
           onError?.(event);

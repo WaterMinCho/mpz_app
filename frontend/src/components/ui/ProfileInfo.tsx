@@ -57,10 +57,9 @@ export function ProfileInfo({
             src={profileImage}
             alt={author}
             fill
+            sizes="48px"
             className="object-cover"
-            unoptimized
-            onError={(e) => {
-              console.error("ProfileInfo Image load error:", e);
+            onError={() => {
               setHasImageError(true);
             }}
           />

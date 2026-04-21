@@ -48,6 +48,7 @@ function CenterCard({
               src={imageUrl}
               alt={name}
               fill
+              sizes="63px"
               className="object-cover"
               priority
               onError={() => {

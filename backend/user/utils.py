@@ -89,16 +89,6 @@ async def decodeJWT(bearer):
             return None
 
 
-# async def create_password_reset_token(user):
-#     token = secrets.token_urlsafe(32)
-#     await PasswordEmailVerification.objects.filter(
-#         user=user, is_verified=False
-#     ).adelete()
-#     verification = await PasswordEmailVerification.objects.acreate(
-#         user=user, token=token, is_verified=False
-#     )
-#     return verification
-
 
 def set_cookie_jwt(response, access, refresh, access_exp, refresh_exp, reset=None, request=None):
     domain = getattr(settings, 'SESSION_COOKIE_DOMAIN', None)

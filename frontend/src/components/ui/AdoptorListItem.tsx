@@ -45,6 +45,7 @@ export function AdoptorListItem({
             src={petImage}
             alt={petName || "반려동물"}
             fill
+            sizes="48px"
             className={cn("object-cover rounded-lg", isRejected && "grayscale")}
           />
         </div>

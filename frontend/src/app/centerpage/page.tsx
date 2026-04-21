@@ -140,6 +140,7 @@ export default function MyPage() {
                     src={myCenter.imageUrl}
                     alt="프로필 이미지"
                     fill
+                    sizes="56px"
                     className="object-cover"
                   />
                 ) : (

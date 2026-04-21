@@ -168,6 +168,7 @@ export default function MyPage() {
                     src={user.image}
                     alt="프로필 이미지"
                     fill
+                    sizes="56px"
                     className="object-cover"
                   />
                 ) : (
@@ -252,6 +253,7 @@ export default function MyPage() {
                             src={adoption.animal_image || "/img/dummyImg.png"}
                             alt={adoption.animal_name || "동물"}
                             fill
+                            sizes="64px"
                             className="object-cover"
                             onError={(e) => {
                               const target = e.target as HTMLImageElement;

@@ -102,11 +102,9 @@ export function CommentItem({
                   src={profileImg}
                   alt={nickname}
                   fill
+                  sizes="32px"
                   className="object-cover"
-                  unoptimized
-                  onError={(e) => {
-                    console.error("ProfileInfo Image load error:", e);
-                  }}
+                  onError={() => {}}
                 />
               ) : (
                 <div

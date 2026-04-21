@@ -255,11 +255,9 @@ export default function UserProfilePage() {
                   src={userPosts[0].user_image}
                   alt={userPosts[0].user_nickname}
                   fill
+                  sizes="64px"
                   className="object-cover"
-                  unoptimized
-                  onError={(e) => {
-                    console.error("ProfileInfo Image load error:", e);
-                  }}
+                  onError={() => {}}
                 />
               </div>
             ) : (
@@ -283,11 +281,9 @@ export default function UserProfilePage() {
                   src={userPosts[0].user_image}
                   alt={userPosts[0].user_nickname || "사용자"}
                   fill
+                  sizes="64px"
                   className="object-cover"
-                  unoptimized
-                  onError={(e) => {
-                    console.error("ProfileInfo Image load error:", e);
-                  }}
+                  onError={() => {}}
                 />
               ) : (
                 <div

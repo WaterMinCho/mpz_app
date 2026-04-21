@@ -274,49 +274,27 @@ async def get_me(request):
 async def update_me(request, data: UserUpdateIn):
     user = request.auth
     try:
-        # 사용자 정보 업데이트
-        import logging
-        logger = logging.getLogger(__name__)
-        
-        # Pydantic 모델을 딕셔너리로 변환
-        try:
-            data_dict = data.model_dump(exclude_none=True)
-        except AttributeError:
-            # 이전 버전의 pydantic이면 dict() 사용
-            data_dict = data.dict(exclude_none=True)
-        
-        logger.info(f"Updating user {user.id} with data: {data_dict}")
-        
-        # null 값과 빈 문자열을 제외하고 업데이트할 데이터만 필터링
-        # null이 아닌 값만 업데이트하고, null이거나 빈 문자열인 경우 해당 필드는 수정하지 않음
+        data_dict = data.model_dump(exclude_none=True)
+
         update_data = {}
         for key, value in data_dict.items():
             if value is not None and value != "":
-                # nickname이 빈 문자열이 아닌 경우 추가 검증
                 if key == "nickname" and len(value.strip()) == 0:
-                    continue  # 빈 nickname은 무시
+                    continue
                 update_data[key] = value
-        
-        logger.info(f"Filtered update data: {update_data}")
-        
+
         if update_data:
-            # sync_to_async를 사용하여 업데이트
             await sync_to_async(User.objects.filter(id=user.id).update)(**update_data)
-        
-        # 업데이트된 사용자 정보 반환
+
         updated_user = await sync_to_async(User.objects.get)(id=user.id)
         return UserMeOut.from_user(updated_user)
-        
+
     except User.DoesNotExist:
         raise HttpError(404, "사용자를 찾을 수 없습니다.")
     except Exception as e:
-        import traceback
         import logging
-        logger = logging.getLogger(__name__)
-        error_detail = f"User update error: {str(e)}\nTraceback: {traceback.format_exc()}"
-        logger.error(error_detail)
-        print(error_detail)  # 콘솔에도 출력
-        raise HttpError(500, f"사용자 정보 수정 중 오류가 발생했습니다: {str(e)}")
+        logging.getLogger(__name__).exception("User update error")
+        raise HttpError(500, "사용자 정보 수정 중 오류가 발생했습니다.")
 
 
 @router.delete(

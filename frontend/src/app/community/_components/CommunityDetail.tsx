@@ -152,6 +152,7 @@ export function CommunityDetail({
               src={imageUrls[0]}
               alt={title}
               fill
+              sizes="420px"
               className="object-contain"
             />
           </div>
@@ -167,6 +168,7 @@ export function CommunityDetail({
                   src={url}
                   alt={`feed-img-${i}`}
                   fill
+                  sizes="330px"
                   className="object-contain"
                 />
               </div>
@@ -195,11 +197,9 @@ export function CommunityDetail({
                 src={profileImage}
                 alt={author}
                 fill
+                sizes="40px"
                 className="object-cover rounded-full w-10 h-10"
-                unoptimized
-                onError={(e) => {
-                  console.error("ProfileInfo Image load error:", e);
-                }}
+                onError={() => {}}
               />
             ) : (
               <div
