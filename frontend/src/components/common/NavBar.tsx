@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "../providers/AuthProvider";
-import { HouseSimple, Dog, Chats, Heart, User } from "@phosphor-icons/react";
+import { HouseSimple, Dog, Heart, User } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { CustomModal } from "../ui/CustomModal";
 import { Capacitor } from "@capacitor/core";
