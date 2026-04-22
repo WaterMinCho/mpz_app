@@ -25,6 +25,8 @@ services:
       - network
     depends_on:
       - redis
+    volumes:
+      - static_files:/backend/local-cdn
     restart: always
 
   redis:
@@ -44,7 +46,7 @@ services:
       - network
     volumes:
       - ./nginx/${APP_ENV:-prod}.conf:/etc/nginx/conf.d/default.conf
-      - ./backend/local-cdn:/app/backend/local-cdn
+      - static_files:/app/backend/local-cdn
       - /etc/letsencrypt:/etc/letsencrypt:ro
     depends_on:
       - frontend
@@ -56,3 +58,4 @@ networks:
 
 volumes:
   redis_data:
+  static_files:
