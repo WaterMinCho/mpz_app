@@ -3,6 +3,9 @@ local-cdn
 .DS_Store
 **/.DS_Store
 
+# Claude Code 로컬 설정
+.claude/settings.local.json
+
 # Python
 __pycache__/
 *.py[cod]

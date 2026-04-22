@@ -204,7 +204,6 @@ export function ImageCarouselModal({
                   className="object-contain object-center select-none"
                   sizes="(min-width: 1024px) 98vw, 98vw"
                   draggable={false}
-                  unoptimized={image.startsWith("/api/proxy-image")}
                   priority={index === 0 || index === currentIndex}
                   onLoad={() => {
                     setImageLoaded((prev) => {
@@ -268,8 +267,8 @@ export function ImageCarouselModal({
                   src={img}
                   alt={`썸네일 ${index + 1}`}
                   fill
+                  sizes="64px"
                   className="object-cover"
-                  unoptimized={img.startsWith("/api/proxy-image")}
                 />
               </button>
             ))}
