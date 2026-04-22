@@ -292,7 +292,7 @@ function AnimalTab() {
       <div className="flex flex-wrap justify-start gap-2 cursor-pointer mx-4">
         {allAnimals
           .filter((animal) => animal && animal.id)
-          .map((animal) => (
+          .map((animal, index) => (
             <AnimalCardWithFavorite
               key={animal.id}
               animal={animal}
@@ -300,6 +300,7 @@ function AnimalTab() {
               localFavorite={localFavorites[animal.id]}
               onLikeToggle={handleLikeToggle}
               onNavigate={() => router.push(`/list/animal/${animal.id}`)}
+              imagePriority={index < 2}
             />
           ))}
       </div>
@@ -333,12 +334,14 @@ function AnimalCardWithFavorite({
   onLikeToggle,
   localFavorite,
   onNavigate,
+  imagePriority,
 }: {
   animal: RawAnimalResponse;
   isAuthenticated: boolean;
   onLikeToggle: (animalId: string) => void;
   localFavorite?: boolean;
   onNavigate: () => void;
+  imagePriority?: boolean;
 }) {
   const { data: favoriteData } = useCheckAnimalFavorite(
     animal.id,
@@ -361,6 +364,7 @@ function AnimalCardWithFavorite({
           variant="primary"
           imageSize="full"
           className="w-full"
+          imagePriority={imagePriority}
           headerAction={
             isAuthenticated ? (
               <div onClick={(e) => e.stopPropagation()}>

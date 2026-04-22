@@ -30,6 +30,7 @@ interface PetCardProps {
   adoptionStatus?: AdoptionStatus | string;
   imageOverlay?: React.ReactNode;
   headerAction?: React.ReactNode;
+  imagePriority?: boolean;
 }
 
 export function PetCard({
@@ -46,6 +47,7 @@ export function PetCard({
   adoptionStatus,
   imageOverlay,
   headerAction,
+  imagePriority,
 }: PetCardProps) {
   const router = useRouter();
 
@@ -258,6 +260,7 @@ export function PetCard({
               imageUrl={mainImageUrl}
               alt={breed || "동물"}
               fill
+              priority={imagePriority}
               containerClassName="w-full h-full"
               imageClassName="object-cover"
             />
@@ -320,6 +323,7 @@ export function PetCard({
             imageUrl={mainImageUrl}
             alt={breed || "동물"}
             fill
+            priority={imagePriority}
             containerClassName="w-full h-full"
             imageClassName="object-cover rounded-[10px]"
           />
@@ -364,6 +368,7 @@ export function PetCard({
             imageUrl={mainImageUrl}
             alt={breed || "동물"}
             fill
+            priority={imagePriority}
             containerClassName="w-full h-full"
             imageClassName="object-cover"
           />
@@ -407,6 +412,7 @@ export function PetCard({
             imageUrl={mainImageUrl}
             alt={breed || "동물"}
             fill
+            priority={imagePriority}
             containerClassName="w-full h-full"
             imageClassName="object-cover rounded-[10px]"
           />
@@ -478,6 +484,7 @@ export function PetCard({
           imageUrl={mainImageUrl}
           alt={breed || "동물"}
           fill
+          priority={imagePriority}
           containerClassName="w-full h-full"
           imageClassName="object-cover rounded-[10px]"
         />

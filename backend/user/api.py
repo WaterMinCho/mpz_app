@@ -155,15 +155,23 @@ async def login(request, data: UserLoginIn):
     response={
         200: SuccessOut,
     },
-    auth=jwt_auth,
 )
 async def logout(request):
-    user = request.auth
+    import logging
+    logger = logging.getLogger(__name__)
 
-    # 사용자의 모든 JWT 토큰 삭제
-    await sync_to_async(Jwt.objects.filter(user_id=user.id).delete)()
+    # 인증 없이 수동 JWT 파싱 — 토큰이 만료/무효해도 로그아웃은 항상 성공해야 함
+    token = request.COOKIES.get("access")
+    if token:
+        try:
+            import jwt as pyjwt
+            decoded = pyjwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
+            user_id = decoded.get("user_id")
+            if user_id:
+                await sync_to_async(Jwt.objects.filter(user_id=user_id).delete)()
+        except Exception as e:
+            logger.warning(f"로그아웃 시 토큰 처리 실패 (무시): {e}")
 
-    from django.http import JsonResponse
     response = JsonResponse({"detail": "로그아웃 되었습니다."})
 
     domain = getattr(settings, 'SESSION_COOKIE_DOMAIN', None)

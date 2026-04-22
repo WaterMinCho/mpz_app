@@ -32,7 +32,7 @@ export function HomeHeader({ isLoggedIn }: HomeHeaderProps) {
       className="px-0"
       left={
         <Link href="/">
-          <Image src="/illust/logo.svg" alt="logo" width={71} height={38} />
+          <Image src="/illust/logo.svg" alt="logo" width={71} height={38} style={{ width: 'auto', height: 'auto' }} />
         </Link>
       }
       right={
