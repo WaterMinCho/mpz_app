@@ -234,6 +234,7 @@ async def kakao_login_callback(request, code: str, state: str, redirect_uri: str
                 "http://localhost:3001",
                 "http://127.0.0.1:3000",
                 "http://127.0.0.1:3001",
+                *settings.CORS_ALLOWED_ORIGINS,
             ]
             if decoded_url in allowed_origins:
                 frontend_base = decoded_url

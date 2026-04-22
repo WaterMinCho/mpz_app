@@ -267,10 +267,7 @@ R2_BUCKET = config("R2_BUCKET", default="")
 R2_ENDPOINT = config("R2_ENDPOINT", default="")
 R2_PUBLIC_BASE_URL = config("R2_PUBLIC_BASE_URL", default="")
 
-if DEBUG:
-    FRONTEND_URL = "http://127.0.0.1:3000"
-else:
-    FRONTEND_URL = config("FRONTEND_URL", default=None)
+FRONTEND_URL = config("FRONTEND_URL", default="http://127.0.0.1:3000")
 
 # OpenAI Settings for AI Features
 OPENAI_API_KEY = config("OPENAI_API_KEY", default="")
