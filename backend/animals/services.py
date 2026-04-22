@@ -28,7 +28,6 @@ class PublicDataService:
     def __init__(self, service_key: str):
         self.service_key = service_key
         self._storage_client: Optional[StorageClient] = None
-        self._storage_disabled = False
     
     async def fetch_abandoned_animals(
         self,
@@ -728,35 +727,36 @@ class PublicDataService:
         return adoption_mapping.get(status, '입양가능')
     
     def _get_storage_client(self) -> Optional[StorageClient]:
-        """Storage 클라이언트를 지연 생성"""
-        if self._storage_disabled:
-            return None
+        """Storage 클라이언트를 지연 생성 (매 호출마다 재시도)"""
         if self._storage_client is None:
             try:
                 self._storage_client = StorageClient()
+                logger.info(f"Storage 클라이언트 초기화 성공: bucket={self._storage_client.bucket}")
             except Exception as exc:
                 logger.error(f"Storage 클라이언트 초기화 실패: {exc}")
-                self._storage_disabled = True
                 return None
         return self._storage_client
     
     def _sanitize_storage_prefix(self, value: str) -> str:
         if not value:
             return "unknown"
-        sanitized = "".join(ch if ch.isalnum() else "-" for ch in value)
+        sanitized = "".join(ch if ch.isascii() and ch.isalnum() else "-" for ch in value)
         sanitized = sanitized.strip("-")
         return sanitized or "unknown"
     
     def _guess_extension(self, image_url: str, content_type: Optional[str]) -> str:
-        if content_type:
-            mime = content_type.split(";")[0].strip().lower()
-            ext = mimetypes.guess_extension(mime)
-            if ext:
-                return ".jpg" if ext == ".jpe" else ext
+        # 1) URL 확장자 우선 (공공 API가 octet-stream으로 응답하지만 URL에 .jpg가 있음)
         parsed = urlparse(image_url)
         _, ext = os.path.splitext(parsed.path)
-        if ext:
+        if ext and ext.lower() in ('.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp', '.svg'):
             return ext
+        # 2) Content-Type으로 추론
+        if content_type:
+            mime = content_type.split(";")[0].strip().lower()
+            if mime and mime != 'application/octet-stream':
+                guessed = mimetypes.guess_extension(mime)
+                if guessed:
+                    return ".jpg" if guessed == ".jpe" else guessed
         return ".jpg"
     
     def _build_public_image_key(self, prefix: str, extension: str) -> str:

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { PetCard } from "@/components/ui/PetCard";
 import type { RawAnimalResponse } from "@/types/animal";
@@ -16,8 +16,18 @@ function AnimalTab() {
   const [hasMore, setHasMore] = useState(true);
 
   const { data: animalsData } = useGetAnimals();
-  const allAnimals =
-    animalsData?.pages?.flatMap((page) => page.data || []) || [];
+  const allAnimals = useMemo(() => {
+    if (!animalsData?.pages) return [];
+    const seen = new Set<string>();
+    return animalsData.pages
+      .flatMap((page) => page.data || [])
+      .filter((animal: any) => {
+        if (!animal?.id) return false;
+        if (seen.has(animal.id)) return false;
+        seen.add(animal.id);
+        return true;
+      });
+  }, [animalsData]);
 
   // 무한스크롤 시뮬레이션 (데이터 반복 X)
   const loadMorePets = () => {

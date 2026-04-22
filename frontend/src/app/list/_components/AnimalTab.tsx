@@ -126,17 +126,18 @@ function AnimalTab() {
     window.scrollTo(0, 0);
   }, [apiParams]);
 
-  // React Query 데이터에서 직접 동물 목록 추출
+  // React Query 데이터에서 직접 동물 목록 추출 (페이지 간 중복 제거)
   const allAnimals = useMemo(() => {
     if (!data) return [];
-    const result = data.pages
-      .flatMap((page) => {
-        // 백엔드 CustomPageNumberPagination 응답 구조에 맞게 data 필드에서 추출
-        return page.data || [];
-      })
-      .filter((animal) => animal && typeof animal === "object");
-
-    return result;
+    const seen = new Set<string>();
+    return data.pages
+      .flatMap((page) => page.data || [])
+      .filter((animal) => {
+        if (!animal || typeof animal !== "object" || !animal.id) return false;
+        if (seen.has(animal.id)) return false;
+        seen.add(animal.id);
+        return true;
+      });
   }, [data]);
 
   const loadMoreAnimals = useCallback(() => {
