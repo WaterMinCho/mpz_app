@@ -28,6 +28,7 @@ class PublicDataService:
     def __init__(self, service_key: str):
         self.service_key = service_key
         self._storage_client: Optional[StorageClient] = None
+        self._skip_images: bool = False
     
     async def fetch_abandoned_animals(
         self,
@@ -802,6 +803,9 @@ class PublicDataService:
     
     async def _process_animal_images(self, animal: Animal, animal_data: PublicDataAnimalOut):
         """동물 이미지 처리 - filename과 popfile 모두 처리"""
+        # status_sync 모드면 이미지 처리 스킵 (기존 이미지 유지)
+        if self._skip_images:
+            return
         await sync_to_async(AnimalImage.objects.filter(animal=animal).delete)()
         
         images = []

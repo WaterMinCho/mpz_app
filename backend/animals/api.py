@@ -1251,14 +1251,25 @@ async def sync_public_data(
     try:
         # 동기화 전략에 따른 설정
         is_initial_sync = sync_strategy in ("full", "status_check")
+        skip_images = sync_strategy == "status_sync"
 
-        # 연도별 상태 자동 설정
+        # incremental: 날짜 미지정 시 어제~오늘 자동 설정
+        if sync_strategy == "incremental" and not bgnde:
+            yesterday = (timezone.now() - timezone.timedelta(days=1)).strftime('%Y%m%d')
+            today = timezone.now().strftime('%Y%m%d')
+            bgnde = yesterday
+            endde = today
+
+        # 상태 필터 자동 설정
         if not state:
             state = "protect" if bgnde else None
 
-        logger.info(f"공공데이터 동기화 시작 - 전략: {sync_strategy}, 날짜: {bgnde or '전체'}~{endde or '전체'}")
+        logger.info(f"공공데이터 동기화 시작 - 전략: {sync_strategy}, 날짜: {bgnde or '전체'}~{endde or '전체'}, 이미지스킵: {skip_images}")
 
         public_data_service = PublicDataService(service_key)
+        if skip_images:
+            public_data_service._storage_client = None
+            public_data_service._skip_images = True
 
         animals_data = await public_data_service.fetch_abandoned_animals(
             bgnde=bgnde,

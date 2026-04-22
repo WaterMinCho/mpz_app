@@ -3,6 +3,7 @@
 import React, { useMemo, useState, useEffect } from "react";
 import { Chip } from "@/components/ui/Chip";
 import AnimalImage from "@/components/ui/AnimalImage";
+import { getDisplayBreedName } from "@/lib/animal-utils";
 import {
   ArrowLeft,
   ArrowRight,
@@ -210,7 +211,7 @@ export default function AnimalBasicInfo({
               <Chip className={statusInfo.colorClass}>{statusInfo.text}</Chip>
             );
           })()}
-          <h3 className="text-bk">{breed}</h3>
+          <h3 className="text-bk">{getDisplayBreedName(breed, name)}</h3>
           {isFemale ? (
             <span className="text-red">
               <GenderFemaleIcon size={16} weight="bold" />

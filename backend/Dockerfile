@@ -12,7 +12,13 @@ RUN apt-get update && apt-get install -y \
     libjpeg-dev \
     libcairo2 \
     gcc \
+    curl \
     && rm -rf /var/lib/apt/lists/*
+
+# supercronic (worker 컨테이너용 cron)
+ENV SUPERCRONIC_URL=https://github.com/aptible/supercronic/releases/download/v0.2.33/supercronic-linux-amd64
+RUN curl -fsSL "$SUPERCRONIC_URL" -o /usr/local/bin/supercronic \
+    && chmod +x /usr/local/bin/supercronic
 
 COPY requirements.txt /tmp/requirements.txt
 RUN pip install --upgrade pip && \
@@ -21,8 +27,9 @@ RUN pip install --upgrade pip && \
 # ---- Runner stage: 빌드 도구 제외한 최종 이미지 ----
 FROM python:${PYTHON_VERSION} AS runner
 
-# 빌드된 venv만 복사 (gcc 등 빌드 도구는 포함되지 않음)
+# 빌드된 venv + supercronic 복사
 COPY --from=builder /opt/venv /opt/venv
+COPY --from=builder /usr/local/bin/supercronic /usr/local/bin/supercronic
 ENV PATH=/opt/venv/bin:$PATH
 
 # 런타임에 필요한 시스템 라이브러리만 설치
@@ -41,7 +48,7 @@ COPY ./ /backend
 WORKDIR /backend
 
 RUN DJANGO_SECRET_KEY=build-only-dummy-key python manage.py collectstatic --noinput && \
-    chmod +x paracord_runner.sh
+    chmod +x paracord_runner.sh worker_entrypoint.sh
 
 RUN adduser --disabled-password --no-create-home django-user && \
     touch /backend/django.log && \

@@ -1,4 +1,3 @@
-version: "3.3"
 services:
   frontend:
     build:
@@ -27,6 +26,19 @@ services:
       - redis
     volumes:
       - static_files:/backend/local-cdn
+    restart: always
+
+  worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    command: ["bash", "./worker_entrypoint.sh"]
+    env_file:
+      - ./backend/.env.${APP_ENV:-prod}
+    networks:
+      - network
+    depends_on:
+      - redis
     restart: always
 
   redis:

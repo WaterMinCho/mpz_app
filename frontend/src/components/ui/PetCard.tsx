@@ -8,6 +8,7 @@ import { MiniButton } from "./MiniButton";
 import { Chip } from "./Chip";
 import AnimalImage from "./AnimalImage";
 import { cn, getRelativeTime } from "@/lib/utils";
+import { getDisplayBreedName } from "@/lib/animal-utils";
 // 기존 호환성을 위한 타입 사용
 import { PetCardAnimal } from "@/types/animal";
 import { AdoptionStatus } from "@/types/adoption";
@@ -63,8 +64,11 @@ export function PetCard({
     sensitivity,
     sociability,
     breed,
+    name,
     admissionDate,
   } = pet;
+
+  const displayBreedName = getDisplayBreedName(breed, name);
   // admissionDate 기준으로 waitingDays 계산
   const calculateWaitingDays = () => {
     if (!admissionDate) return waitingDays || 0;
@@ -278,7 +282,7 @@ export function PetCard({
               );
             })()}
             {createHeadingElement(
-              breed || "종 미등록",
+              displayBreedName,
               "text-bk truncate flex-1"
             )}
           </div>
@@ -385,7 +389,7 @@ export function PetCard({
               );
             })()}
             {createHeadingElement(
-              breed || "종 미등록",
+              displayBreedName,
               "text-bk truncate flex-1"
             )}
           </div>
@@ -448,7 +452,7 @@ export function PetCard({
             );
           })()}
           {createHeadingElement(
-            breed || "종 미등록",
+            displayBreedName,
             cn("text-bk truncate flex-1")
           )}
         </div>
@@ -522,7 +526,7 @@ export function PetCard({
             );
           })()}
           {createHeadingElement(
-            breed || "종 미등록",
+            displayBreedName,
             cn("text-bk truncate flex-1")
           )}
         </div>
