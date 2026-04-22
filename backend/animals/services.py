@@ -12,7 +12,7 @@ from asgiref.sync import sync_to_async
 from django.conf import settings
 from django.utils import timezone
 
-from cloudflare.services import R2Client
+from storage_service.services import StorageClient
 from centers.models import Center
 
 logger = logging.getLogger(__name__)
@@ -27,8 +27,8 @@ class PublicDataService:
     
     def __init__(self, service_key: str):
         self.service_key = service_key
-        self._r2_client: Optional[R2Client] = None
-        self._r2_disabled = False
+        self._storage_client: Optional[StorageClient] = None
+        self._storage_disabled = False
     
     async def fetch_abandoned_animals(
         self,
@@ -727,18 +727,18 @@ class PublicDataService:
         }
         return adoption_mapping.get(status, '입양가능')
     
-    def _get_r2_client(self) -> Optional[R2Client]:
-        """R2 클라이언트를 지연 생성"""
-        if self._r2_disabled:
+    def _get_storage_client(self) -> Optional[StorageClient]:
+        """Storage 클라이언트를 지연 생성"""
+        if self._storage_disabled:
             return None
-        if self._r2_client is None:
+        if self._storage_client is None:
             try:
-                self._r2_client = R2Client()
+                self._storage_client = StorageClient()
             except Exception as exc:
-                logger.error(f"R2 클라이언트 초기화 실패: {exc}")
-                self._r2_disabled = True
+                logger.error(f"Storage 클라이언트 초기화 실패: {exc}")
+                self._storage_disabled = True
                 return None
-        return self._r2_client
+        return self._storage_client
     
     def _sanitize_storage_prefix(self, value: str) -> str:
         if not value:
@@ -774,7 +774,7 @@ class PublicDataService:
             logger.warning(f"공공데이터 이미지 다운로드 실패 ({image_url}): {exc}")
             return None, None
     
-    async def _upload_image_to_r2(
+    async def _upload_image_to_storage(
         self,
         image_bytes: Optional[bytes],
         content_type: Optional[str],
@@ -783,21 +783,21 @@ class PublicDataService:
     ) -> Optional[str]:
         if not image_bytes:
             return None
-        r2_client = self._get_r2_client()
-        if not r2_client:
+        storage_client = self._get_storage_client()
+        if not storage_client:
             return None
         normalized_ct = (content_type or "image/jpeg").split(";")[0].strip() or "image/jpeg"
         extension = self._guess_extension(original_url, normalized_ct)
         key = self._build_public_image_key(storage_prefix, extension)
         try:
-            result = await sync_to_async(r2_client.upload_file)(
+            result = await sync_to_async(storage_client.upload_file)(
                 key=key,
                 data=image_bytes,
                 content_type=normalized_ct,
             )
             return result.get("url")
         except Exception as exc:
-            logger.warning(f"R2 업로드 실패 ({original_url}): {exc}")
+            logger.warning(f"Storage 업로드 실패 ({original_url}): {exc}")
             return None
     
     async def _process_animal_images(self, animal: Animal, animal_data: PublicDataAnimalOut):
@@ -816,7 +816,7 @@ class PublicDataService:
                     continue
                 
                 image_bytes, content_type = await self._download_image_bytes(client, url)
-                uploaded_url = await self._upload_image_to_r2(
+                uploaded_url = await self._upload_image_to_storage(
                     image_bytes=image_bytes,
                     content_type=content_type,
                     storage_prefix=storage_prefix,

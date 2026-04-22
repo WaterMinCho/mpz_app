@@ -13,7 +13,7 @@ const uploadAnimalImages = async (data: {
     fd.append("file", file);
     fd.append("folder", "animals"); // 동물 이미지는 animals 폴더에 저장
 
-    const res = await instance.post(`/cloudflare/upload-multipart`, fd, {
+    const res = await instance.post(`/storage/upload-multipart`, fd, {
       headers: { "Content-Type": "multipart/form-data" },
       maxBodyLength: Infinity,
       maxContentLength: Infinity,

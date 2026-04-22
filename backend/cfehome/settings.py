@@ -82,7 +82,7 @@ INSTALLED_APPS = [
     "notices",
     "feedback",
     "banners",
-    "cloudflare",
+    "storage_service",
 ]
 
 MIDDLEWARE = [
@@ -259,13 +259,13 @@ KAKAO_SOCIAL_LOGIN_CLIENT_ID = config("KAKAO_SOCIAL_LOGIN_CLIENT_ID", default=""
 KAKAO_SOCIAL_LOGIN_CLIENT_SECRET = config("KAKAO_SOCIAL_LOGIN_CLIENT_SECRET", default="")
 NEXT_PUBLIC_KAKAO_REDIRECT_URI = config("NEXT_PUBLIC_KAKAO_REDIRECT_URI", default="")
 
-# Cloudflare R2 Settings
-R2_ACCOUNT_ID = config("R2_ACCOUNT_ID", default="")
-R2_ACCESS_KEY = config("R2_ACCESS_KEY", default="")
-R2_SECRET_KEY = config("R2_SECRET_KEY", default="")
-R2_BUCKET = config("R2_BUCKET", default="")
-R2_ENDPOINT = config("R2_ENDPOINT", default="")
-R2_PUBLIC_BASE_URL = config("R2_PUBLIC_BASE_URL", default="")
+# Storage Settings (Supabase Storage, S3 호환)
+STORAGE_ACCESS_KEY = config("STORAGE_ACCESS_KEY", default="")
+STORAGE_SECRET_KEY = config("STORAGE_SECRET_KEY", default="")
+STORAGE_BUCKET = config("STORAGE_BUCKET", default="")
+STORAGE_ENDPOINT = config("STORAGE_ENDPOINT", default="")
+STORAGE_PUBLIC_BASE_URL = config("STORAGE_PUBLIC_BASE_URL", default="")
+STORAGE_REGION = config("STORAGE_REGION", default="ap-northeast-2")
 
 FRONTEND_URL = config("FRONTEND_URL", default="http://127.0.0.1:3000")
 

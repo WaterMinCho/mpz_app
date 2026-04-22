@@ -28,7 +28,7 @@ from adoptions.api.main_api import router as adoption_router
 from animals.api import router as animals_router
 from centers.api import router as centers_router
 from centers.api.preset_api import router as preset_router
-from cloudflare.api import router as cloudflare_router
+from storage_service.api import router as storage_router
 from favorites.api import router as favorites_router
 from notifications.api import router as notifications_router
 from posts.api import router as posts_router
@@ -60,7 +60,7 @@ base_api.add_router("v1/adoptions", adoption_router)
 base_api.add_router("v1/animals", animals_router)
 base_api.add_router("v1/centers", centers_router)
 base_api.add_router("v1/preset-questions", preset_router)
-base_api.add_router("v1/cloudflare", cloudflare_router)
+base_api.add_router("v1/storage", storage_router)
 base_api.add_router("v1/favorites", favorites_router)
 base_api.add_router("v1/notifications", notifications_router)
 base_api.add_router("v1/posts", posts_router)

@@ -34,7 +34,7 @@ class Banner(BaseModel):
     description = models.TextField(blank=True, null=True, help_text="배너 설명")
     alt = models.CharField(max_length=200, help_text="이미지 대체 텍스트")
     image_file = models.ImageField(upload_to=banner_upload_path, blank=True, null=True, help_text="배너 이미지 파일")
-    image_url = models.CharField(max_length=500, blank=True, null=True, help_text="R2 이미지 URL (파일 업로드 시 자동 생성)")
+    image_url = models.CharField(max_length=500, blank=True, null=True, help_text="이미지 URL (파일 업로드 시 자동 생성)")
     order_index = models.IntegerField(default=0, help_text="캐러셀 순서")
     is_active = models.BooleanField(default=True, help_text="활성화 상태")
     link_url = models.CharField(max_length=500, blank=True, null=True, help_text="클릭 시 이동할 URL")
@@ -46,76 +46,48 @@ class Banner(BaseModel):
         ordering = ['type', 'order_index']
     
     def save(self, *args, **kwargs):
-        # 파일이 업로드된 경우 R2에 업로드하고 URL만 저장
+        import logging
+        logger = logging.getLogger(__name__)
+
         if self.image_file and hasattr(self.image_file, 'file'):
             try:
-                import boto3
-                
-                # R2 설정 (하드코딩)
-                R2_ACCOUNT_ID = "8d401410410a61e14cc2e67a1349462c"
-                R2_ACCESS_KEY = "941e949a32330cf45f5f702c0a8b494d"
-                R2_SECRET_KEY = "1e98588d8c9189f7974df479119ce80e2fba111619144c18e3ac9de0019a3d55"
-                R2_BUCKET = "mpz-animal-images"
-                R2_ENDPOINT = "https://8d401410410a61e14cc2e67a1349462c.r2.cloudflarestorage.com"
-                R2_PUBLIC_BASE_URL = "https://pub-cb782373d9db4c77afff3d6f1e4d28af.r2.dev"
-                
-                # boto3 클라이언트 생성
-                s3_client = boto3.client(
-                    's3',
-                    aws_access_key_id=R2_ACCESS_KEY,
-                    aws_secret_access_key=R2_SECRET_KEY,
-                    endpoint_url=R2_ENDPOINT,
-                    region_name='auto'
-                )
-                
-                # 파일 확장자 가져오기
+                from storage_service.services import StorageClient
+                import mimetypes
+
+                storage = StorageClient()
+
                 file_extension = os.path.splitext(self.image_file.name)[1]
                 if not file_extension:
-                    file_extension = '.jpg'  # 기본값
-                
-                # R2 키 생성 (banners/ 폴더에 저장)
+                    file_extension = '.jpg'
+
+                content_type = mimetypes.guess_type(self.image_file.name)[0] or 'image/jpeg'
                 key = f"banners/{uuid.uuid4()}{file_extension}"
-                
-                # 파일을 R2에 업로드
-                self.image_file.seek(0)  # 파일 포인터를 처음으로 이동
-                s3_client.upload_fileobj(
-                    self.image_file.file,
-                    R2_BUCKET,
-                    key,
-                    ExtraArgs={'ContentType': 'image/jpeg'}
-                )
-                
-                # R2 URL 저장
-                self.image_url = f"{R2_PUBLIC_BASE_URL}/{key}"
-                
-                # 로컬 파일은 즉시 삭제
+
+                self.image_file.seek(0)
+                file_bytes = self.image_file.read()
+                result = storage.upload_file(key=key, data=file_bytes, content_type=content_type)
+
+                self.image_url = result['url']
+
                 if self.image_file.name:
                     try:
                         default_storage.delete(self.image_file.name)
-                    except:
+                    except Exception:
                         pass
-                
-                # image_file 필드는 None으로 설정 (R2에만 저장)
+
                 self.image_file = None
-                
+
             except Exception as e:
-                # R2 업로드 실패 시 로컬 파일로 대체
-                print(f"R2 업로드 실패: {e}")
-                
-                # 로컬 파일 URL 생성
+                logger.error(f"Storage 업로드 실패: {e}")
                 if hasattr(self.image_file, 'url'):
                     self.image_url = self.image_file.url
                 else:
-                    # 기본 플레이스홀더 이미지 사용
                     self.image_url = 'https://via.placeholder.com/800x400/cccccc/666666?text=Upload+Failed'
-                
-                # 로컬 파일은 그대로 유지
-                print(f"로컬 파일로 대체: {self.image_url}")
-        
+
         super().save(*args, **kwargs)
     
     def get_image_url(self):
-        """이미지 URL 반환 (R2 URL만 사용)"""
+        """이미지 URL 반환"""
         return self.image_url
     
     def __str__(self):

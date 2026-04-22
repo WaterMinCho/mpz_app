@@ -44,7 +44,7 @@ export interface AppConfig {
 // 환경별 기본 설정
 const baseConfig: Partial<AppConfig> = {
   images: {
-    baseUrl: "https://pub-cb782373d9db4c77afff3d6f1e4d28af.r2.dev/uploads/",
+    baseUrl: process.env.NEXT_PUBLIC_STORAGE_BASE_URL || "",
   },
   jwt: {
     secret: process.env.JWT_SECRET || "",
@@ -139,7 +139,7 @@ const testConfig: AppConfig = {
   },
 } as AppConfig;
 
-// 개발 서버 환경 (Cloudflare Workers)
+// 개발 서버 환경
 const devConfig: AppConfig = {
   ...baseConfig,
   env: "dev",
@@ -223,7 +223,7 @@ function getConfig(): AppConfig {
 
   if (nodeEnv === "development") {
     // 로컬인지 Workers dev인지 구분
-    if (typeof process !== "undefined" && process.env.CLOUDFLARE_ACCOUNT_ID) {
+    if (typeof process !== "undefined" && process.env.APP_ENV === "dev") {
       return devConfig;
     }
     return localConfig;

@@ -21,7 +21,7 @@ interface UploadSingleImageResponse {
 const uploadSingleImage = async (
   data: UploadSingleImageParams
 ): Promise<UploadSingleImageResponse> => {
-  const res = await instance.post("/cloudflare/upload", {
+  const res = await instance.post("/storage/upload", {
     file: data.file,
     filename: data.filename,
     content_type: data.content_type || "image/jpeg",

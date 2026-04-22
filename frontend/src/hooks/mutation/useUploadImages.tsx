@@ -15,7 +15,7 @@ const uploadImages = async (data: {
     fd.append("file", file);
     fd.append("folder", "uploads");
 
-    const res = await instance.post(`/cloudflare/upload-multipart`, fd, {
+    const res = await instance.post(`/storage/upload-multipart`, fd, {
       headers: { "Content-Type": "multipart/form-data" },
       maxBodyLength: Infinity,
       maxContentLength: Infinity,

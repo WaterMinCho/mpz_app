@@ -37,7 +37,7 @@ class BannerAdmin(admin.ModelAdmin):
         }),
         ('이미지 설정', {
             'fields': ('image_file', 'image_url', 'image_preview_large'),
-            'description': '파일을 업로드하면 자동으로 R2에 저장되고 URL이 생성됩니다. 또는 직접 R2 URL을 입력할 수 있습니다.'
+            'description': '파일을 업로드하면 자동으로 Storage에 저장되고 URL이 생성됩니다. 또는 직접 이미지 URL을 입력할 수 있습니다.'
         }),
         ('링크 설정', {
             'fields': ('link_url',)
