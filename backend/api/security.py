@@ -5,6 +5,7 @@ from ninja.security import HttpBearer
 from django.contrib.auth import get_user_model
 from django.conf import settings
 from django.utils import timezone
+from user.models import Jwt
 
 
 User = get_user_model()
@@ -36,7 +37,9 @@ class JWTAuth(HttpBearer):
 
             user_id = decoded.get("user_id")
             if user_id:
-                # return await User.objects.aget(id=user_id)
+                # 로그아웃된 토큰 차단: DB에 토큰이 존재하는지 확인
+                if not await Jwt.objects.filter(user_id=user_id, access=token).aexists():
+                    return None
                 return await User.objects.aget(id=user_id)
         except jwt.ExpiredSignatureError:
             return None  # 토큰 만료 에러 처리

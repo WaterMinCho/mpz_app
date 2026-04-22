@@ -166,16 +166,20 @@ async def logout(request):
     from django.http import JsonResponse
     response = JsonResponse({"detail": "로그아웃 되었습니다."})
 
-    # 쿠키 삭제 (원래 set_cookie와 동일한 속성으로 삭제해야 브라우저가 인식)
     domain = getattr(settings, 'SESSION_COOKIE_DOMAIN', None)
     secure = getattr(settings, 'SESSION_COOKIE_SECURE', True)
     user_agent = request.META.get('HTTP_USER_AGENT', '')
     is_safari = 'Safari' in user_agent and 'Chrome' not in user_agent
     samesite = 'Lax' if is_safari else getattr(settings, 'SESSION_COOKIE_SAMESITE', 'None')
 
+    # 쿠키 삭제: Django delete_cookie() + 수동 max_age=0 병행 (브라우저 호환성 최대화)
     from datetime import datetime
     expired = datetime(1970, 1, 1)
     for cookie_name in ("access", "refresh", "reset"):
+        httponly = cookie_name != "access"
+        # Django 기본 delete_cookie
+        response.delete_cookie(cookie_name, path="/", domain=domain, samesite=samesite)
+        # 명시적 속성 일치 삭제 (Set-Cookie 헤더 덮어쓰기)
         response.set_cookie(
             key=cookie_name,
             value="",
@@ -185,7 +189,7 @@ async def logout(request):
             path="/",
             secure=secure,
             samesite=samesite,
-            httponly=cookie_name != "access",
+            httponly=httponly,
         )
 
     return response

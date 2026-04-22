@@ -307,8 +307,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       await disconnectKakaoSession();
       await instance.post("/auth/logout", {}, { withCredentials: true });
     } catch (error) {
-      console.error("로그아웃 요청 실패:", error);
+      console.warn("로그아웃 요청 실패:", error);
     } finally {
+      // access 쿠키는 httponly=false → JS에서 직접 만료 처리 (벨트+멜빵)
+      document.cookie = "access=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; SameSite=None; Secure";
+      document.cookie = "access=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; SameSite=Lax";
       setUser(null);
       setIsAuthenticated(false);
       pushTokenRegisteredRef.current = false; // 로그아웃 시 플래그 리셋
