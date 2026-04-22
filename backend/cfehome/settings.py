@@ -37,7 +37,6 @@ SYNC_API_KEY = config("SYNC_API_KEY", default="")
 DEBUG = config("DJANGO_DEBUG", default=False, cast=bool)
 
 ALLOWED_HOSTS = [
-    ".railway.app",
     ".mpz.kr",
     "127.0.0.1",
     "localhost",
@@ -50,8 +49,6 @@ if DEBUG:
     ]
 
 CSRF_TRUSTED_ORIGINS = [
-    "http://*.railway.app",
-    "https://*.railway.app",
     "http://*.mpz.kr",
     "https://*.mpz.kr",
 ]

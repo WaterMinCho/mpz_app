@@ -1,9 +1,0 @@
-[build]
-builder = "DOCKERFILE"
-dockerfilePath = "./django_dockerfile"
-watchPatterns = [
-    "backend/requirements.txt", 
-    "backend/**", 
-    "django_railway.toml",
-    "django_dockerfile",
-]

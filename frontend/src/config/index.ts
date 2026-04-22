@@ -180,7 +180,7 @@ const prodConfig: AppConfig = {
   api: {
     baseUrl:
       process.env.NEXT_PUBLIC_API_URL ||
-      "https://mpzfullstack-production.up.railway.app",
+      "https://api.mpz.kr/v1/",
     timeout: 15000, // 프로덕션에서는 더 빠르게
   },
   kakao: {
@@ -190,7 +190,7 @@ const prodConfig: AppConfig = {
   cors: {
     origin: [
       process.env.NEXT_PUBLIC_API_URL ||
-        "https://mpzfullstack-production.up.railway.app",
+        "https://api.mpz.kr/v1/",
     ],
   },
   rateLimit: {
