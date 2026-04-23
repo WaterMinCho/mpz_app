@@ -73,7 +73,7 @@ export default function Home() {
   const { isAuthenticated } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
-  const kakaoChannelUrl = "http://pf.kakao.com/_mbxbDn/chat";
+  // const kakaoChannelUrl = "http://pf.kakao.com/_mbxbDn/chat";
   const [selectedLocation, setSelectedLocation] = useState<string>("서울");
 
   // 클라이언트에서만 localStorage에서 초기값 로드
