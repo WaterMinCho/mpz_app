@@ -242,7 +242,7 @@ export default function Home() {
           </div>
         )}
 
-        <div className="mt-5">
+        <div>
           {bannerLoading ? (
             <div className="w-full h-[232px] bg-gray-200 animate-pulse" />
           ) : (

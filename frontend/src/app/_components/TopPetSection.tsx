@@ -120,7 +120,7 @@ export function TopPetSection({
   if (isExpertAnalysis) {
     if (isLoading) {
       return (
-        <MainSection className="pt-5 pb-8">
+        <MainSection className="pb-0">
           <div className="flex flex-col gap-3">
             {[...Array(3)].map((_, index) => (
               <PetCardSkeleton key={index} variant="primary" />
@@ -138,7 +138,7 @@ export function TopPetSection({
 
     if (error) {
       return (
-        <MainSection className="pt-5 pb-8">
+        <MainSection className="pb-0">
           <div className="flex items-center justify-center h-32">
             <div className="text-lg text-error">
               동물 정보를 불러오는데 실패했습니다.
@@ -159,7 +159,7 @@ export function TopPetSection({
       .slice(0, 3);
 
     return (
-      <MainSection className="pt-5 pb-8">
+      <MainSection className="pb-0">
         <div className="flex flex-col gap-3">
           {analysisAnimals.map((animal) => (
             <PetCard
@@ -203,7 +203,7 @@ export function TopPetSection({
       title={title}
       rightSlot={rightSlot}
       onRightClick={() => router.push("/list/animal")}
-      className="pt-5 pb-8"
+      className="pb-0"
     >
       {/* 지역 필터 */}
       {showLocationFilter && (
