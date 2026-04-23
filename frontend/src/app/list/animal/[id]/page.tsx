@@ -20,7 +20,7 @@ import AnimalDetails from "./_components/AnimalDetails";
 import RelatedPosts from "./_components/RelatedPosts";
 import { RelatedAnimals } from "@/app/list/animal/[id]/_components/RelatedAnimals";
 import { PetCard } from "@/components/ui/PetCard";
-import SubscriberDetails from "./_components/SubscriberDetails";
+// import SubscriberDetails from "./_components/SubscriberDetails";
 import { AnimalDetailSkeleton } from "./_components/AnimalDetailSkeleton";
 import {
   useGetAnimalById,
