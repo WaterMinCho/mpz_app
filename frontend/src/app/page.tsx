@@ -242,45 +242,47 @@ export default function Home() {
           </div>
         )}
 
-        <div>
+        <div className="mt-5">
           {bannerLoading ? (
             <div className="w-full h-[232px] bg-gray-200 animate-pulse" />
           ) : (
             <Banner variant="main" />
           )}
         </div>
-        <TopPetSection
-          title="내 근처에 있는 아이들"
-          rightSlot="모두 보기"
-          animals={topSectionAnimals}
-          variant="primary"
-          showLocationFilter={true}
-          locations={[
-            "서울",
-            "부산",
-            "대구",
-            "인천",
-            "광주",
-            "대전",
-            "울산",
-            "세종",
-            "경기",
-            "강원",
-            "충북",
-            "충남",
-            "전북",
-            "전남",
-            "경북",
-            "경남",
-            "제주",
-          ]}
-          isLoading={isTopSectionLoading}
-          error={topSectionError}
-          selectedLocation={selectedLocation}
-          onLocationSelect={handleLocationSelect}
-          sortBy="admission_date"
-          sortOrder="asc"
-        />
+        <div className="mt-5">
+          <TopPetSection
+            title="내 근처에 있는 아이들"
+            rightSlot="모두 보기"
+            animals={topSectionAnimals}
+            variant="primary"
+            showLocationFilter={true}
+            locations={[
+              "서울",
+              "부산",
+              "대구",
+              "인천",
+              "광주",
+              "대전",
+              "울산",
+              "세종",
+              "경기",
+              "강원",
+              "충북",
+              "충남",
+              "전북",
+              "전남",
+              "경북",
+              "경남",
+              "제주",
+            ]}
+            isLoading={isTopSectionLoading}
+            error={topSectionError}
+            selectedLocation={selectedLocation}
+            onLocationSelect={handleLocationSelect}
+            sortBy="admission_date"
+            sortOrder="asc"
+          />
+        </div>
 
         {/* <MatchingSection
           variant="variant2"
@@ -292,14 +294,18 @@ export default function Home() {
 
         {/* <CommunitySection /> */}
 
-        <PetSection
-          title={`지금 주목받고 있는 \n아이들이에요`}
-          animals={petSectionAnimals}
-          isLoading={isPetSectionLoading}
-          error={petSectionError}
-        />
+        <div className="mt-5">
+          <PetSection
+            title={`지금 주목받고 있는 \n아이들이에요`}
+            animals={petSectionAnimals}
+            isLoading={isPetSectionLoading}
+            error={petSectionError}
+          />
+        </div>
 
-        <FooterSection />
+        <div className="mt-5">
+          <FooterSection />
+        </div>
       </div>
 
       <NavBar />

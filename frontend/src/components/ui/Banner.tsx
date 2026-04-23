@@ -26,7 +26,7 @@ export function Banner({ variant, className = "" }: BannerProps) {
 
   if (isLoading) {
     return (
-      <div className={`pt-5 ${className}`}>
+      <div className={`pt-0 ${className}`}>
         <div
           className={
             variant === "sub"
@@ -55,7 +55,7 @@ export function Banner({ variant, className = "" }: BannerProps) {
     : "";
 
   return (
-    <div className={`pt-5 ${className}`}>
+    <div className={`pt-0 ${className}`}>
       <div
         className={
           variant === "sub"

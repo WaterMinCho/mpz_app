@@ -521,22 +521,11 @@ export default function AnimalDetailPage({
   }, [pathname, id]);
 
   const handleBack = () => {
-    if (typeof window !== "undefined") {
-      const lastPath = sessionStorage.getItem("lastNonVerificationPath");
-
-      if (!lastPath) {
-        router.push("/list/animal");
-        return;
-      }
-
-      if (lastPath && !lastPath.includes("/adoption/")) {
-        router.push(lastPath);
-        return;
-      }
+    if (typeof window !== "undefined" && window.history.length > 1) {
+      router.back();
+    } else {
+      router.push("/list/animal");
     }
-
-    // 이전 경로가 없거나 입양 경로뿐이면 리스트로 이동 (입양 절차로는 가지 않도록)
-    router.push("/list/animal");
   };
 
   // 거리 기반 관련 동물 데이터 가져오기

@@ -62,7 +62,7 @@ class CenterAdmin(admin.ModelAdmin):
 @admin.register(AdoptionContractTemplate)
 class AdoptionContractTemplateAdmin(admin.ModelAdmin):
     list_display = ['title', 'center', 'is_active', 'created_at']
-    list_filter = ['is_active', ('center__region', admin.FieldListFilter)]
+    list_filter = ['is_active', 'center__region']
     search_fields = ['title', 'center__name']
     list_editable = ['is_active']
     readonly_fields = ['created_at', 'updated_at']
@@ -87,7 +87,7 @@ class AdoptionContractTemplateAdmin(admin.ModelAdmin):
 @admin.register(AdoptionConsent)
 class AdoptionConsentAdmin(admin.ModelAdmin):
     list_display = ['title', 'center', 'is_active', 'created_at']
-    list_filter = ['is_active', ('center__region', admin.FieldListFilter)]
+    list_filter = ['is_active', 'center__region']
     search_fields = ['title', 'center__name']
     list_editable = ['is_active']
     readonly_fields = ['created_at', 'updated_at']
