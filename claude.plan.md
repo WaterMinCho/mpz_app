@@ -73,6 +73,15 @@
 
 ---
 
+## 보안 검수
+- [ ] OWASP Top 10 기준 크리티컬 수준 분류 및 점검
+- [ ] XSS, CSRF, SQL Injection, 인증/인가 취약점 검토
+- [ ] 환경변수/시크릿 노출 여부 확인
+- [ ] API 엔드포인트 권한 검증 (인증 없이 접근 가능한 API 점검)
+- [ ] 크리티컬 → 긴급 수정, 중간 → 일정 내 수정, 낮음 → 백로그
+
+---
+
 ## 테스트 시스템 구축
 - [ ] Jest/Vitest + React Testing Library
 - [ ] Backend: Django test / pytest
