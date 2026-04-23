@@ -138,8 +138,8 @@ export default function DetailInfo({
         )}
       </div>
       <InfoCard>
-        반려동물 추천에서 사용되는 정보로, 성향 분석표를 기반으로 정확한 성향
-        분석이 가능한 훈련사 및 전문가 작성 항목
+        반려동물 추천에서 사용되는 정보로, 성향 분석표를 기반으로 작성하는
+        항목
         {!canEdit && (
           <div className="mt-2 text-xs text-error font-medium">
             ⚠️ 비전문가는 수정할 수 없습니다.
@@ -189,7 +189,7 @@ export default function DetailInfo({
           </div>
         </div>
       )}
-      <div className="flex flex-col w-full gap-2">
+      {/* <div className="flex flex-col w-full gap-2">
         <h5 className="text-dg">전문가 한 마디</h5>
         <textarea
           placeholder="아이에 대해 덧붙이고 싶은 사항이 있다면 자유롭게 작성해주세요."
@@ -198,7 +198,7 @@ export default function DetailInfo({
           disabled={!canEdit}
           className="flex w-full rounded-md border border-lg bg-background px-4 py-3 h5 ring-offset-background placeholder:text-gr placeholder:text-body placeholder:text-top disabled:cursor-not-allowed disabled:opacity-50 resize-none h-[150px] focus:outline-none"
         />
-      </div>
+      </div> */}
     </div>
   );
 }
