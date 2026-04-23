@@ -57,6 +57,7 @@ export function TopPetSection({
   } = useGeolocation();
   const [userLocation, setUserLocation] = useState<string>("");
   const [isMounted, setIsMounted] = useState(false);
+  const [isNearbyActive, setIsNearbyActive] = useState(true);
   const hasAutoAppliedLocation = useRef(false);
 
   // 클라이언트 마운트 시 GPS 자동 요청
@@ -99,8 +100,6 @@ export function TopPetSection({
     onLocationSelect,
     isNearbyActive,
   ]);
-
-  const [isNearbyActive, setIsNearbyActive] = useState(true);
 
   // "내 주변" 버튼 클릭 시 위치정보 요청
   const handleNearbyClick = () => {

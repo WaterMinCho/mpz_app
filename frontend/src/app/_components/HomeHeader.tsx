@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
+// import Image from "next/image";
 
 import { Bell } from "@phosphor-icons/react";
 import { IconButton } from "@/components/ui/IconButton";
