@@ -303,7 +303,7 @@ export default function Home() {
       </div>
 
       <NavBar />
-      <div className="max-w-[420px] mx-auto">
+      {/* <div className="max-w-[420px] mx-auto">
         <button
           type="button"
           onClick={handleConsultClick}
@@ -334,7 +334,7 @@ export default function Home() {
         rightButtonText="이동하기"
         onLeftClick={() => setShowConsultModal(false)}
         onRightClick={handleConfirmConsult}
-      />
+      /> */}
     </Container>
   );
 }
