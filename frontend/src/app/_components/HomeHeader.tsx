@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
+// import Image from "next/image";
 
 import { Bell } from "@phosphor-icons/react";
 import { IconButton } from "@/components/ui/IconButton";
@@ -32,7 +32,7 @@ export function HomeHeader({ isLoggedIn }: HomeHeaderProps) {
       className="px-0"
       left={
         <Link href="/">
-          <Image src="/illust/logo.svg" alt="logo" width={71} height={38} style={{ width: 'auto', height: 'auto' }} />
+          <img src="/illust/logo.svg" alt="logo" width={71} height={38} />
         </Link>
       }
       right={

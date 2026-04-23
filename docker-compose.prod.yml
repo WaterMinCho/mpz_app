@@ -6,6 +6,7 @@ services:
       args:
         - NEXT_PUBLIC_API_BASE_URL=${NEXT_PUBLIC_API_BASE_URL}
         - NEXT_PUBLIC_KAKAO_CLIENT_ID=${NEXT_PUBLIC_KAKAO_CLIENT_ID}
+        - CACHE_BUST=${CACHE_BUST}
     command: ["node", "server.js"]
     networks:
       - network

@@ -6,6 +6,10 @@ on:
       - main   # prod 배포
       - dev    # dev 배포
 
+concurrency:
+  group: deploy-${{ github.ref_name }}
+  cancel-in-progress: true
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -45,33 +49,25 @@ jobs:
           script: |
             cd ~/mpz_app
 
-            # Docker Compose가 자동으로 읽는 .env 파일 생성 (NEXT_PUBLIC_* 빌드 변수 포함)
+            # .env 생성 (NEXT_PUBLIC_* 빌드 변수 + CACHE_BUST)
             echo "APP_ENV=$APP_ENV" > .env
+            echo "CACHE_BUST=$(date +%s)" >> .env
             grep '^NEXT_PUBLIC_' backend/.env.$APP_ENV >> .env || true
-
-            # NEXT_PUBLIC_KAKAO_CLIENT_ID 추가 (backend에선 KAKAO_SOCIAL_LOGIN_CLIENT_ID로 저장)
             if ! grep -q 'NEXT_PUBLIC_KAKAO_CLIENT_ID' .env; then
               KAKAO_ID=$(grep '^KAKAO_SOCIAL_LOGIN_CLIENT_ID=' backend/.env.$APP_ENV | cut -d= -f2)
               [ -n "$KAKAO_ID" ] && echo "NEXT_PUBLIC_KAKAO_CLIENT_ID=$KAKAO_ID" >> .env
             fi
 
-            # 빌드 + 재시작 (worker 제외, CACHE_BUST로 frontend 캐시 무효화)
-            CACHE_BUST=$(date +%s) APP_ENV=$APP_ENV docker compose -f docker-compose.prod.yml build --build-arg CACHE_BUST=$CACHE_BUST frontend
-            APP_ENV=$APP_ENV docker compose -f docker-compose.prod.yml up -d --force-recreate --no-deps frontend backend redis
+            # 빌드 + 재시작 한 줄 (worker 제외)
+            APP_ENV=$APP_ENV docker compose -f docker-compose.prod.yml up -d --build --force-recreate frontend backend nginx redis
 
-            # worker는 최초 생성만 (기존 컨테이너 재시작 안 함)
+            # worker 최초 생성만
             APP_ENV=$APP_ENV docker compose -f docker-compose.prod.yml up -d --no-recreate worker
 
-            # backend가 준비될 때까지 대기 후 nginx 재시작 (502 방지)
-            echo "⏳ Waiting for backend to be ready..."
-            for i in $(seq 1 30); do
-              if APP_ENV=$APP_ENV docker compose -f docker-compose.prod.yml exec -T backend python -c "import django" 2>/dev/null; then
-                break
-              fi
+            # backend 준비 대기 후 마이그레이션 + 정적 파일
+            until APP_ENV=$APP_ENV docker compose -f docker-compose.prod.yml exec -T backend python -c "import django" 2>/dev/null; do
               sleep 2
             done
-
-            APP_ENV=$APP_ENV docker compose -f docker-compose.prod.yml restart nginx
             APP_ENV=$APP_ENV docker compose -f docker-compose.prod.yml exec -T backend python manage.py migrate --noinput
-            APP_ENV=$APP_ENV docker compose -f docker-compose.prod.yml exec -T backend python manage.py collectstatic --noinput --clear
-            echo "✅ Deploy complete: $APP_ENV (worker 유지)"
+            APP_ENV=$APP_ENV docker compose -f docker-compose.prod.yml exec -T backend python manage.py collectstatic --noinput
+            echo "✅ Deploy complete: $APP_ENV"
