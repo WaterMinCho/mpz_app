@@ -37,7 +37,7 @@ function LogInInner() {
   }, [isAuthenticated, router, searchParams]);
 
   return (
-    <Container className="h-screen flex flex-col justify-between px-4 overflow-hidden py-12">
+    <Container className="flex flex-col justify-between px-4 overflow-hidden py-12" style={{ height: '100dvh' }}>
       <div className="flex flex-col gap-1 items-center mt-8">
         <div className="w-[167px] h-[89px] flex items-center justify-center">
           <Link href="/">
