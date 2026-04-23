@@ -133,7 +133,8 @@ export function KakaoButton({
       const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL || "https://api.mpz.kr/v1/";
       const redirectUri = `${apiBase.replace(/\/$/, "")}/kakao/login/callback`;
       const frontendUrl = window.location.origin;
-      const state = `${crypto.randomUUID().replace(/-/g, "")}_frontend_${encodeURIComponent(frontendUrl)}`;
+      const returnPath = window.location.pathname + window.location.search;
+      const state = `${crypto.randomUUID().replace(/-/g, "")}_frontend_${encodeURIComponent(frontendUrl)}_returnpath_${encodeURIComponent(returnPath)}`;
       const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(
         redirectUri
       )}&response_type=code&state=${state}`;

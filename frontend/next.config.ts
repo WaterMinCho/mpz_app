@@ -23,6 +23,7 @@ const nextConfig = {
       { protocol: "https", hostname: "encrypted-tbn3.gstatic.com" },
       { protocol: "http", hostname: "k.kakaocdn.net" },
       { protocol: "https", hostname: "k.kakaocdn.net" },
+      { protocol: "https", hostname: "images.unsplash.com" },
     ],
   },
 };

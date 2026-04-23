@@ -222,11 +222,18 @@ async def kakao_login_callback(request, code: str, state: str, redirect_uri: str
         logger.exception("JWT 토큰 생성 또는 사용자 처리 중 오류")
         raise HttpError(503, "카카오 로그인 처리 중 오류가 발생했습니다.")
 
-    # state에서 frontend URL 추출 (로컬 개발 지원)
+    # state에서 frontend URL + return path 추출
     frontend_base = settings.FRONTEND_URL
+    return_path = "/"
     if state and "_frontend_" in state:
         try:
-            encoded_url = state.split("_frontend_", 1)[1]
+            after_frontend = state.split("_frontend_", 1)[1]
+            # _returnpath_ 가 있으면 분리
+            if "_returnpath_" in after_frontend:
+                encoded_url, encoded_path = after_frontend.split("_returnpath_", 1)
+                return_path = unquote(encoded_path) or "/"
+            else:
+                encoded_url = after_frontend
             decoded_url = unquote(encoded_url)
             allowed_origins = [
                 settings.FRONTEND_URL,
@@ -251,7 +258,7 @@ async def kakao_login_callback(request, code: str, state: str, redirect_uri: str
     if redirect_candidate:
         redirect_path = unquote(redirect_candidate)
     else:
-        redirect_path = "/"
+        redirect_path = return_path
 
     if redirect_path and not redirect_path.startswith(("http://", "https://")):
         if not redirect_path.startswith("/"):

@@ -31,7 +31,7 @@ export function Banner({ variant, className = "" }: BannerProps) {
           className={
             variant === "sub"
               ? "relative w-full h-20 overflow-hidden rounded-lg"
-              : "relative w-full h-[232px] overflow-hidden"
+              : "relative w-full aspect-[18/10] max-h-[232px] overflow-hidden"
           }
         >
           <div className="w-full h-full bg-gray-200 animate-pulse" />
@@ -60,7 +60,7 @@ export function Banner({ variant, className = "" }: BannerProps) {
         className={
           variant === "sub"
             ? "relative w-full h-20 overflow-hidden rounded-lg cursor-pointer"
-            : "relative w-full h-[232px] overflow-hidden cursor-pointer"
+            : "relative w-full aspect-[18/10] max-h-[232px] overflow-hidden cursor-pointer"
         }
         onClick={() => {
           if (linkUrl) {

@@ -9,7 +9,7 @@ import { HomeHeader } from "@/app/_components/HomeHeader";
 import { PetSection } from "@/app/_components/PetSection";
 import { TopPetSection } from "@/app/_components/TopPetSection";
 //import { MatchingSection } from "@/app/_components/MatchingSection";
-import { CommunitySection } from "@/app/_components/CommunitySection";
+// import { CommunitySection } from "@/app/_components/CommunitySection";
 import { FooterSection } from "@/app/_components/FooterSection";
 import { useGetAnimals } from "@/hooks/query/useGetAnimals";
 import { useGetBanners } from "@/hooks/query/useGetBanners";
@@ -290,7 +290,7 @@ export default function Home() {
           aiMatchingResult={aiMatchingResult}
         /> */}
 
-        <CommunitySection />
+        {/* <CommunitySection /> */}
 
         <PetSection
           title={`지금 주목받고 있는 \n아이들이에요`}
