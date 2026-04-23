@@ -333,28 +333,28 @@ async def update_consent(request: HttpRequest, consent_id: str, data: ConsentUpd
                 except AttributeError:
                     raise HttpError(400, "등록된 센터가 없습니다")
             
-            # 해당 센터의 동의서 조회
+            # 해당 센터의 동의서 조회 — 없으면 새로 생성 (upsert)
             try:
                 consent = AdoptionConsent.objects.get(id=consent_id, center=user_center)
+                # 업데이트할 데이터만 필터링하여 업데이트
+                update_fields = {
+                    'title': data.title,
+                    'description': data.description,
+                    'content': data.content,
+                    'is_active': data.is_active
+                }
+                update_data = {k: v for k, v in update_fields.items() if v is not None}
+                AdoptionConsent.objects.filter(id=consent.id).update(**update_data)
+                updated_consent = AdoptionConsent.objects.get(id=consent.id)
             except AdoptionConsent.DoesNotExist:
-                raise HttpError(404, "동의서를 찾을 수 없습니다")
-            
-            # 업데이트할 데이터만 필터링하여 업데이트
-            update_fields = {
-                'title': data.title,
-                'description': data.description,
-                'content': data.content,
-                'is_active': data.is_active
-            }
-            
-            # None이 아닌 값만 업데이트
-            update_data = {k: v for k, v in update_fields.items() if v is not None}
-            
-            # 동의서 정보 업데이트
-            AdoptionConsent.objects.filter(id=consent.id).update(**update_data)
-            
-            # 업데이트된 동의서 정보 조회
-            updated_consent = AdoptionConsent.objects.get(id=consent.id)
+                # 동의서가 없으면 새로 생성
+                updated_consent = AdoptionConsent.objects.create(
+                    center=user_center,
+                    title=data.title or "",
+                    description=data.description or "",
+                    content=data.content or "",
+                    is_active=data.is_active if data.is_active is not None else True,
+                )
             
             # 응답 데이터 변환
             return ConsentOut(
