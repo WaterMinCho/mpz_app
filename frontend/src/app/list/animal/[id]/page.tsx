@@ -615,7 +615,7 @@ export default function AnimalDetailPage({
         />
         <div className="py-3" />
 
-        {isCenterSubscriber && (
+        {/* {isCenterSubscriber && (
           <SubscriberDetails
             activityLevel={animal.activity_level || 3}
             sensitivity={animal.sensitivity || 3}
@@ -625,7 +625,7 @@ export default function AnimalDetailPage({
             trainerName={animal.trainer_name || undefined}
             trainerComment={animal.trainer_comment || undefined}
           />
-        )}
+        )} */}
         <div className="py-3" />
         <RelatedPosts
           currentPet={{

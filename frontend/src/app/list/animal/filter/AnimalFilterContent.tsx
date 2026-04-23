@@ -55,9 +55,9 @@ export function AnimalFilterContent() {
   const [selectedProtectionStatus, setSelectedProtectionStatus] = useState<
     string[]
   >(defaultProtectionStatus);
-  const [selectedExpertOpinion, setSelectedExpertOpinion] = useState<string[]>(
-    filters.expertOpinion || []
-  );
+  // const [selectedExpertOpinion, setSelectedExpertOpinion] = useState<string[]>(
+  //   filters.expertOpinion || []
+  // );
 
   const [lastSelectedProtectionStatus, setLastSelectedProtectionStatus] =
     useState<string>(
@@ -80,7 +80,7 @@ export function AnimalFilterContent() {
       ages: selectedAges,
       genders: selectedGenders,
       protectionStatus: selectedProtectionStatus,
-      expertOpinion: selectedExpertOpinion,
+      expertOpinion: [],
     };
 
     setFilters(nextFilters);
