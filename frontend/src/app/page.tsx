@@ -74,17 +74,10 @@ export default function Home() {
   const router = useRouter();
   const pathname = usePathname();
   // const kakaoChannelUrl = "http://pf.kakao.com/_mbxbDn/chat";
-  const [selectedLocation, setSelectedLocation] = useState<string>("서울");
+  const [selectedLocation, setSelectedLocation] = useState<string>("");
 
-  // 클라이언트에서만 localStorage에서 초기값 로드
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const savedLocation = localStorage.getItem("homeLocationFilter") || "";
-      if (savedLocation) {
-        setSelectedLocation(savedLocation);
-      }
-    }
-  }, []);
+  // 초기 진입 시 localStorage 무시 — 항상 "내 주변"으로 시작
+  // (TopPetSection에서 isNearbyActive 기본값 true + GPS 자동 요청)
   // 메인 배너는 공통 로직 컴포넌트로 대체
   const [showMatchingNotification, setShowMatchingNotification] =
     useState(false);

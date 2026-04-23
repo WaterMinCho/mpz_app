@@ -59,9 +59,10 @@ export function TopPetSection({
   const [isMounted, setIsMounted] = useState(false);
   const hasAutoAppliedLocation = useRef(false);
 
-  // 클라이언트 마운트 여부 추적
+  // 클라이언트 마운트 시 GPS 자동 요청
   useEffect(() => {
     setIsMounted(true);
+    requestLocation();
   }, []);
 
   // selectedLocation이 변경되면 자동 적용 플래그 업데이트
@@ -98,7 +99,7 @@ export function TopPetSection({
     onLocationSelect,
   ]);
 
-  const [isNearbyActive, setIsNearbyActive] = useState(false);
+  const [isNearbyActive, setIsNearbyActive] = useState(true);
 
   // "내 주변" 버튼 클릭 시 위치정보 요청
   const handleNearbyClick = () => {
@@ -226,7 +227,7 @@ export function TopPetSection({
           {locations.map((loc) => {
             const displayName = getShortLocationName(loc);
             const fullName = getFullLocationName(loc);
-            const isSelected = selectedLocation
+            const isSelected = !isNearbyActive && selectedLocation
               ? isLocationMatch(selectedLocation, loc) ||
                 isLocationMatch(selectedLocation, fullName)
               : false;
