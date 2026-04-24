@@ -307,7 +307,7 @@ export default function EventCentersPage() {
 
       {/* 스크롤 연동 다크 배경 */}
       <div
-        className="fixed inset-0 bg-[#5C3D0E] pointer-events-none z-0"
+        className="fixed top-0 bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[420px] bg-[#5C3D0E] pointer-events-none z-0"
         style={{ opacity: bgOpacity * 0.4 }}
       />
 
