@@ -61,10 +61,10 @@ export default function CenterSettingName() {
     setAddress(myCenter.location || "");
     setCallAvailableTime(myCenter.callAvailableTime || "");
     setIsPublicAddress(
-      myCenter.isPublic ? "모두에게 공개" : "입양자에게만 공개"
+      myCenter.isPublic ? "모두에게 공개" : "입양자에게만 공개",
     );
     setAdoptionPrice(
-      myCenter.adoptionPrice ? myCenter.adoptionPrice.toLocaleString() : ""
+      myCenter.adoptionPrice ? myCenter.adoptionPrice.toLocaleString() : "",
     );
     setCenterImage(myCenter.imageUrl || "");
     setIsTemporaryAdoption(myCenter.hasFosterCare ? "가능" : "불가능");
@@ -208,7 +208,7 @@ export default function CenterSettingName() {
       showToastMessage(
         error instanceof Error
           ? error.message
-          : "센터 정보 업데이트 중 오류가 발생했습니다."
+          : "센터 정보 업데이트 중 오류가 발생했습니다.",
       );
     }
   };

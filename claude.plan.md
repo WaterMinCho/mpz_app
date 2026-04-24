@@ -3,34 +3,38 @@
 ## 🔴 다음 세션
 
 ### ~~1. deploy.yml 재설계~~ ✅ 완료
-- concurrency 추가, 한 줄 통합, backend 상태 기반 대기
 
-### 2. 이벤트 페이지
+### 1.5. Figma MCP 연동 ✅ 완료
+- `figma-dev` MCP 서버 설정 (figma-developer-mcp, PAT 기반)
+- 디자인 파일: https://www.figma.com/design/30IyUJvsyizlnUQ5urTx24/MPZ-기획?m=dev
+- 세션 재시작 후 Figma 도구 사용 가능
+
+### 2. 이벤트 페이지 (진행 중)
 - 홈 배너 → 이벤트 페이지 연결
 - 스토리 블록 + 만화 패널 + 참여 센터 리스트 + 신청 폼
 - 기획안: /Users/jominsu/Downloads/배너.html
+- **Figma 디자인 참고하여 구현**
+
+#### 현재 상태 (2026-04-24)
+- FE: Figma 기획 반영 완료 — 이미지 영역 + 민간센터 리스트(DB) + 신청 폼(주소API, 셀렉트박스, 전체필수)
+- BE: `is_public` 필터 추가 완료, `/v1/event/apply` API 미구현
+- 센터 리스트: `useGetCenters({ is_public: false })` 연동 완료
 
 #### 확정된 사항
 - 경로: `/event/centers`
-- 센터 리스트: 기존 DB 민간센터 (`is_public=false`)
-- 신청 폼: 이메일 전송 (mypetguardians@naver.com)
-- 테마: 라이트 (다크 아님)
-- "아이들 보러가기" 버튼: 미정 (대표님 확인 후)
+- 센터 리스트: 기존 DB 민간센터 (`is_public=false`) — API 연동 완료
+- 신청 폼: 센터명, 운영자이름, 연락처, 주소(다음API+상세), 동물수(셀렉트) — 전체 필수
+- 신청 완료 시: Alert "신청이 완료되었습니다. 담당자가 2영업일 내 문자로 연락드립니다." + 초기화
+- 센터 카드 클릭: `/list/center/{id}`로 이동
+- 홈 배너: BO에서 등록 (dev에 임시 등록 완료)
+- 이벤트 설명 영역: Figma 이미지 사용 (`event-screenshot.png`)
 
-#### 대표님 확인 필요 질문
-1. "우리 아이들 만나러 가기" CTA 버튼 → 어디로 이동? `/list/animal`?
-2. 만화 패널 일러스트 — 기획안 SVG 그대로? 별도 이미지?
-3. 홈 배너 이미지 — 디자이너가 만들어서 백오피스 업로드? 코드 구현?
-4. 신청 폼 이메일 발송 — SMTP 세팅 있는지? 없으면 방식 결정 필요
-5. "더 많은 센터 보기" 버튼 → `/list/center`로 이동?
-6. pill 태그 ("입양·임시보호 모두 가능", "전국 센터 한눈에") — 하드코딩? 동적?
-7. 이벤트 페이지 접근 — 로그인 없이 퍼블릭?
-8. 센터 카드의 "강아지 5", "고양이 3" 수치 — DB에서 실시간 카운트? 수동 입력?
-9. 센터 카드 태그 (#소형견, #접종완료 등) — DB 필드에 있는지? 수동?
-10. "NEW" 배지 — 기준이 뭔지? 최근 N일 이내 등록?
-11. 센터 카드 클릭 시 — 센터 상세(`/list/center/{id}`)로 이동?
-12. 신청 폼 필수값 — 전부 필수? 한 줄 소개만 선택?
-13. 신청 완료 후 UI — 토스트? 완료 화면? 리다이렉트?
+#### 남은 작업
+- BE: `/v1/event/apply` API (SMTP 이메일 전송)
+
+#### SMTP 세팅 필요
+- 네이버 메일 POP3/SMTP 사용 허용 필요
+- 네이버 계정 비밀번호 필요 (env에 설정)
 
 ### 3. 카카오 개발자 콘솔 (코드 X, 콘솔 작업)
 - [ ] 공유: dev.mpz.kr / localhost:3001 도메인 등록
@@ -56,7 +60,12 @@
 - gunicorn은 HTTP만 처리, WebSocket은 Daphne 등 ASGI 서버 필요
 - prod/로컬에서 무한 재연결 시도 발생 중
 
-### 9. 모니터링
+### 9. deploy.yml 고도화 (검토)
+- [ ] GitHub Actions에서 빌드 테스트 먼저 → 실패 시 EC2 배포 안 함
+- [ ] 또는 Actions에서 이미지 빌드 → Docker Registry push → EC2에서 pull만 (더 효율적)
+- [ ] 시간 2배 문제 vs 안정성 트레이드오프 검토
+
+### 10. 모니터링
 - [ ] Freshping + Sentry + Slack 배포 알림
 - [ ] **필수**: GitHub Actions 배포 성공/실패 Slack 알림 (에러 로그 포함) — 수동 체크 제거
 

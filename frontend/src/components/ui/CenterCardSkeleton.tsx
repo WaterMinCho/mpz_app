@@ -8,21 +8,15 @@ export function CenterCardSkeleton({
   className = "",
 }: CenterCardSkeletonProps) {
   return (
-    <div className={`w-full bg-white${className}`}>
-      <div className="flex items-center gap-4">
-        {/* 이미지 스켈레톤 */}
-        <div className="flex-shrink-0">
-          <div className="w-[63px] h-[63px] bg-gray-200 rounded-lg animate-pulse" />
-        </div>
-        {/* 정보 스켈레톤 */}
-        <div className="flex-1 min-w-0">
-          {/* 센터 이름 스켈레톤 */}
-          <div className="w-3/4 h-5 bg-gray-200 rounded animate-pulse mb-2" />
-
-          {/* 위치 스켈레톤 */}
-          <div className="w-1/2 h-4 bg-gray-200 rounded animate-pulse mb-3" />
-        </div>
+    <div
+      className={`w-full flex items-center bg-wh rounded-xl border border-lg p-3 ${className}`}
+    >
+      <div className="w-[63px] h-[63px] rounded-md bg-gray-200 animate-pulse flex-shrink-0 mr-3" />
+      <div className="flex-1 min-w-0">
+        <div className="h-4 bg-gray-200 rounded animate-pulse w-1/2" />
+        <div className="h-3 bg-gray-200 rounded animate-pulse w-1/3 mt-2" />
       </div>
+      <div className="h-3 bg-gray-200 rounded animate-pulse w-14 ml-2" />
     </div>
   );
 }
