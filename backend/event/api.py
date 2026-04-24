@@ -1,3 +1,4 @@
+import os
 import re
 import logging
 from ninja import Router, Schema, Field
@@ -58,7 +59,8 @@ async def event_apply(request: HttpRequest, data: EventApplyIn):
     if data.address_detail:
         full_address += f" {_sanitize(data.address_detail)}"
 
-    subject = f"[MPZ 센터 신청] {_sanitize(data.center_name)}"
+    env_label = "DEV" if settings.DEBUG or os.environ.get("APP_ENV") == "dev" else "PROD"
+    subject = f"[MPZ-{env_label} 센터 신청] {_sanitize(data.center_name)}"
     message = (
         f"센터명: {_sanitize(data.center_name)}\n"
         f"운영자: {_sanitize(data.owner_name)}\n"

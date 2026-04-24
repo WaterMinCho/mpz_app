@@ -13,6 +13,7 @@ import { BigButton } from "@/components/ui/BigButton";
 import { NotificationToast } from "@/components/ui/NotificationToast";
 import { CustomAlert } from "@/components/ui/CustomAlert";
 import { SearchInput } from "@/components/ui/SearchInput";
+import { CenterCardSkeleton } from "@/components/ui/CenterCardSkeleton";
 import { useGetCenters } from "@/hooks/query/useGetCenters";
 import { transformRawCenterToCenter } from "@/types/center";
 import { openKakaoAddress } from "@/lib/openKakaoAddress";
@@ -152,6 +153,19 @@ export default function EventCentersPage() {
   }, []);
 
   const [showAlert, setShowAlert] = useState(false);
+  const [bgOpacity, setBgOpacity] = useState(1);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      if (docHeight <= 0) return;
+      const progress = window.scrollY / docHeight;
+      setBgOpacity(Math.max(0, 1 - progress));
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   /* ── 폼 상태 ── */
   const [toast, setToast] = useState<{
@@ -291,11 +305,17 @@ export default function EventCentersPage() {
         }
       />
 
+      {/* 스크롤 연동 다크 배경 */}
+      <div
+        className="fixed inset-0 bg-[#5C3D0E] pointer-events-none z-0"
+        style={{ opacity: bgOpacity * 0.4 }}
+      />
+
       {introState === "pending" ? (
         <div className="min-h-screen" />
       ) : (
         <Container
-          className={`min-h-screen pb-20 transition-all duration-1000 ease-out ${
+          className={`min-h-screen pb-20 !bg-transparent transition-all duration-1000 ease-out ${
             introState === "done" || introState === "playing"
               ? "opacity-100 translate-y-0"
               : "opacity-0 translate-y-4"
@@ -315,7 +335,7 @@ export default function EventCentersPage() {
                 />
               </div>
               <div className="absolute bottom-0 left-0 right-0">
-                <div className="bg-black/50 backdrop-blur-[2px] px-4 py-3 rounded-b-xl">
+                <div className="bg-black/30 backdrop-blur-[1px] px-4 py-3 rounded-b-xl">
                   <p className="text-xs text-orange-100 font-medium mb-0.5">
                     어린시절 전 매일 창밖을 보며
                   </p>
@@ -336,7 +356,7 @@ export default function EventCentersPage() {
                 />
               </div>
               <div className="absolute bottom-0 left-0 right-0">
-                <div className="bg-black/50 backdrop-blur-[2px] px-4 py-3 rounded-b-xl">
+                <div className="bg-black/30 backdrop-blur-[1px] px-4 py-3 rounded-b-xl">
                   <p className="text-xs text-orange-100 font-medium mb-0.5">
                     10년 후, 같은 자리
                   </p>
@@ -365,16 +385,7 @@ export default function EventCentersPage() {
             {centersLoading ? (
               <div className="space-y-3">
                 {[1, 2, 3].map((i) => (
-                  <div
-                    key={i}
-                    className="flex items-center bg-wh rounded-xl border border-lg p-3 animate-pulse"
-                  >
-                    <div className="w-16 h-16 rounded-lg bg-gray-200 mr-3" />
-                    <div className="flex-1 space-y-2">
-                      <div className="h-4 bg-gray-200 rounded w-1/2" />
-                      <div className="h-3 bg-gray-200 rounded w-1/3" />
-                    </div>
-                  </div>
+                  <CenterCardSkeleton key={i} />
                 ))}
               </div>
             ) : centers.length > 0 ? (
@@ -473,6 +484,7 @@ export default function EventCentersPage() {
                 </h5>
                 <SearchInput
                   variant="variant2"
+                  className="!bg-gray-200"
                   placeholder="센터 주소를 검색해주세요."
                   value={formData.address}
                   onChange={(e) => handleFormChange("address", e.target.value)}
