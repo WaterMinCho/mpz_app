@@ -218,17 +218,17 @@ export default function AnimalDetailPage({
       return;
     }
 
-    // 구독 센터인 경우 입양 절차 모달을 먼저 보여줌
-    if (isCenterSubscriber) {
-      if (center?.adoptionProcedure || center?.callAvailableTime) {
-        setShowAdoptionProcedureModal(true);
-      } else {
-        handleAdoptionProcedureConfirm();
-      }
-      return;
-    }
+    // TODO: 구독 센터 앱 내 입양 신청 절차 복원 예정 — 임시로 전화 연결로 통일
+    // if (isCenterSubscriber) {
+    //   if (center?.adoptionProcedure || center?.callAvailableTime) {
+    //     setShowAdoptionProcedureModal(true);
+    //   } else {
+    //     handleAdoptionProcedureConfirm();
+    //   }
+    //   return;
+    // }
 
-    // 일반 센터인 경우 기존 바텀시트 표시
+    // 구독/일반 센터 모두 전화 연결 바텀시트 표시
     setShowAdoptionBottomSheet(true);
   };
 

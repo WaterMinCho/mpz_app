@@ -72,28 +72,28 @@ export default function AnimalBasicInfo({
       case "임시보호":
         return {
           text: "임시보호",
-          colorClass: "bg-blue/10 text-blue",
+          colorClass: "bg-brand-sub2 text-brand",
         };
       case "기증":
         return {
           text: "기증",
-          colorClass: "bg-purple/10 text-purple",
+          colorClass: "bg-bg text-dg",
         };
       case "안락사":
       case "자연사":
         return {
           text: "🌈",
-          colorClass: "bg-orange-100/10",
+          colorClass: "bg-orange-50 text-orange-100",
         };
       case "반환":
         return {
           text: "반환",
-          colorClass: "bg-gr/10 text-gr",
+          colorClass: "bg-bg text-gr",
         };
       case "방사":
         return {
           text: "방사",
-          colorClass: "bg-gray/10 text-gray",
+          colorClass: "bg-bg text-gr",
         };
       case "입양완료":
         return {
@@ -111,12 +111,12 @@ export default function AnimalBasicInfo({
           case "입양진행중":
             return {
               text: adoptionStatus,
-              colorClass: "bg-blue/10 text-blue",
+              colorClass: "bg-brand-sub2 text-brand",
             };
           case "입양불가":
             return {
               text: adoptionStatus,
-              colorClass: "bg-red-100/10 text-red-600",
+              colorClass: "bg-orange-50 text-error",
             };
           case "입양가능":
           default:
@@ -200,8 +200,8 @@ export default function AnimalBasicInfo({
       </div>
 
       {/* 기본 정보 섹션 */}
-      <div className="mx-4 py-4 border-b border-lg">
-        <div className="flex items-center gap-2 mb-3">
+      <div className="px-4 py-4 border-b border-lg">
+        <div className="flex items-center mb-3 space-x-2">
           {(() => {
             const statusInfo = getStatusInfo(
               protection_status,
@@ -222,15 +222,15 @@ export default function AnimalBasicInfo({
             </span>
           )}
         </div>
-        <div className="flex items-center body2 text-dg gap-2">
+        <div className="flex items-center body2 text-dg space-x-2">
           <span>
             {isFemale ? "암컷" : "수컷"} ({neutering ? "중성화 O" : "중성화 X"})
           </span>
-          <span className="text-gray-300">|</span>
+          <span className="text-lg">|</span>
           <span>{Math.trunc(age / 12)}살 추정</span>
-          <span className="text-gray-300">|</span>
+          <span className="text-lg">|</span>
           <span>{weight}kg</span>
-          <span className="text-gray-300">|</span>
+          <span className="text-lg">|</span>
           <span>{color}</span>
         </div>
       </div>

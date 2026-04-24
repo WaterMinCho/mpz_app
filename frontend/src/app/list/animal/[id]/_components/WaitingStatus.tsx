@@ -53,13 +53,13 @@ export default function WaitingStatus({ admissionDate }: WaitingStatusProps) {
     if (days <= 21) {
       return "text-green";
     } else {
-      return "text-[#FF814F]";
+      return "text-orange-100";
     }
   };
 
   return (
-    <div className="bg-bg rounded-lg mx-2 my-3 p-2">
-      <div className="flex items-center justify-center gap-1">
+    <div className="bg-bg rounded-lg mx-4 my-3 p-2">
+      <div className="flex items-center justify-center space-x-1">
         <Timer
           className={cn("w-4 h-4", getWaitingDaysIconColor(waitingDays))}
         />
