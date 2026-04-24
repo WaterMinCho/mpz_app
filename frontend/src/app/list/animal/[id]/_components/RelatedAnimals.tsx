@@ -14,8 +14,8 @@ export function RelatedAnimals({
   className,
 }: RelatedAnimalsProps) {
   return (
-    <div className={`mx-4 my-3 flex flex-col gap-4 ${className}`}>
-      <h2 className="text-bk">{location}에 있는 다른 아이들</h2>
+    <div className={`px-4 my-5 ${className}`}>
+      <h2 className="text-bk mb-4">{location}에 있는 다른 아이들</h2>
       {pets.length === 0 ? (
         <div className="text-gr text-md">가까운 동물이 없습니다.</div>
       ) : (

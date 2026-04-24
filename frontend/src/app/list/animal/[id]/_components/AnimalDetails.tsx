@@ -24,7 +24,7 @@ export default function AnimalDetails({
   healthNotes = [],
 }: AnimalDetailsProps) {
   return (
-    <div className="bg-white rounded-lg mx-4">
+    <div className="bg-white rounded-lg px-4">
       <table className="w-full text-sm">
         <tbody>
           {!isCenterSubscriber && (
@@ -77,13 +77,13 @@ export default function AnimalDetails({
               {healthNotes && healthNotes.length > 0 ? (
                 <ul className="space-y-1">
                   {healthNotes.map((note, index) => (
-                    <li key={index} className="flex items-start text-gray-700">
+                    <li key={index} className="flex items-start text-dg">
                       {note}
                     </li>
                   ))}
                 </ul>
               ) : (
-                <div className="text-gray-700">-</div>
+                <div className="text-dg">-</div>
               )}
             </td>
           </tr>
