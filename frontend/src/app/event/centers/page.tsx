@@ -15,6 +15,7 @@ import { SearchInput } from "@/components/ui/SearchInput";
 import { useGetCenters } from "@/hooks/query/useGetCenters";
 import { transformRawCenterToCenter } from "@/types/center";
 import { openKakaoAddress } from "@/lib/openKakaoAddress";
+import instance from "@/lib/axios-instance";
 
 function CenterThumbnail({ imageUrl, name }: { imageUrl: string | null; name: string }) {
   const [hasError, setHasError] = useState(false);
@@ -138,7 +139,14 @@ export default function EventCentersPage() {
 
     setIsSubmitting(true);
     try {
-      // TODO: 백엔드 API 연동 (/v1/event/apply)
+      await instance.post("/event/apply", {
+        center_name: formData.centerName.trim(),
+        owner_name: formData.ownerName.trim(),
+        phone: formData.phone.trim(),
+        address: formData.address.trim(),
+        address_detail: formData.addressDetail.trim(),
+        animal_count: formData.animalCount,
+      });
       alert(
         "신청이 완료되었습니다.\n담당자가 2영업일 내 문자로 연락드립니다."
       );
