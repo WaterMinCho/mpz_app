@@ -107,7 +107,7 @@
 ### 웹 표준화 · SEO 작업 및 보완
 - [ ] 시맨틱 HTML 태그 점검 (header, main, section, article, nav 등)
 - [ ] 접근성 (div onClick → button, aria-label, 키보드 네비게이션)
-- [ ] 동적 메타데이터 (동물/센터 상세 페이지별 OG)
+- [ ] 동적 메타데이터: 센터 상세 페이지별 OG (동물 상세는 완료)
 - [ ] Core Web Vitals 점검 (LCP, CLS, INP)
 
 ---
