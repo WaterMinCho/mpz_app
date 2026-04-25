@@ -7,7 +7,7 @@ import { PetSectionError } from "@/components/ui/PetSectionError";
 import { RawAnimalResponse, transformRawAnimalToPetCard } from "@/types/animal";
 import { PetCardVariant } from "@/types/petcard";
 import { useGeolocation } from "@/hooks/useGeolocaiton";
-import { getLocationBasedRegion, isValidLocation, getRegionNameByGeocode } from "@/lib/location-utils";
+import { isValidLocation, getRegionNameByGeocode } from "@/lib/location-utils";
 import {
   getFullLocationName,
   getShortLocationName,
