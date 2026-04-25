@@ -162,8 +162,8 @@ export default function MyPage() {
         <div className="pb-6 pt-4">
           {/* 프로필 정보 */}
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="relative w-14 h-14 rounded-[20px] overflow-hidden">
+            <div className="flex items-center">
+              <div className="relative w-14 h-14 rounded-[20px] overflow-hidden flex-shrink-0 mr-3">
                 {user?.image ? (
                   <Image
                     src={getProxyImageUrl(user.image) ?? user.image}
@@ -179,8 +179,8 @@ export default function MyPage() {
                 )}
               </div>
               {isAuthenticated && user ? (
-                <div>
-                  <span className="font-medium text-black">
+                <div className="min-w-0">
+                  <span className="font-medium text-black block truncate">
                     {user.nickname || "사용자"}
                   </span>
                 </div>

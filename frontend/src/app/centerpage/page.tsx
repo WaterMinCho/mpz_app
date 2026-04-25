@@ -133,8 +133,8 @@ export default function MyPage() {
       <div className="w-full flex flex-col gap-2 pb-[72px] min-h-[100px] flex-1">
         <div className="w-full px-4">
           <div className="w-full flex py-3 items-center justify-between h-20">
-            <div className="flex items-center gap-3">
-              <div className="relative w-14 h-14 rounded-[20px] overflow-hidden">
+            <div className="flex items-center min-w-0 flex-1">
+              <div className="relative w-14 h-14 rounded-[20px] overflow-hidden flex-shrink-0 mr-3">
                 {myCenter?.imageUrl ? (
                   <Image
                     src={myCenter.imageUrl}
@@ -149,10 +149,10 @@ export default function MyPage() {
                   </div>
                 )}
               </div>
-              <div className="flex items-center gap-1">
+              <div className="flex items-center min-w-0">
                 {isAuthenticated && myCenter ? (
-                  <div>
-                    <h4 className="text-black">
+                  <div className="min-w-0">
+                    <h4 className="text-black line-clamp-3">
                       {myCenter.name || "보호센터 이름"}
                     </h4>
                   </div>
