@@ -16,6 +16,7 @@ import { useGetAnimalById } from "@/hooks/query/useGetAnimals";
 import { useGetMyCenter } from "@/hooks/query/useGetMyCenter";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { BottomSheet } from "@/components/ui/BottomSheet";
+import { Toast } from "@/components/ui/Toast";
 
 interface FormData {
   basicInfo: {
@@ -127,6 +128,14 @@ export default function EditAnimal({
   const isSubscriber = myCenter?.isSubscriber === true;
   const isTrainer = user?.userType === "훈련사";
   const [showBackConfirmSheet, setShowBackConfirmSheet] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
+  const [showToast, setShowToast] = useState(false);
+
+  const showToastMsg = (msg: string) => {
+    setToastMessage(msg);
+    setShowToast(true);
+    setTimeout(() => setShowToast(false), 3000);
+  };
   // 기존 동물 데이터 불러오기
   const { data: animalData, isLoading: isLoadingAnimal } = useGetAnimalById(
     resolvedParams.id
@@ -236,7 +245,7 @@ export default function EditAnimal({
       !basicInfo.neutering ||
       !basicInfo.weight
     ) {
-      alert("필수 항목을 모두 입력해주세요.");
+      showToastMsg("필수 항목을 모두 입력해주세요.");
       return;
     }
 
@@ -321,7 +330,7 @@ export default function EditAnimal({
       router.push("/centerpage/animal");
     } catch (error) {
       console.error("동물 정보 수정 실패:", error);
-      alert("동물 정보 수정에 실패했습니다. 다시 시도해주세요.");
+      showToastMsg("동물 정보 수정에 실패했어요. 다시 시도해주세요.");
     }
   };
 
@@ -404,6 +413,11 @@ export default function EditAnimal({
         onLeftClick={() => setShowBackConfirmSheet(false)}
         onRightClick={handleSubmit}
       />
+      {showToast && (
+        <div className="fixed bottom-4 left-4 right-4 z-[10000]">
+          <Toast>{toastMessage}</Toast>
+        </div>
+      )}
     </Container>
   );
 }

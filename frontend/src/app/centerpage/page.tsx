@@ -28,7 +28,7 @@ interface MenuItem {
 export default function MyPage() {
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [showLogoutToast, setShowLogoutToast] = useState(false);
-  const { isAuthenticated, logout, user } = useAuth();
+  const { isAuthenticated, logout, user, isLoading: authLoading } = useAuth();
   const { data: myCenter } = useGetMyCenter();
 
   const isSubscriber = myCenter?.isSubscriber === true;
@@ -150,14 +150,18 @@ export default function MyPage() {
                 )}
               </div>
               <div className="flex items-center min-w-0">
-                {isAuthenticated && myCenter ? (
+                {authLoading ? (
+                  <div className="min-w-0">
+                    <div className="h-6 w-28 bg-lg rounded animate-pulse" />
+                  </div>
+                ) : isAuthenticated && myCenter ? (
                   <div className="min-w-0">
                     <h4 className="text-black line-clamp-3">
                       {myCenter.name || "보호센터 이름"}
                     </h4>
                   </div>
                 ) : (
-                  <h4 className=" text-black">
+                  <h4 className="text-black">
                     센터 정보를 불러오는 중입니다...
                   </h4>
                 )}

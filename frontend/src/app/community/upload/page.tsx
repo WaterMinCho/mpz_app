@@ -255,15 +255,13 @@ export default function CommunityUploadPage() {
     const remainingSlots = 5 - currentCount;
 
     if (remainingSlots <= 0) {
-      alert("이미지는 최대 5개까지 업로드할 수 있습니다.");
+      showToast("이미지는 최대 5개까지 업로드할 수 있어요.", "error");
       return;
     }
 
     // 선택 수가 남은 슬롯보다 많으면 경고 후 남은 수만 처리
     if (files.length > remainingSlots) {
-      alert(
-        `이미지는 최대 5개까지 선택할 수 있습니다. 남은 슬롯이 ${remainingSlots}개뿐이므로 ${remainingSlots}개만 선택됩니다.`
-      );
+      showToast(`남은 슬롯이 ${remainingSlots}개뿐이라 ${remainingSlots}개만 선택돼요.`, "error");
     }
 
     // 포맷 및 크기 검증
@@ -279,14 +277,12 @@ export default function CommunityUploadPage() {
     const validFiles = files.filter((file) => {
       // 포맷 체크
       if (!allowedFormats.includes(file.type)) {
-        alert(
-          `${file.name}은(는) 지원하지 않는 형식입니다. (JPG, PNG, WEBP, GIF만 가능)`
-        );
+        showToast(`${file.name}은(는) 지원하지 않는 형식이에요. (JPG, PNG, WEBP, GIF만 가능)`, "error");
         return false;
       }
       // 파일 크기 체크
       if (file.size > maxSize) {
-        alert(`${file.name}의 크기가 너무 큽니다. (최대 10MB)`);
+        showToast(`${file.name}의 크기가 너무 커요. (최대 10MB)`, "error");
         return false;
       }
       return true;
@@ -565,7 +561,7 @@ export default function CommunityUploadPage() {
                     const remainingSlots = 5 - currentCount;
 
                     if (remainingSlots <= 0) {
-                      alert("이미지는 최대 5개까지 업로드할 수 있습니다.");
+                      showToast("이미지는 최대 5개까지 업로드할 수 있어요.", "error");
                       return;
                     }
 

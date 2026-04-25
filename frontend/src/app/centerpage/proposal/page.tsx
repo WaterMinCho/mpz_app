@@ -9,10 +9,13 @@ import { IconButton } from "@/components/ui/IconButton";
 import { BigButton } from "@/components/ui/BigButton";
 import { useCreateFeedback } from "@/hooks/mutation/useCreateFeedback";
 import { useAuth } from "@/components/providers/AuthProvider";
+import { useToast } from "@/hooks/useToast";
+import { NotificationToast } from "@/components/ui/NotificationToast";
 
 export default function ProposalPage() {
   const [content, setContent] = useState("");
   const { user } = useAuth();
+  const { showToast, hideToast, toast } = useToast();
 
   const {
     mutate: createFeedback,
@@ -30,7 +33,7 @@ export default function ProposalPage() {
 
   const handleSubmit = () => {
     if (!content.trim()) {
-      alert("내용을 입력해주세요");
+      showToast("내용을 입력해주세요.", "error");
       return;
     }
 
@@ -107,6 +110,13 @@ export default function ProposalPage() {
       </div>
 
       <ToastComponent />
+      {toast.show && (
+        <NotificationToast
+          message={toast.message}
+          type={toast.type}
+          onClose={hideToast}
+        />
+      )}
     </Container>
   );
 }

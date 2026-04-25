@@ -93,11 +93,8 @@ export default function ProfileEditPage() {
       } catch (error) {
         // 업로드 실패 시 미리보기 제거
         setProfileImage(authUser?.image || null);
-        setToastMessage(
-          error instanceof Error
-            ? error.message
-            : "이미지 업로드에 실패했습니다"
-        );
+        console.error("이미지 업로드 실패:", error);
+        setToastMessage("사진 업로드에 실패했어요. 다시 시도해주세요.");
         setShowToast(true);
       }
     }
@@ -135,9 +132,8 @@ export default function ProfileEditPage() {
         router.push("/my");
       }, 2000);
     } catch (error) {
-      setToastMessage(
-        error instanceof Error ? error.message : "프로필 수정에 실패했습니다"
-      );
+      console.error("프로필 수정 실패:", error);
+      setToastMessage("프로필 수정에 실패했어요. 다시 시도해주세요.");
       setShowToast(true);
     }
   };
@@ -249,7 +245,8 @@ export default function ProfileEditPage() {
                 label="닉네임"
                 placeholder="닉네임을 설정해보세요."
                 value={nickname}
-                onChange={(e) => setNickname(e.target.value)}
+                maxLength={100}
+                onChange={(e) => setNickname(e.target.value.slice(0, 100))}
               />
             </div>
 

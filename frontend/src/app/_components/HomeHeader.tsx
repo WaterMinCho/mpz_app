@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-// import Image from "next/image";
+import { useEffect, useState, useCallback } from "react";
 
 import { Bell } from "@phosphor-icons/react";
 import { IconButton } from "@/components/ui/IconButton";
@@ -11,20 +11,31 @@ import { useNotificationSocket } from "@/hooks/useNotificationSocket";
 
 interface HomeHeaderProps {
   isLoggedIn: boolean;
+  isAuthLoading?: boolean;
 }
 
-export function HomeHeader({ isLoggedIn }: HomeHeaderProps) {
-  const { data: notificationsData } = useGetNotifications();
+export function HomeHeader({ isLoggedIn, isAuthLoading }: HomeHeaderProps) {
+  const { data: notificationsData, refetch } = useGetNotifications();
   const { unreadCount: socketUnreadCount, isConnected } =
     useNotificationSocket();
+  const [fcmBump, setFcmBump] = useState(0);
 
-  // 읽지 않은 알림이 있는지 확인 (소켓 연결 시 소켓 데이터 우선, 아니면 API 데이터)
+  // FCM 포그라운드 메시지 수신 시 뱃지 업데이트
+  const handleFcmNotification = useCallback(() => {
+    setFcmBump((prev) => prev + 1);
+    refetch();
+  }, [refetch]);
+
+  useEffect(() => {
+    window.addEventListener("fcm-notification-received", handleFcmNotification);
+    return () => window.removeEventListener("fcm-notification-received", handleFcmNotification);
+  }, [handleFcmNotification]);
+
+  // 읽지 않은 알림이 있는지 확인
   const hasUnreadNotifications =
-    isConnected && socketUnreadCount > 0
-      ? true
-      : notificationsData?.data?.some(
-          (notification) => notification.is_read === false
-        );
+    fcmBump > 0 ||
+    (isConnected && socketUnreadCount > 0) ||
+    notificationsData?.data?.some((notification) => notification.is_read === false);
 
   return (
     <TopBar
@@ -36,7 +47,9 @@ export function HomeHeader({ isLoggedIn }: HomeHeaderProps) {
         </Link>
       }
       right={
-        isLoggedIn ? (
+        isAuthLoading ? (
+          <div className="w-10 h-10" />
+        ) : isLoggedIn ? (
           <Link href="/notifications">
             <div className="relative">
               <IconButton
@@ -50,7 +63,7 @@ export function HomeHeader({ isLoggedIn }: HomeHeaderProps) {
           </Link>
         ) : (
           <Link href="/login">
-            <div className="flex items-center gap-2 cursor-pointer">
+            <div className="flex items-center cursor-pointer">
               <button>로그인</button>
             </div>
           </Link>

@@ -28,6 +28,8 @@ import { useGetSystemTags } from "@/hooks";
 import type { PetCardAnimal, RawAnimalResponse } from "@/types/animal";
 import type { UserAdoptionOut } from "@/types/adoption";
 import { pickImages } from "@/lib/image-picker";
+import { useToast } from "@/hooks/useToast";
+import { NotificationToast } from "@/components/ui/NotificationToast";
 
 // PetCardAnimal을 확장한 타입 (adoptionId 포함)
 type ExtendedPetCardAnimal = PetCardAnimal & { adoptionId?: string };
@@ -56,6 +58,7 @@ export default function CommunityEditPage({
   const [newImageUrls, setNewImageUrls] = useState<string[]>([]);
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [deletedImageUrls, setDeletedImageUrls] = useState<string[]>([]);
+  const { showToast, hideToast, toast } = useToast();
   const [tags, setTags] = useState<string[]>([]);
   const [showPetSelection, setShowPetSelection] = useState(false);
   const { data: systemTags } = useGetSystemTags();
@@ -306,15 +309,13 @@ export default function CommunityEditPage({
     const currentCount = existingImageUrls.length + newImageUrls.length;
     const remainingSlots = 5 - currentCount;
     if (remainingSlots <= 0) {
-      alert("이미지는 최대 5개까지 업로드할 수 있습니다.");
+      showToast("이미지는 최대 5개까지 업로드할 수 있어요.", "error");
       return;
     }
 
     const allSelected = files;
     if (allSelected.length > remainingSlots) {
-      alert(
-        `이미지는 최대 5개까지 선택할 수 있습니다. 남은 슬롯이 ${remainingSlots}개뿐이므로 ${remainingSlots}개만 선택됩니다.`
-      );
+      showToast(`남은 슬롯이 ${remainingSlots}개뿐이라 ${remainingSlots}개만 선택돼요.`, "error");
     }
 
     const selectedLimited = allSelected.slice(0, remainingSlots);
@@ -322,14 +323,12 @@ export default function CommunityEditPage({
     const newFiles = selectedLimited.filter((file) => {
       // 포맷 체크
       if (!allowedFormats.includes(file.type)) {
-        alert(
-          `${file.name}은(는) 지원하지 않는 형식입니다. (JPG, PNG, WEBP, GIF만 가능)`
-        );
+        showToast(`${file.name}은(는) 지원하지 않는 형식이에요. (JPG, PNG, WEBP, GIF만 가능)`, "error");
         return false;
       }
       // 파일 크기 체크
       if (file.size > maxSize) {
-        alert(`${file.name}의 크기가 너무 큽니다. (최대 10MB)`);
+        showToast(`${file.name}의 크기가 너무 커요. (최대 10MB)`, "error");
         return false;
       }
       return true;
@@ -462,7 +461,7 @@ export default function CommunityEditPage({
       setIsUploadingImages(false);
       setIsUpdatingPost(false);
       setShowSaveModal(true); // 모달 다시 열기
-      alert("저장에 실패했습니다. 다시 시도해주세요.");
+      showToast("저장에 실패했어요. 다시 시도해주세요.", "error");
     }
   };
 
@@ -656,7 +655,7 @@ export default function CommunityEditPage({
                     const remainingSlots = 5 - currentCount;
 
                     if (remainingSlots <= 0) {
-                      alert("이미지는 최대 5개까지 업로드할 수 있습니다.");
+                      showToast("이미지는 최대 5개까지 업로드할 수 있어요.", "error");
                       return;
                     }
 
@@ -815,6 +814,13 @@ export default function CommunityEditPage({
         onLeftClick={() => !isLoading && setShowSaveModal(false)}
         onRightClick={handleConfirmSave}
       />
+      {toast.show && (
+        <NotificationToast
+          message={toast.message}
+          type={toast.type}
+          onClose={hideToast}
+        />
+      )}
     </Container>
   );
 }

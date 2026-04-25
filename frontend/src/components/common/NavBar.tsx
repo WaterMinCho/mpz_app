@@ -20,22 +20,22 @@ export function NavbarBtn({
   onClick,
 }: NavbarBtnProps) {
   const iconWithColor = React.cloneElement(icon, {
-    className: cn("w-5 h-5 transition-colors", active ? "text-dg" : "text-[#e3e3e3]"),
+    className: cn("w-5 h-5 transition-colors", active ? "text-dg" : "text-[#cccccc]"),
   });
 
   return (
     <div
       className={cn(
         "flex flex-col gap-1 items-center justify-center w-full h-16 bg-wh cursor-pointer",
-        active ? "text-dg" : "text-[#e3e3e3]"
+        active ? "text-dg" : "text-[#cccccc]"
       )}
       onClick={onClick}
     >
       {iconWithColor}
       <h6
         className={cn(
-          "text-xs font-medium cursor-pointer leading-tight",
-          active && "text-dg"
+          "text-xs cursor-pointer leading-tight",
+          active ? "text-dg font-bold" : "font-medium"
         )}
       >
         {label}
@@ -47,7 +47,7 @@ export function NavbarBtn({
 function NavBar() {
   const router = useRouter();
   const pathname = usePathname();
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, isLoading: authLoading } = useAuth();
   const isCenter =
     user?.userType === "센터관리자" || user?.userType === "센터최고관리자";
   const [showLoginModal, setShowLoginModal] = useState(false);
@@ -85,6 +85,7 @@ function NavBar() {
         url = "/community";
         break;
       case "like":
+        if (authLoading) return;
         if (isAuthenticated) {
           url = "/favorite/animal";
         } else {
@@ -93,6 +94,7 @@ function NavBar() {
         }
         break;
       case "my":
+        if (authLoading) return;
         if (isAuthenticated) {
           url = isCenter ? "/centerpage" : "/my";
         } else {

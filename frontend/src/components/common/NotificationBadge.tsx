@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { Bell } from "@phosphor-icons/react";
 import { useNotificationSocket } from "@/hooks/useNotificationSocket";
 import { useRouter } from "next/navigation";
@@ -16,22 +16,27 @@ export function NotificationBadge({
   showCount = true,
   size = "md",
 }: NotificationBadgeProps) {
-  const { unreadCount, isConnected } = useNotificationSocket();
+  const { unreadCount: socketUnreadCount } = useNotificationSocket();
   const router = useRouter();
+  const [fcmBump, setFcmBump] = useState(0);
 
-  const sizeClasses = {
-    sm: "w-5 h-5",
-    md: "w-6 h-6",
-    lg: "w-7 h-7",
-  };
+  // FCM 포그라운드 메시지 수신 시 카운트 증가
+  const handleFcmNotification = useCallback(() => {
+    setFcmBump((prev) => prev + 1);
+  }, []);
 
-  const badgeSizeClasses = {
-    sm: "w-4 h-4 text-xs",
-    md: "w-5 h-5 text-sm",
-    lg: "w-6 h-6 text-base",
-  };
+  useEffect(() => {
+    window.addEventListener("fcm-notification-received", handleFcmNotification);
+    return () => window.removeEventListener("fcm-notification-received", handleFcmNotification);
+  }, [handleFcmNotification]);
+
+  // WebSocket 카운트 + FCM 수신 카운트
+  const unreadCount = socketUnreadCount + fcmBump;
+
+  const iconSize = { sm: 20, md: 24, lg: 28 }[size];
 
   const handleClick = () => {
+    setFcmBump(0); // 알림함 진입 시 FCM 카운트 리셋
     router.push("/notifications");
   };
 
@@ -40,28 +45,13 @@ export function NotificationBadge({
       className={`relative cursor-pointer ${className}`}
       onClick={handleClick}
     >
-      {/* 벨 아이콘 */}
-      <Bell
-        className={`${sizeClasses[size]} text-gray-600 hover:text-gray-800 transition-colors`}
-        weight="regular"
-      />
+      <Bell size={iconSize} className="text-dg" weight="regular" />
 
-      {/* 연결 상태 표시 (개발 모드에서만) */}
-      {process.env.NODE_ENV === "development" && (
-        <div
-          className={`absolute -top-1 -left-1 w-2 h-2 rounded-full ${
-            isConnected ? "bg-green-500" : "bg-red-500"
-          }`}
-          title={isConnected ? "소켓 연결됨" : "소켓 연결 끊김"}
-        />
-      )}
-
-      {/* 읽지 않은 알림 개수 배지 */}
       {showCount && unreadCount > 0 && (
-        <div
-          className={`absolute -top-2 -right-2 ${badgeSizeClasses[size]} bg-red-500 text-white rounded-full flex items-center justify-center font-bold min-w-max px-1`}
-        >
-          {unreadCount > 99 ? "99+" : unreadCount}
+        <div className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 bg-red rounded-full flex items-center justify-center">
+          <span className="text-[10px] font-bold text-wh leading-none">
+            {unreadCount > 99 ? "99+" : unreadCount}
+          </span>
         </div>
       )}
     </div>

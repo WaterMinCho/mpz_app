@@ -68,7 +68,7 @@ export default function Notification() {
           <div className="flex flex-col items-start gap-2">
             <h2 className="text-bk">공지사항을 찾을 수 없습니다</h2>
             <p className="body2 text-gr">
-              {error?.message || "알 수 없는 오류가 발생했습니다"}
+              잠시 문제가 생겼어요. 다시 시도해주세요.
             </p>
           </div>
         </div>

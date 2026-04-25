@@ -32,6 +32,7 @@ export const useGetNotifications = (params?: GetNotificationsParams) => {
     enabled: enabled !== undefined ? enabled : true,
     staleTime: 1 * 60 * 1000, // 1분
     gcTime: 10 * 60 * 1000, // 10분
+    refetchOnWindowFocus: true, // 탭 복귀 시 자동 갱신 (백그라운드 푸시 후 뱃지 업데이트)
   });
 };
 
@@ -50,5 +51,6 @@ export const useGetNotificationsInfinite = (page_size: number = 20) => {
     initialPageParam: 1,
     staleTime: 1 * 60 * 1000, // 1분
     gcTime: 10 * 60 * 1000, // 10분
+    refetchOnWindowFocus: true, // 탭 복귀 시 자동 갱신
   });
 };

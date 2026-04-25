@@ -121,7 +121,7 @@ function ContractContent() {
           <p className="text-center text-red-500">
             계약서 데이터를 불러오는 중 오류가 발생했습니다.
           </p>
-          <p className="text-center text-gr text-sm mt-2">{error.message}</p>
+          <p className="text-center text-gr text-sm mt-2">잠시 문제가 생겼어요. 다시 시도해주세요.</p>
         </div>
       </Container>
     );

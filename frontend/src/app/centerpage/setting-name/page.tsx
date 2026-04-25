@@ -205,11 +205,7 @@ export default function CenterSettingName() {
       }, 2000);
     } catch (error) {
       console.error("센터 정보 업데이트 오류:", error);
-      showToastMessage(
-        error instanceof Error
-          ? error.message
-          : "센터 정보 업데이트 중 오류가 발생했습니다.",
-      );
+      showToastMessage("센터 정보 업데이트에 실패했어요. 다시 시도해주세요.");
     }
   };
 

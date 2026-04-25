@@ -70,7 +70,7 @@ if (typeof window !== "undefined") {
 }
 
 export default function Home() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
   // const kakaoChannelUrl = "http://pf.kakao.com/_mbxbDn/chat";
@@ -211,7 +211,7 @@ export default function Home() {
   return (
     <Container>
       <div className="flex flex-col min-h-screen">
-        <HomeHeader isLoggedIn={isAuthenticated} />
+        <HomeHeader isLoggedIn={isAuthenticated} isAuthLoading={authLoading} />
 
         {/* 매칭 완료 알림 */}
         {showMatchingNotification && (

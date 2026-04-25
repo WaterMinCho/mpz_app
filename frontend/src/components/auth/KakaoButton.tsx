@@ -151,13 +151,9 @@ export function KakaoButton({
 
       // 네이티브 환경에서 에러가 발생했을 때는 웹으로 fallback하지 않음
       if (isNative) {
-        alert(
-          `네이티브 로그인에 실패했습니다: ${
-            error instanceof Error ? error.message : String(error)
-          }`
-        );
+        alert("로그인에 실패했어요. 앱을 재시작한 후 다시 시도해주세요.");
       } else {
-        alert("로그인에 실패했습니다. 다시 시도해주세요.");
+        alert("로그인에 실패했어요. 다시 시도해주세요.");
       }
     } finally {
       setIsLoading(false);

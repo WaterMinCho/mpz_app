@@ -15,6 +15,7 @@ import {
 } from "@/lib/region-utils";
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { Toast } from "@/components/ui/Toast";
 
 interface PetSectionProps {
   title: string;
@@ -58,6 +59,7 @@ export function TopPetSection({
   const [userLocation, setUserLocation] = useState<string>("");
   const [isMounted, setIsMounted] = useState(false);
   const hasAutoAppliedLocation = useRef(false);
+  const [locationToastMsg, setLocationToastMsg] = useState("");
 
   // 클라이언트 마운트 시 GPS 자동 요청
   useEffect(() => {
@@ -97,9 +99,8 @@ export function TopPetSection({
   // 위치정보 에러가 있는 경우 처리
   useEffect(() => {
     if (locationError) {
-      alert(
-        "위치정보를 가져올 수 없습니다. 브라우저 설정에서 위치정보 접근을 허용해주세요."
-      );
+      setLocationToastMsg("위치정보를 가져올 수 없어요. 브라우저 설정에서 위치정보 접근을 허용해주세요.");
+      setTimeout(() => setLocationToastMsg(""), 4000);
     }
   }, [locationError]);
   // ExpertAnalysis 모드일 때
@@ -107,7 +108,7 @@ export function TopPetSection({
     if (isLoading) {
       return (
         <MainSection className="pb-0">
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col space-y-3">
             {[...Array(3)].map((_, index) => (
               <PetCardSkeleton key={index} variant="primary" />
             ))}
@@ -146,7 +147,7 @@ export function TopPetSection({
 
     return (
       <MainSection className="pb-0">
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col space-y-3">
           {analysisAnimals.map((animal) => (
             <PetCard
               key={animal.id}
@@ -193,7 +194,7 @@ export function TopPetSection({
     >
       {/* 지역 필터 */}
       {showLocationFilter && (
-        <div className="flex items-center overflow-x-auto scrollbar-hide gap-[6px] -mx-4 px-4">
+        <div className="flex items-center overflow-x-auto scrollbar-hide space-x-[6px] -mx-4 px-4">
           <MiniButton
             key="location"
             leftIcon={<MapPin size={16} />}
@@ -228,13 +229,13 @@ export function TopPetSection({
 
       {/* 동물 카드 목록 */}
       {isLoading ? (
-        <div className="flex gap-3 overflow-x-auto scrollbar-hide flex-nowrap -mx-4 px-4">
+        <div className="flex space-x-3 overflow-x-auto scrollbar-hide flex-nowrap -mx-4 px-4">
           {[...Array(10)].map((_, index) => (
             <PetCardSkeleton key={index} variant="primary" />
           ))}
         </div>
       ) : displayAnimals.length > 0 ? (
-        <div className="flex gap-3 overflow-x-auto scrollbar-hide flex-nowrap -mx-4 px-4">
+        <div className="flex space-x-3 overflow-x-auto scrollbar-hide flex-nowrap -mx-4 px-4">
           {displayAnimals.map((animal) => (
             <PetCard
               key={animal.id}
@@ -248,6 +249,11 @@ export function TopPetSection({
           <div className="text-sm text-gr">
             해당 지역에 보호중인 동물이 없습니다.
           </div>
+        </div>
+      )}
+      {locationToastMsg && (
+        <div className="fixed bottom-4 left-4 right-4 z-[10000]">
+          <Toast>{locationToastMsg}</Toast>
         </div>
       )}
     </MainSection>

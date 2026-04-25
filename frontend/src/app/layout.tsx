@@ -10,8 +10,8 @@ import { AppUrlHandler } from "@/components/common/AppUrlHandler";
 import "./globals.css";
 import { SafeAreaLayout } from "@/components/layouts/SafeAreaLayout";
 
-// 시스템 폰트 사용
-const inter = { className: "font-sans" };
+// Pretendard Variable (CDN) — globals.css에서 @import
+const fontConfig = { className: "font-sans" };
 
 export const viewport = {
   width: "device-width",
@@ -80,7 +80,10 @@ export const metadata: Metadata = {
     creator: "@mapetz_official",
   },
   verification: {
-    google: "google-site-verification-code",
+    google: "et4yYQxLZeD6XseRIZDMLB75vhxgbDnHPvKRTFKZQ9Q",
+    other: {
+      "naver-site-verification": "e7e171419ca7383b5ba6e5ed44a9b726fbbc2cea",
+    },
   },
   robots: {
     index: true,
@@ -120,7 +123,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         />
       </head>
       <body
-        className={`${inter.className} bg-wh max-w-[420px] mx-auto shadow-md `}
+        className={`${fontConfig.className} bg-wh max-w-[420px] mx-auto shadow-md `}
       >
         <QueryProvider>
           <AuthProvider>

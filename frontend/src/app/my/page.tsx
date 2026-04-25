@@ -33,7 +33,7 @@ export default function MyPage() {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isLogoutSheetOpen, setIsLogoutSheetOpen] = useState(false);
   const [showLogoutToast, setShowLogoutToast] = useState(false);
-  const { isAuthenticated, user, logout } = useAuth();
+  const { isAuthenticated, user, logout, isLoading: authLoading } = useAuth();
   const router = useRouter();
 
   // 실제 사용자의 입양 목록 가져오기
@@ -162,7 +162,7 @@ export default function MyPage() {
         <div className="pb-6 pt-4">
           {/* 프로필 정보 */}
           <div className="flex items-center justify-between">
-            <div className="flex items-center">
+            <div className="flex items-center min-w-0 flex-1">
               <div className="relative w-14 h-14 rounded-[20px] overflow-hidden flex-shrink-0 mr-3">
                 {user?.image ? (
                   <Image
@@ -178,9 +178,13 @@ export default function MyPage() {
                   </div>
                 )}
               </div>
-              {isAuthenticated && user ? (
+              {authLoading ? (
                 <div className="min-w-0">
-                  <span className="font-medium text-black block truncate">
+                  <div className="h-5 w-20 bg-lg rounded animate-pulse" />
+                </div>
+              ) : isAuthenticated && user ? (
+                <div className="min-w-0">
+                  <span className="font-medium text-black block line-clamp-3">
                     {user.nickname || "사용자"}
                   </span>
                 </div>
@@ -192,7 +196,9 @@ export default function MyPage() {
             </div>
 
             {/* 프로필 수정 버튼 */}
-            {isAuthenticated ? (
+            {authLoading ? (
+              <div className="w-20 h-8" />
+            ) : isAuthenticated ? (
               <Link href="/my/profile">
                 <MiniButton text="프로필 수정" variant="outline" />
               </Link>
@@ -210,12 +216,12 @@ export default function MyPage() {
         {isAuthenticated && (
           <div className="space-y-2">
             {adoptionsLoading ? (
-              <div className="p-4 bg-white border border-gray-200 rounded-lg">
-                <div className="text-center text-gray-500">로딩 중...</div>
+              <div className="p-4 bg-white border border-lg rounded-lg">
+                <div className="text-center text-gr">로딩 중...</div>
               </div>
             ) : adoptionsError ? (
-              <div className="p-4 bg-white border border-gray-200 rounded-lg">
-                <div className="text-center text-red-500">
+              <div className="p-4 bg-white border border-lg rounded-lg">
+                <div className="text-center text-error">
                   입양 현황을 불러오는데 실패했습니다.
                 </div>
               </div>
@@ -225,7 +231,7 @@ export default function MyPage() {
                 .map((adoption) => (
                   <div
                     key={adoption.id}
-                    className="p-4 bg-white border border-gray-200 rounded-lg cursor-pointer"
+                    className="p-4 bg-white border border-lg rounded-lg cursor-pointer"
                     onClick={() => {
                       // 입양 상태에 따라 해당 스텝 페이지로 이동
                       const status = adoption.status;
@@ -246,10 +252,10 @@ export default function MyPage() {
                       }
                     }}
                   >
-                    <div className="flex w-full items-center justify-between gap-3 mb-4">
+                    <div className="flex w-full items-center justify-between mb-4">
                       {/* 동물 이미지 */}
-                      <div className="flex items-center gap-3">
-                        <div className="relative overflow-hidden w-16 h-16 rounded-lg bg-gray-100">
+                      <div className="flex items-center">
+                        <div className="relative overflow-hidden w-16 h-16 rounded-lg bg-bg mr-3">
                           <Image
                             src={adoption.animal_image || "/img/dummyImg.png"}
                             alt={adoption.animal_name || "동물"}
@@ -270,7 +276,7 @@ export default function MyPage() {
                           님과의 만남을 기다리고 있어요!
                         </p>
                       </div>
-                      <CaretRight className="w-5 h-5 text-gray-400" />
+                      <CaretRight className="w-5 h-5 text-gr" />
                     </div>
                     <DotProgressBar
                       currentStep={getAdoptionStep(adoption.status)}
@@ -278,8 +284,8 @@ export default function MyPage() {
                   </div>
                 ))
             ) : (
-              <div className="p-4 bg-white border border-gray-200 rounded-lg">
-                <div className="text-center text-gray-500">
+              <div className="p-4 bg-white border border-lg rounded-lg">
+                <div className="text-center text-gr">
                   진행 중인 입양이 없습니다.
                 </div>
               </div>

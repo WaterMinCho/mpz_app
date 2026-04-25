@@ -12,6 +12,7 @@ interface AnimalStatusUpdateModalProps {
   currentProtectionStatus?: string;
   currentAdoptionStatus?: string;
   onSuccess?: () => void;
+  onError?: (message: string) => void;
 }
 
 export function AnimalStatusUpdateModal({
@@ -21,15 +22,18 @@ export function AnimalStatusUpdateModal({
   currentProtectionStatus = "",
   currentAdoptionStatus = "",
   onSuccess,
+  onError,
 }: AnimalStatusUpdateModalProps) {
   const [protectionStatus, setProtectionStatus] = useState(
     currentProtectionStatus
   );
   const [adoptionStatus, setAdoptionStatus] = useState(currentAdoptionStatus);
+  const [errorMsg, setErrorMsg] = useState("");
 
   const updateStatusMutation = useUpdateAnimalStatus();
 
   const handleSubmit = async () => {
+    setErrorMsg("");
     try {
       await updateStatusMutation.mutateAsync({
         animal_id: animalId,
@@ -41,7 +45,12 @@ export function AnimalStatusUpdateModal({
       onClose();
     } catch (error) {
       console.error("상태 변경 실패:", error);
-      alert("상태 변경에 실패했습니다. 다시 시도해주세요.");
+      const msg = "상태 변경에 실패했어요. 다시 시도해주세요.";
+      if (onError) {
+        onError(msg);
+      } else {
+        setErrorMsg(msg);
+      }
     }
   };
 
@@ -74,6 +83,10 @@ export function AnimalStatusUpdateModal({
           value={adoptionStatus}
           onChangeOption={(value) => setAdoptionStatus(value)}
         />
+
+        {errorMsg && (
+          <p className="text-sm text-red-500">{errorMsg}</p>
+        )}
       </div>
     </CustomModal>
   );

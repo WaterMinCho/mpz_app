@@ -1,10 +1,10 @@
 import * as React from "react";
-import { CheckCircle, XCircle, X } from "@phosphor-icons/react";
+import { CheckCircle, XCircle, X, Bell } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 
 interface NotificationToastProps {
   message: string;
-  type: "success" | "error";
+  type: "success" | "error" | "push";
   onClose: () => void;
   duration?: number;
   className?: string;
@@ -17,41 +17,56 @@ export function NotificationToast({
   duration = 3000,
   className,
 }: NotificationToastProps) {
+  const [isVisible, setIsVisible] = React.useState(false);
+
   React.useEffect(() => {
+    // 마운트 직후 애니메이션 시작
+    requestAnimationFrame(() => setIsVisible(true));
+
     const timer = setTimeout(() => {
-      onClose();
+      setIsVisible(false);
+      setTimeout(onClose, 300); // 퇴장 애니메이션 후 제거
     }, duration);
 
     return () => clearTimeout(timer);
   }, [duration, onClose]);
 
   const icon =
-    type === "success" ? (
+    type === "push" ? (
+      <Bell size={20} weight="fill" className="text-brand flex-shrink-0" />
+    ) : type === "success" ? (
       <CheckCircle size={20} className="text-brand flex-shrink-0" />
     ) : (
       <XCircle size={20} className="text-red flex-shrink-0" />
     );
 
-  const borderColor = type === "success" ? "border-brand" : "border-red";
-  const textColor = type === "success" ? "text-brand" : "text-red";
+  const borderColor = type === "error" ? "border-red" : "border-brand";
+  const textColor = type === "error" ? "text-red" : "text-dg";
 
   return (
     <div
       className={cn(
-        "fixed bottom-24 left-1/2 transform -translate-x-1/2 z-[9999]",
-        "flex items-center gap-3 px-4 py-3 rounded-lg shadow-sm shadow-black/10",
-        "border max-w-sm w-full mx-auto",
-        "bg-white opacity-100",
+        "fixed left-1/2 transform -translate-x-1/2 z-[9999]",
+        "flex items-center px-4 py-3 rounded-lg shadow-md shadow-black/15",
+        "border max-w-sm w-[calc(100%-32px)]",
+        "bg-white",
         borderColor,
         textColor,
+        "transition-all duration-300 ease-out",
+        isVisible
+          ? "top-[env(safe-area-inset-top,16px)] mt-4 opacity-100"
+          : "-top-20 opacity-0",
         className
       )}
     >
-      {icon}
-      <span className="flex-1 text-sm font-medium">{message}</span>
+      <div className="mr-3">{icon}</div>
+      <span className="flex-1 text-sm font-medium line-clamp-2">{message}</span>
       <button
-        onClick={onClose}
-        className="text-gray-400 hover:text-gray-600 transition-colors"
+        onClick={() => {
+          setIsVisible(false);
+          setTimeout(onClose, 300);
+        }}
+        className="text-gr hover:text-dg transition-colors ml-2 flex-shrink-0"
       >
         <X size={16} />
       </button>

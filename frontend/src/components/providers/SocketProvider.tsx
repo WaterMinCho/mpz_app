@@ -218,6 +218,46 @@ export function SocketProvider({ children }: SocketProviderProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated, user]); // requestPermissionAndRegisterToken은 안정적인 함수이므로 의존성에서 제외
 
+  // Firebase 포그라운드 메시지 수신
+  useEffect(() => {
+    if (!isAuthenticated || !user) return;
+
+    let unsubscribe: (() => void) | null = null;
+
+    const setup = async () => {
+      try {
+        const { getFirebaseMessaging } = await import("@/lib/firebase");
+        const { onMessage } = await import("firebase/messaging");
+
+        const messaging = await getFirebaseMessaging();
+        if (!messaging) {
+          console.log("[FCM] 이 브라우저는 Firebase Messaging을 지원하지 않습니다.");
+          return;
+        }
+
+        console.log("[FCM] 포그라운드 메시지 리스너 등록 완료");
+
+        unsubscribe = onMessage(messaging, (payload) => {
+          console.log("[FCM] 포그라운드 메시지 수신:", payload.notification?.title, payload.notification?.body);
+
+          const body = payload.notification?.body || "";
+          if (body) showToast(body, "push");
+
+          // 알림 쿼리 갱신 → 뱃지 카운트 실시간 업데이트 (window 이벤트로 트리거)
+          window.dispatchEvent(new CustomEvent("fcm-notification-received"));
+        });
+      } catch (error) {
+        console.error("[FCM] 포그라운드 메시지 설정 실패:", error);
+      }
+    };
+
+    setup();
+
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
+  }, [isAuthenticated, user, showToast]);
+
   // 알림 추가 함수
   const addNotification = useCallback((notification: Notification) => {
     setNotifications((prev: Notification[]) => [notification, ...prev]);
