@@ -35,10 +35,9 @@
 - gunicorn은 HTTP만 처리, WebSocket은 Daphne 등 ASGI 서버 필요
 - prod/로컬에서 무한 재연결 시도 발생 중
 
-### 7. deploy.yml 고도화 (검토)
-- [ ] GitHub Actions에서 빌드 테스트 먼저 → 실패 시 EC2 배포 안 함
-- [ ] 또는 Actions에서 이미지 빌드 → Docker Registry push → EC2에서 pull만 (더 효율적)
-- [ ] 시간 2배 문제 vs 안정성 트레이드오프 검토
+### 7. deploy.yml 고도화 ✅ (dev 적용 완료, prod 대기)
+- [x] GitHub Actions에서 Docker 이미지 빌드 → GHCR push → EC2에서 pull만
+- [ ] prod 적용 (dev → main 머지 후 push)
 
 ### 8. 모니터링
 - [ ] Freshping + Sentry + Slack 배포 알림
@@ -111,6 +110,10 @@
 ## 🔄 상시
 
 ### 웹 표준화 · SEO 작업 및 보완
+- [x] sitemap.xml / robots.txt (prod 정상 동작 확인)
+- [ ] **Google Search Console 등록** — 사이트 소유권 인증 + sitemap 제출
+- [ ] **네이버 서치어드바이저 등록** — 사이트 등록 + sitemap 제출
+- [ ] 소유권 인증 메타태그 삽입 (Google/Naver 각각 발급 → layout.tsx에 추가)
 - [ ] 시맨틱 HTML 태그 점검 (header, main, section, article, nav 등)
 - [ ] 접근성 (div onClick → button, aria-label, 키보드 네비게이션)
 - [ ] 동적 메타데이터: 센터 상세 페이지별 OG (동물 상세는 완료)
