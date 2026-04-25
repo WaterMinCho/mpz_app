@@ -12,7 +12,6 @@ concurrency:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_PREFIX: ghcr.io/${{ github.repository_owner }}/mpz
 
 jobs:
   build-and-push:
@@ -34,6 +33,8 @@ jobs:
             echo "APP_ENV=dev" >> $GITHUB_ENV
             echo "EC2_HOST=${{ secrets.DEV_EC2_HOST }}" >> $GITHUB_ENV
           fi
+          OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          echo "IMAGE_PREFIX=ghcr.io/${OWNER}/mpz" >> $GITHUB_ENV
           echo "TAG=${{ github.ref_name }}-$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_ENV
 
       - name: Log in to GHCR
@@ -104,15 +105,20 @@ jobs:
             echo "APP_ENV=dev" >> $GITHUB_ENV
             echo "EC2_HOST=${{ secrets.DEV_EC2_HOST }}" >> $GITHUB_ENV
           fi
+          OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          echo "IMAGE_PREFIX=ghcr.io/${OWNER}/mpz" >> $GITHUB_ENV
           echo "TAG=${{ github.ref_name }}-latest" >> $GITHUB_ENV
 
       - name: Deploy on EC2
         uses: appleboy/ssh-action@v1.0.3
+        env:
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GHCR_USER: ${{ github.actor }}
         with:
           host: ${{ env.EC2_HOST }}
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
-          envs: APP_ENV,TAG
+          envs: APP_ENV,TAG,GHCR_TOKEN,GHCR_USER
           command_timeout: 10m
           script: |
             cd ~/mpz_app
@@ -121,15 +127,16 @@ jobs:
             git fetch origin ${{ github.ref_name }} && git reset --hard origin/${{ github.ref_name }}
 
             # GHCR 로그인
-            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+            echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_USER" --password-stdin
 
             # 이미지 pull (빌드 없음!)
-            docker pull ghcr.io/${{ github.repository_owner }}/mpz-frontend:$TAG
-            docker pull ghcr.io/${{ github.repository_owner }}/mpz-backend:$TAG
+            OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+            docker pull ghcr.io/${OWNER}/mpz-frontend:$TAG
+            docker pull ghcr.io/${OWNER}/mpz-backend:$TAG
 
             # 이미지 태그를 compose에서 사용할 이름으로 변환
-            docker tag ghcr.io/${{ github.repository_owner }}/mpz-frontend:$TAG mpz_app-frontend:latest
-            docker tag ghcr.io/${{ github.repository_owner }}/mpz-backend:$TAG mpz_app-backend:latest
+            docker tag ghcr.io/${OWNER}/mpz-frontend:$TAG mpz_app-frontend:latest
+            docker tag ghcr.io/${OWNER}/mpz-backend:$TAG mpz_app-backend:latest
 
             # 컨테이너 교체 (빌드 없이 pull된 이미지 사용)
             APP_ENV=$APP_ENV docker compose -f docker-compose.prod.yml up -d --no-build --force-recreate frontend backend nginx redis
