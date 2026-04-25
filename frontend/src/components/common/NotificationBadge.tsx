@@ -3,7 +3,9 @@
 import React from "react";
 import { Bell } from "@phosphor-icons/react";
 import { useNotificationSocket } from "@/hooks/useNotificationSocket";
+import { useGetNotifications } from "@/hooks/query/useGetNotifications";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/components/providers/AuthProvider";
 
 interface NotificationBadgeProps {
   className?: string;
@@ -16,20 +18,24 @@ export function NotificationBadge({
   showCount = true,
   size = "md",
 }: NotificationBadgeProps) {
-  const { unreadCount, isConnected } = useNotificationSocket();
+  const { unreadCount: socketUnreadCount } = useNotificationSocket();
+  const { isAuthenticated } = useAuth();
   const router = useRouter();
 
-  const sizeClasses = {
-    sm: "w-5 h-5",
-    md: "w-6 h-6",
-    lg: "w-7 h-7",
-  };
+  // API에서도 읽지 않은 개수 가져오기 (탭 복귀 시 갱신)
+  const { data: notificationsData } = useGetNotifications({
+    page: 1,
+    page_size: 1,
+    enabled: isAuthenticated,
+  });
 
-  const badgeSizeClasses = {
-    sm: "w-4 h-4 text-xs",
-    md: "w-5 h-5 text-sm",
-    lg: "w-6 h-6 text-base",
-  };
+  // API 응답에서 읽지 않은 개수 계산
+  const apiUnreadCount = notificationsData?.data?.filter((n) => !n.is_read).length ?? 0;
+
+  // WebSocket 카운트가 있으면 우선, 없으면 API 카운트 사용
+  const unreadCount = socketUnreadCount > 0 ? socketUnreadCount : apiUnreadCount;
+
+  const iconSize = { sm: 20, md: 24, lg: 28 }[size];
 
   const handleClick = () => {
     router.push("/notifications");
@@ -40,28 +46,13 @@ export function NotificationBadge({
       className={`relative cursor-pointer ${className}`}
       onClick={handleClick}
     >
-      {/* 벨 아이콘 */}
-      <Bell
-        className={`${sizeClasses[size]} text-gray-600 hover:text-gray-800 transition-colors`}
-        weight="regular"
-      />
+      <Bell size={iconSize} className="text-dg" weight="regular" />
 
-      {/* 연결 상태 표시 (개발 모드에서만) */}
-      {process.env.NODE_ENV === "development" && (
-        <div
-          className={`absolute -top-1 -left-1 w-2 h-2 rounded-full ${
-            isConnected ? "bg-green-500" : "bg-red-500"
-          }`}
-          title={isConnected ? "소켓 연결됨" : "소켓 연결 끊김"}
-        />
-      )}
-
-      {/* 읽지 않은 알림 개수 배지 */}
       {showCount && unreadCount > 0 && (
-        <div
-          className={`absolute -top-2 -right-2 ${badgeSizeClasses[size]} bg-red-500 text-white rounded-full flex items-center justify-center font-bold min-w-max px-1`}
-        >
-          {unreadCount > 99 ? "99+" : unreadCount}
+        <div className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 bg-red rounded-full flex items-center justify-center">
+          <span className="text-[10px] font-bold text-wh leading-none">
+            {unreadCount > 99 ? "99+" : unreadCount}
+          </span>
         </div>
       )}
     </div>
