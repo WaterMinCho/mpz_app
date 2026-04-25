@@ -243,7 +243,7 @@ export function SocketProvider({ children }: SocketProviderProps) {
           console.log("[FCM] 포그라운드 메시지 수신:", payload.notification?.title, payload.notification?.body);
 
           const body = payload.notification?.body || "";
-          if (body) showToast(body, "success");
+          if (body) showToast(body, "push");
 
           // 알림 쿼리 갱신 → 뱃지 카운트 실시간 업데이트
           queryClient.invalidateQueries({ queryKey: ["notifications"] });

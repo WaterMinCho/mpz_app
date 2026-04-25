@@ -5,7 +5,7 @@ import { useState, useCallback } from "react";
 interface ToastState {
   show: boolean;
   message: string;
-  type: "success" | "error";
+  type: "success" | "error" | "push";
 }
 
 export function useToast() {
@@ -16,7 +16,7 @@ export function useToast() {
   });
 
   const showToast = useCallback(
-    (message: string, type: "success" | "error" = "success") => {
+    (message: string, type: "success" | "error" | "push" = "success") => {
       setToast({
         show: true,
         message,
