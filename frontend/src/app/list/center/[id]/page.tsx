@@ -48,7 +48,50 @@ export async function generateMetadata({
   }
 }
 
+async function getCenterData(id: string) {
+  try {
+    const res = await fetch(`${API_URL}centers/${id}`, {
+      next: { revalidate: 3600 },
+    });
+    if (!res.ok) return null;
+    return res.json();
+  } catch {
+    return null;
+  }
+}
+
 export default async function CenterDetailPage({ params }: PageProps) {
   const { id } = await params;
-  return <CenterDetailClient id={id} />;
+  const center = await getCenterData(id);
+
+  const jsonLd = center
+    ? {
+        "@context": "https://schema.org",
+        "@type": "AnimalShelter",
+        name: center.name,
+        description: center.description,
+        image: center.image_url,
+        url: `https://mpz.kr/list/center/${id}`,
+        address: center.location
+          ? {
+              "@type": "PostalAddress",
+              addressLocality: center.region,
+              streetAddress: center.location,
+            }
+          : undefined,
+        telephone: center.phone_number,
+      }
+    : null;
+
+  return (
+    <>
+      {jsonLd && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      )}
+      <CenterDetailClient id={id} />
+    </>
+  );
 }
