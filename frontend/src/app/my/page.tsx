@@ -33,7 +33,7 @@ export default function MyPage() {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isLogoutSheetOpen, setIsLogoutSheetOpen] = useState(false);
   const [showLogoutToast, setShowLogoutToast] = useState(false);
-  const { isAuthenticated, user, logout } = useAuth();
+  const { isAuthenticated, user, logout, isLoading: authLoading } = useAuth();
   const router = useRouter();
 
   // 실제 사용자의 입양 목록 가져오기
@@ -178,7 +178,11 @@ export default function MyPage() {
                   </div>
                 )}
               </div>
-              {isAuthenticated && user ? (
+              {authLoading ? (
+                <div className="min-w-0">
+                  <div className="h-5 w-20 bg-lg rounded animate-pulse" />
+                </div>
+              ) : isAuthenticated && user ? (
                 <div className="min-w-0">
                   <span className="font-medium text-black block line-clamp-3">
                     {user.nickname || "사용자"}
@@ -192,7 +196,9 @@ export default function MyPage() {
             </div>
 
             {/* 프로필 수정 버튼 */}
-            {isAuthenticated ? (
+            {authLoading ? (
+              <div className="w-20 h-8" />
+            ) : isAuthenticated ? (
               <Link href="/my/profile">
                 <MiniButton text="프로필 수정" variant="outline" />
               </Link>

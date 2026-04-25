@@ -47,7 +47,7 @@ export function NavbarBtn({
 function NavBar() {
   const router = useRouter();
   const pathname = usePathname();
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, isLoading: authLoading } = useAuth();
   const isCenter =
     user?.userType === "센터관리자" || user?.userType === "센터최고관리자";
   const [showLoginModal, setShowLoginModal] = useState(false);
@@ -85,6 +85,7 @@ function NavBar() {
         url = "/community";
         break;
       case "like":
+        if (authLoading) return;
         if (isAuthenticated) {
           url = "/favorite/animal";
         } else {
@@ -93,6 +94,7 @@ function NavBar() {
         }
         break;
       case "my":
+        if (authLoading) return;
         if (isAuthenticated) {
           url = isCenter ? "/centerpage" : "/my";
         } else {

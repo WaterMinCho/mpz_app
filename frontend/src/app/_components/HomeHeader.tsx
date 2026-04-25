@@ -11,9 +11,10 @@ import { useNotificationSocket } from "@/hooks/useNotificationSocket";
 
 interface HomeHeaderProps {
   isLoggedIn: boolean;
+  isAuthLoading?: boolean;
 }
 
-export function HomeHeader({ isLoggedIn }: HomeHeaderProps) {
+export function HomeHeader({ isLoggedIn, isAuthLoading }: HomeHeaderProps) {
   const { data: notificationsData, refetch } = useGetNotifications();
   const { unreadCount: socketUnreadCount, isConnected } =
     useNotificationSocket();
@@ -46,7 +47,9 @@ export function HomeHeader({ isLoggedIn }: HomeHeaderProps) {
         </Link>
       }
       right={
-        isLoggedIn ? (
+        isAuthLoading ? (
+          <div className="w-10 h-10" />
+        ) : isLoggedIn ? (
           <Link href="/notifications">
             <div className="relative">
               <IconButton

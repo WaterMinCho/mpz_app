@@ -64,7 +64,9 @@ export function ListLayout({ children }: ListLayoutProps) {
         variant="variant4"
         left={<h2>입양</h2>}
         right={
-          isAuthenticated ? (
+          authLoading ? (
+            <div className="w-10 h-10" />
+          ) : isAuthenticated ? (
             <Link href="/notifications">
               <div className="relative">
                 <IconButton
