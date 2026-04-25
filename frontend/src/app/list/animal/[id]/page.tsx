@@ -36,6 +36,9 @@ export async function generateMetadata({
     return {
       title,
       description,
+      alternates: {
+        canonical: `/list/animal/${id}`,
+      },
       openGraph: {
         title: `${title} | 마펫쯔`,
         description,

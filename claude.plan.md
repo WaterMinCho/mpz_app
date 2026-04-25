@@ -30,14 +30,52 @@
 
 ## 🔄 상시
 
-### SEO (3단계 — 성능)
+### SEO (네이버 서치어드바이저 + Google 공통 기준)
+
+#### 완료
 - [x] Google Search Console 인증 + sitemap 제출 (8,112 페이지)
 - [x] 네이버 서치어드바이저 인증 + sitemap 제출
-- [x] 센터 상세 동적 OG 메타데이터
-- [x] JSON-LD 구조화 데이터 (동물 + 센터)
+- [x] robots.txt (prod/dev 분기, sitemap 명시, 관리자 페이지 Disallow)
+- [x] sitemap.xml (동적 — 정적페이지 + 동물 + 센터)
+- [x] 전역 메타데이터 (title template, description, OG, Twitter)
+- [x] 동물/센터 상세 generateMetadata (동적 OG + Twitter)
+- [x] JSON-LD 구조화 데이터 (Organization, AnimalShelter, Thing)
 - [x] 시맨틱 HTML (Container main, NavBar button, 접근성)
-- [ ] Core Web Vitals 점검 (PageSpeed Insights로 측정 후 개선)
+- [x] viewport meta (width=device-width)
+- [x] SSR (Next.js App Router — 네이버 SPA 가이드 충족)
+- [x] 커스텀 404 페이지
+- [x] HTTPS 프로토콜
+- [x] 반응형 웹 (모바일 우선)
+
+#### P1 — canonical URL 설정 (중복 URL 방지, 네이버 핵심 권장)
+- [ ] 전역 layout.tsx에 metadataBase 설정 (`https://mpz.kr`)
+- [ ] 동물 상세 generateMetadata에 `alternates.canonical` 추가
+- [ ] 센터 상세 generateMetadata에 `alternates.canonical` 추가
+- [ ] 주요 공개 페이지 layout/page에 canonical 추가 (list/animal, list/center, community, matching 등)
+
+#### P2 — 공개 페이지별 고유 메타데이터
+- [ ] `/list/animal` — 고유 title + description (e.g. "입양 가능한 유기동물 | 마펫쯔")
+- [ ] `/list/center` — 고유 title + description
+- [ ] `/community` — 고유 title + description
+- [ ] `/matching` — 고유 title + description
+- [ ] `/event/centers` — 고유 title + description
+- [ ] `/community/[id]` — 동적 메타데이터 (게시글 제목, 내용 요약)
+
+#### P3 — robots.txt 강화
+- [ ] 네이버 Yeti 명시 허용 규칙 추가 (User-agent: Yeti / Allow: /)
+- [ ] favicon 경로 수집 허용 확인
+- [ ] 로그인 필요 페이지 Disallow 추가 (/my/, /login/, /favorite/)
+
+#### P4 — 파비콘 개선
+- [ ] 전용 favicon.ico 제작 (현재 op-image.png 사용 중)
+- [ ] 절대경로로 변경 (`https://mpz.kr/favicon.ico`)
+- [ ] apple-touch-icon 추가
+
+#### P5 — 기타 개선
+- [ ] Core Web Vitals 점검 (PageSpeed Insights 측정 후 개선)
 - [ ] 추가 접근성 (배경 오버레이 role, toast role="alert" 등)
+- [ ] 네이버 웹마스터도구 URL 검사로 주요 페이지 SEO 점검
+- [ ] sitemap lastmod를 실제 데이터 수정일로 반영 (현재 new Date() 고정)
 
 ---
 
