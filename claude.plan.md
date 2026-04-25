@@ -24,7 +24,13 @@
 - fork → clone → 분석 → Supabase 위에 배포
 - DB: mpz prod/dev Supabase DB 확장 사용 (integration, 별도 DB 아님)
 
-### 6. WebSocket 지원
+### 6. Firebase 확인 + 웹 푸시 알림
+- [ ] 대표님께 Firebase 프로젝트(`mpz-app-b2e01`) 계정 소유 확인
+- [ ] `FIREBASE_ADMIN_CREDENTIALS_JSON` 서비스 계정 키 수령 → env 세팅
+- [ ] 웹 푸시: Service Worker + FCM Web Push + VAPID 키 세팅
+- [ ] 네이티브/웹 분기 처리 (Capacitor 네이티브 vs Web Push API)
+
+### 7. WebSocket 지원
 - 원인: Railway → EC2 이관 시 WebSocket 지원 누락
 - gunicorn은 HTTP만 처리, WebSocket은 Daphne 등 ASGI 서버 필요
 - prod/로컬에서 무한 재연결 시도 발생 중
