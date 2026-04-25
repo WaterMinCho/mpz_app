@@ -80,7 +80,10 @@ export const metadata: Metadata = {
     creator: "@mapetz_official",
   },
   verification: {
-    google: "google-site-verification-code",
+    google: "et4yYQxLZeD6XseRIZDMLB75vhxgbDnHPvKRTFKZQ9Q",
+    other: {
+      "naver-site-verification": "e7e171419ca7383b5ba6e5ed44a9b726fbbc2cea",
+    },
   },
   robots: {
     index: true,
