@@ -76,7 +76,7 @@ export default function FosterDetailPage({ params }: FosterDetailPageProps) {
             임시보호 신청 데이터를 불러오는 중 오류가 발생했습니다
           </div>
           {error && (
-            <div className="text-sm text-gray-500">{error.message}</div>
+            <div className="text-sm text-gray-500">잠시 문제가 생겼어요. 다시 시도해주세요.</div>
           )}
         </div>
       </div>
@@ -90,7 +90,7 @@ export default function FosterDetailPage({ params }: FosterDetailPageProps) {
           <div className="mb-2 text-red-500">
             동물 정보를 불러오는 중 오류가 발생했습니다
           </div>
-          <div className="text-sm text-gray-500">{animalError.message}</div>
+          <div className="text-sm text-gray-500">잠시 문제가 생겼어요. 다시 시도해주세요.</div>
         </div>
       </div>
     );

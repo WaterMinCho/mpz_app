@@ -247,7 +247,7 @@ export default function CenterAnimal() {
             <div className="text-red-500">
               동물 목록을 불러오는데 실패했습니다
             </div>
-            <div className="mt-2 text-sm text-gray-500">{error.message}</div>
+            <div className="mt-2 text-sm text-gray-500">잠시 문제가 생겼어요. 다시 시도해주세요.</div>
           </div>
         )}
 

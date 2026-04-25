@@ -152,14 +152,16 @@ export default function AdoptionMeetingPage({
               },
               onError: (error) => {
                 console.error("계약서 전송 실패:", error);
-                alert("계약서 전송에 실패했습니다.");
+                setToastMessage("계약서 전송에 실패했어요. 다시 시도해주세요.");
+                setShowToast(true);
               },
             }
           );
         },
         onError: (error) => {
           console.error("상태 변경 실패:", error);
-          alert("상태 변경에 실패했습니다. 다시 시도해주세요.");
+          setToastMessage("상태 변경에 실패했어요. 다시 시도해주세요.");
+          setShowToast(true);
         },
       }
     );
@@ -193,7 +195,8 @@ export default function AdoptionMeetingPage({
         },
         onError: (error) => {
           console.error("거절 실패:", error);
-          alert("입양 거절 처리에 실패했습니다.");
+          setToastMessage("입양 거절 처리에 실패했어요. 다시 시도해주세요.");
+          setShowToast(true);
         },
       }
     );

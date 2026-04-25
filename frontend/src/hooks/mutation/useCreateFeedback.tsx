@@ -43,7 +43,8 @@ export const useCreateFeedback = () => {
       queryClient.invalidateQueries({ queryKey: ["feedback"] });
     },
     onError: (error: Error) => {
-      showToastMessage(error.message || "피드백 제출에 실패했습니다");
+      console.error("피드백 제출 실패:", error);
+      showToastMessage("피드백 제출에 실패했어요. 다시 시도해주세요.");
     },
   });
 

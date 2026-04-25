@@ -197,7 +197,7 @@ export function CenterAnimalsTab({
         {error ? (
           <div>
             <div className="mb-2">동물 정보를 불러오는데 실패했습니다.</div>
-            <div className="text-sm text-red-500">{error.message}</div>
+            <div className="text-sm text-red-500">잠시 문제가 생겼어요. 다시 시도해주세요.</div>
           </div>
         ) : (
           <>

@@ -16,16 +16,9 @@ interface ConsentFormPageProps {
 
 function getErrorMessage(error: unknown) {
   if (!error) return "정보를 불러오는 중 오류가 발생했어요.";
-  if (error instanceof Error) return error.message;
-  if (
-    typeof error === "object" &&
-    error !== null &&
-    "message" in error &&
-    typeof (error as { message?: unknown }).message === "string"
-  ) {
-    return (error as { message: string }).message;
-  }
-  return "정보를 불러오는 중 오류가 발생했어요.";
+  // error.message를 사용자에게 직접 노출하지 않고, 친화적 문구로 통일
+  console.error("동의서 로딩 에러:", error);
+  return "정보를 불러오는 중 오류가 발생했어요. 다시 시도해주세요.";
 }
 
 export default function ConsentFormPage({ params }: ConsentFormPageProps) {

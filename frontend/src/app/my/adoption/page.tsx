@@ -181,7 +181,7 @@ export default function AdoptionPage() {
             입양 현황을 불러오는 중 오류가 발생했습니다.
             <br />
             <span className="text-sm text-gray-500">
-              {error instanceof Error ? error.message : "알 수 없는 오류"}
+              잠시 문제가 생겼어요. 다시 시도해주세요.
             </span>
           </div>
         </div>
