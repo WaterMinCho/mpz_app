@@ -52,8 +52,10 @@ jobs:
         run: |
           if [ "${{ env.APP_ENV }}" = "prod" ]; then
             echo "NEXT_PUBLIC_API_BASE_URL=https://api.mpz.kr/v1/" >> $GITHUB_ENV
+            echo "NEXT_PUBLIC_KAKAO_REDIRECT_URI=https://api.mpz.kr/v1/kakao/login/callback" >> $GITHUB_ENV
           else
             echo "NEXT_PUBLIC_API_BASE_URL=https://dev-api.mpz.kr/v1/" >> $GITHUB_ENV
+            echo "NEXT_PUBLIC_KAKAO_REDIRECT_URI=https://dev-api.mpz.kr/v1/kakao/login/callback" >> $GITHUB_ENV
           fi
           echo "NEXT_PUBLIC_KAKAO_CLIENT_ID=${{ secrets.KAKAO_CLIENT_ID }}" >> $GITHUB_ENV
 
@@ -69,6 +71,7 @@ jobs:
           build-args: |
             NEXT_PUBLIC_API_BASE_URL=${{ env.NEXT_PUBLIC_API_BASE_URL }}
             NEXT_PUBLIC_KAKAO_CLIENT_ID=${{ env.NEXT_PUBLIC_KAKAO_CLIENT_ID }}
+            NEXT_PUBLIC_KAKAO_REDIRECT_URI=${{ env.NEXT_PUBLIC_KAKAO_REDIRECT_URI }}
             CACHE_BUST=${{ github.run_number }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
