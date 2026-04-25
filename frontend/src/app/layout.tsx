@@ -135,6 +135,49 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             }),
           }}
         />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebSite",
+              name: "마펫쯔",
+              url: "https://mpz.kr",
+              potentialAction: {
+                "@type": "SearchAction",
+                target: {
+                  "@type": "EntryPoint",
+                  urlTemplate:
+                    "https://mpz.kr/list/animal?search={search_term_string}",
+                },
+                "query-input": "required name=search_term_string",
+              },
+            }),
+          }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "SiteNavigationElement",
+              name: [
+                "입양 가능한 유기동물",
+                "동물 보호센터",
+                "커뮤니티",
+                "나와 맞는 반려동물 찾기",
+                "이벤트 참여 센터",
+              ],
+              url: [
+                "https://mpz.kr/list/animal",
+                "https://mpz.kr/list/center",
+                "https://mpz.kr/community",
+                "https://mpz.kr/matching",
+                "https://mpz.kr/event/centers",
+              ],
+            }),
+          }}
+        />
       </head>
       <body
         className={`${fontConfig.className} bg-wh max-w-[420px] mx-auto shadow-md `}
