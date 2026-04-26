@@ -112,12 +112,19 @@ class Command(BaseCommand):
 
         update_only = strategy == 'status_sync'
         result = await public_data_service.process_abandoned_animals(animals_data, update_only=update_only)
+
+        # status_sync: 공공데이터에 없는 기존 "보호중" 동물 → 보호 종료 처리
+        expired_count = 0
+        if strategy == 'status_sync':
+            api_notice_numbers = {a.notice_no for a in animals_data if a.notice_no}
+            expired_count = await self._expire_missing_animals(api_notice_numbers)
+
         duration = (timezone.now() - started_at).total_seconds()
 
         sync_status = 'partial' if result['errors'] > 0 else 'success'
         await self._save_sync_log(
             strategy, sync_status,
-            result['created'], result['updated'], result.get('deleted', 0),
+            result['created'], result['updated'], result.get('deleted', 0) + expired_count,
             result['errors'], result['total'], duration, started_at,
         )
 
@@ -127,10 +134,32 @@ class Command(BaseCommand):
 
         self.stdout.write(
             f'[sync] 완료 created={result["created"]} updated={result["updated"]} '
-            f'deleted={result.get("deleted", 0)} errors={result["errors"]} '
+            f'deleted={result.get("deleted", 0)} expired={expired_count} '
+            f'errors={result["errors"]} '
             f'total={result["total"]} duration={duration:.0f}s '
             f'before={before_count} after={after_count}'
         )
+
+    async def _expire_missing_animals(self, api_notice_numbers: set) -> int:
+        """공공데이터 API에서 보호중으로 내려오지 않은 기존 동물을 보호종료 처리"""
+        expired = await sync_to_async(
+            lambda: Animal.objects.filter(
+                is_public_data=True,
+                protection_status='보호중',
+            ).exclude(
+                public_notice_number__in=api_notice_numbers,
+            ).exclude(
+                public_notice_number__isnull=True,
+            ).exclude(
+                public_notice_number='',
+            ).update(
+                protection_status='보호종료',
+                adoption_status='기타',
+            )
+        )()
+        if expired > 0:
+            self.stdout.write(f'[sync] 보호종료 처리: {expired}개 (API에서 미발견)')
+        return expired
 
     async def _save_sync_log(self, strategy, status, created, updated, deleted, errors, total, duration, started_at):
         try:
